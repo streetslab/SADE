@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 
 ## Global Variables >>
 WindowSize = 250  # size of the window in bp, default is 250 bp
+precision = 1e-10  # to avoid log2(0) in entropy calculation
+precision = 0
 ## Global Variables <<
 
 
@@ -167,7 +169,7 @@ if __name__ == "__main__":
             print('#-th barcode:', i) # print progress
         occur, freq = np.unique(v.toarray(), return_counts=True)
         freq = freq / np.sum(freq)
-        entropy = -np.sum(freq * np.log2(freq + 1e-10))
+        entropy = -np.sum(freq * np.log2(freq + precision))
         barcode_entropy[k] = entropy
 
     # save entropy results
