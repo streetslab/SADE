@@ -91,7 +91,7 @@ if __name__ == "__main__":
     running example:
     python3 calculate_entropy.py --res_dir 'res' \
         --frag_file '/home/syyang/adipose_ln/atac/_cr_atac_results/eda_AB_ATAC_FL_TAM_SQ/fragments.tsv'  \
-        --genome_chromsize 'human_genome_chromsize.tsv' --chromosome 'chr22'
+        --genome_chromsize 'ref/human_genome_chromsize.tsv' --chromosome 'chr22'
     
     # input arguments:
     # res_dir: dir to save entropy calculation results 
