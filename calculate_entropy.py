@@ -158,7 +158,7 @@ if __name__ == "__main__":
         
 
     # %%
-    # calculate entropy for each cell barcode
+    # Step 3. Calculate entropy for each cell barcode for the given chromosome 
     barcode_entropy = {}
     i = 0
     for k, v in insert_record.items():
@@ -175,7 +175,7 @@ if __name__ == "__main__":
     with open(barcode_entropy_file, 'wb') as file:
         pickle.dump(barcode_entropy, file, protocol=pickle.HIGHEST_PROTOCOL)
         
-    ## Knee plot of entropies 
+    # Step 4 (optional -- visualization). Make Knee plot of entropies 
     figure_subdir = os.path.join(res_dir, 'figures')
     if not os.path.exists(figure_subdir):
         os.makedirs(figure_subdir)
