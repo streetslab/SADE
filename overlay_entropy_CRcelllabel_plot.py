@@ -54,6 +54,8 @@ if __name__ == "__main__":
         f.write("Entropy statistics for CR_labeled cells:\n")
         cr_bc_entropy.describe().to_string(f)
         f.write('\n')
+        f.write('EntropyThreshold: ' + str(EntropyThreshold) + '\n')
+        f.write('\n')
         f.write("Entropy statistics for CR_empty barcodes:\n")
         cr_empty_entropy.describe().to_string(f)
 
