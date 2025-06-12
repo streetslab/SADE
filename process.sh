@@ -8,7 +8,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # environment setup
 source ${SCRIPT_DIR}/config.sh
-# load $PYTHON_ENV
+# load 
+#    $PYTHON_ENV
+#    $Genrich
 #echo "python_path $PYTHON_ENV" # for debugging
 
 
@@ -85,13 +87,18 @@ fi
 
 # MODULE 4:  (I) peak calling on the filtered BAM file
 entropy_peak_calling_subdir="${output_dir}/peaks_entropy_filtered"
-bash ${SCRIPT_DIR}/call_peaks.sh \
+if [ ! -f ${entropy_peak_calling_subdir}/peaks.bed ] ; then
+    bash ${SCRIPT_DIR}/call_peaks.sh \
     -s ${filtered_bam_file} \
     -o ${entropy_peak_calling_subdir} 
+fi
 # MODULE 4:  (II) peak calling on the original BAM file
 peak_calling_subdir="${output_dir}/peaks"
-bash ${SCRIPT_DIR}/call_peaks.sh \
+if [ ! -f ${peak_calling_subdir}/peaks.bed ] ; then
+    bash ${SCRIPT_DIR}/call_peaks.sh \
     -s ${bam_file} \
     -o ${peak_calling_subdir}
+fi
 
 
+# MODULE 5:  Compare the peak calling results
