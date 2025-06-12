@@ -24,10 +24,9 @@ output_peak_file="${output_dir}/peaks.bed"
 output_bedgraph_file="${output_dir}/begraph.bed"
 output_bed_file="${output_dir}/intervals.bed"
 
-echo "Call peaks with Genrich ----> "
-echo " ... could take a while, ..."
-
-sorted_bam="${output_dir}/sorted_bam.bam"
+echo "Call peaks with Genrich ----> "  && \
+echo " ... could take a while, ..." && \
+sorted_bam="${output_dir}/sorted_bam.bam"  && \
 samtools sort -n  -@ 6 $bam_file -o $sorted_bam  # use 6 threads for sorting
 
 
@@ -35,7 +34,5 @@ $Genrich -t $sorted_bam -o $output_peak_file  \
         -k $output_bedgraph_file \
         -b $output_bed_file \
         -r \
-        -j  && rm $sorted_bam
-
-
-echo "Call peaks with Genrich ----> Done"
+        -j  && rm $sorted_bam \
+        &&  echo "Call peaks with Genrich ----> Done"

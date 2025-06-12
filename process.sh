@@ -15,7 +15,7 @@ source ${SCRIPT_DIR}/config.sh
 
 
 ## BEFORE ANYTHING ELSE: process options 
-while  getopts "f:o:b:s:" opt; do
+while  getopts ":f:o:b:s:" opt; do
   case $opt in
     f) 
       fragment_file="$OPTARG"

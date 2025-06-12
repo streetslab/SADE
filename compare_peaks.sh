@@ -2,14 +2,13 @@
 
 
 
-while getopts "d:" opt; do
+while getopts ":d:" opt; do
   case $opt in
-    d) 
+    d)
       output_dir="$OPTARG"
-        output_dir=${peak_dir%/}  # remove trailing slash if exists
+      output_dir=${output_dir%/}  # remove trailing slash if exists
       ;;
-      ;;
-    \?) 
+    \?)
       echo "Invalid option: -$OPTARG" >&2
       exit 1
       ;;
@@ -31,4 +30,8 @@ peaks_entropy_file=$entropy_peak_calling_subdir/peaks.bed
 
 
 
-bedtools intersect -wo -a $peaks_file -b $peaks_entropy_file  >  $comparison_subdir/peaks_intersect.bed
+bedtools intersect -wo -a $peaks_file -b $peaks_entropy_file  >  $comparison_subdir/recovered_peaks.bed  # intersection 
+bedtools intersect -v -a $peaks_file -b $peaks_entropy_file  >  $comparison_subdir/lost_peaks.bed  # in file-a but not in file-b
+bedtools intersect -v -a $peaks_entropy_file -b $peaks_file  >  $comparison_subdir/newly_discovered_peaks.bed 
+
+
