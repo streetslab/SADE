@@ -10,10 +10,11 @@ import gc
 import copy
 import pickle
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 ## Global Variables >>
 WindowSize = 250  # size of the window in bp, default is 250 bp
-precision = 1e-10  # to avoid log2(0) in entropy calculation
+#precision = 1e-10  # to avoid log2(0) in entropy calculation
 precision = 0
 ## Global Variables <<
 
@@ -58,11 +59,7 @@ def insert_frequency(fragments_file:str,
         record = defaultdict(lambda: None)
     with open(fragments_file, "r") as f:
         print(f"counting tn5 insertion frequency for {chromosome} in {fragments_file}")
-        i = 0 
-        for l in f:
-            i += 1
-            if i % 100000 == 0:
-                print('line:', i)
+        for l in tqdm(f, desc="Counting tn5 insertion frequency"):
             if l.startswith("#"):
                 continue
             chrom, left_insert, right_insert, cb, _ = l.strip().split("\t")  # cb -- cell barcode
@@ -162,11 +159,7 @@ if __name__ == "__main__":
     # %%
     # Step 3. Calculate entropy for each cell barcode for the given chromosome 
     barcode_entropy = {}
-    i = 0
-    for k, v in insert_record.items():
-        i += 1
-        if i % 5000 == 0:
-            print('#-th barcode:', i) # print progress
+    for k, v in tqdm(insert_record.items(), desc="Calculating entropy for each cell barcode"):
         occur, freq = np.unique(v.toarray(), return_counts=True)
         freq = freq / np.sum(freq)
         entropy = -np.sum(freq * np.log2(freq + precision))
