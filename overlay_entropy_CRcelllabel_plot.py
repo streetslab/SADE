@@ -1,6 +1,6 @@
 #### GLOBAL VARIABLES >>
 EntropyThreshold = 0.000609
-
+EntropyThreshold = 0.001
 
 #### GLOBAL VARIABLES << 
 
@@ -45,6 +45,17 @@ if __name__ == "__main__":
 
 
     cr_empty_entropy = bc_entropy[bc_entropy.index.isin(cr_bc[0]) == False]
+    
+    print(f"Number of cell barcodes: {len(cr_bc_entropy)}")
+    print(f"Number of empty barcodes: {len(cr_empty_entropy)}")
+    print(f"Number of barcodes : {len(bc_entropy)}")
+    
+    with open(os.path.join(res_dir, 'entropy_stats.txt'), 'w') as f:
+        f.write("Entropy statistics for CR_labeled cells:\n")
+        cr_bc_entropy.describe().to_string(f)
+        f.write('\n')
+        f.write("Entropy statistics for CR_empty barcodes:\n")
+        cr_empty_entropy.describe().to_string(f)
 
     # %%
     import matplotlib.pyplot as plt
@@ -63,10 +74,15 @@ if __name__ == "__main__":
     #%% 
     # now provide only BC that pass entropy threshold
     bc_entropy['pass'] = bc_entropy['entropy'] > EntropyThreshold
+    
+    print(f"Entropy threshold: {EntropyThreshold}")
+    print(f"Number of barcodes that pass entropy threshold: {bc_entropy['pass'].sum()}")
+    print(f"Number of barcodes that do not pass entropy threshold: {(bc_entropy['pass']==False).sum()}")
 
     # save bc_entropy with pass column
     bc_pass_entropy_file = os.path.join(res_dir, 'bc_pass_entropy.tsv')
-    bc_entropy.loc[bc_entropy['pass'] == True].to_csv(bc_pass_entropy_file, sep='\t')
+    bc_pass_entropy = bc_entropy.loc[bc_entropy['pass'] == True]
+    bc_pass_entropy.to_csv(bc_pass_entropy_file, sep='\t')
 
     # %%
 
@@ -77,22 +93,22 @@ if __name__ == "__main__":
     filtered_frag_file = os.path.join(res_dir, "filtered_fragments.tsv") 
     subprocess.run(f"awk -v OFS=''  '{{print $1}}' {bc_pass_entropy_file} > {temp_bc_file}", shell=True)
     subprocess.run(f"grep -f {temp_bc_file} {frag_file} > {filtered_frag_file}", shell=True)
-    #subprocess.run(f"awk -v OFS='' -v prefix='CB:Z:' '{{print prefix, $1}}' {bc_pass_entropy_file} > {res_dir}/temp", shell=True)
+    subprocess.run(f"awk -v OFS='' -v prefix='CB:Z:' '{{print prefix, $1}}' {bc_pass_entropy_file} > {res_dir}/temp_bc_CBZ.txt", shell=True)
 
 
     frag_df = pd.read_csv(frag_file, sep='\t', header=None, comment='#')
-    filter_frag_df = pd.read_csv(filtered_frag_file, sep='\t', header=None, comment='#')
-    print(filter_frag_df.head())
 
 
     frag_df.columns = ['chrom', 'left_insert', 'right_insert', 'cb', 'support']
     frag_df['length'] = frag_df['right_insert'] - frag_df['left_insert']
-    filter_frag_df.columns = ['chrom', 'left_insert', 'right_insert', 'cb', 'support']
-    filter_frag_df['length'] = filter_frag_df['right_insert'] - filter_frag_df['left_insert']
+    filter_frag_df = frag_df[frag_df['cb'].isin(bc_pass_entropy.index)]
+    garbage_frag_df = frag_df[~ frag_df['cb'].isin(filter_frag_df['cb'])]
+    # filter_frag_df = pd.read_csv(filtered_frag_file, sep='\t', header=None, comment='#')
+    # filter_frag_df.columns = ['chrom', 'left_insert', 'right_insert', 'cb', 'support']
+    # filter_frag_df['length'] = filter_frag_df['right_insert'] - filter_frag_df['left_insert']
+
     
-    garbege_frag_df = frag_df[~ frag_df['cb'].isin(filter_frag_df['cb'])]
-    
-# # %%
+    #%%
 
     fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(10, 6), sharey=True)
     ax[0].hist(filter_frag_df['length'], bins=100, alpha=0.5, label='fl', color='green', range=(0,500))
@@ -103,12 +119,10 @@ if __name__ == "__main__":
     ax[1].set_xlabel('Fragment length')
     ax[1].set_ylabel('Frequency')
     ax[1].set_title('Fragment length distribution for all fragments')
-    ax[2].hist(garbege_frag_df['length'], bins=100, alpha=0.5, label='fl', color='green', range=(0,500))
+    ax[2].hist(garbage_frag_df['length'], bins=100, alpha=0.5, label='fl', color='green', range=(0,500))
     ax[2].set_xlabel('Fragment length')
     ax[2].set_ylabel('Frequency')
     ax[2].set_title('thrown-away fragments')
     fig_file = os.path.join(res_dir, 'figures', 'frag_df_length.png')
     fig.tight_layout()
     fig.savefig(fig_file)
-
-# %%
