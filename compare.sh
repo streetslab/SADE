@@ -2,6 +2,8 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+source ${SCRIPT_DIR}/config.sh
+
 
 while getopts ":d:g:" opt; do
   case $opt in
@@ -30,4 +32,13 @@ fi
 
 
 # MODULE 2. Annotate peaks with functional regions 
-bash ${SCRIPT_DIR}/annotate_peaks.sh -d $output_dir -g $genome_name
+annotation_subdir="${output_dir}/annotation"
+annStats_peaks=$annotation_subdir/"annStats_peaks.txt"
+if [ ! -f $annStats_peaks ] ; then
+    bash ${SCRIPT_DIR}/annotate_peaks.sh -d $output_dir -g $genome_name
+fi
+
+
+# MODULE 3. Make plots of peaks comparisons
+source ${PYTHON_ENV}
+python ${SCRIPT_DIR}/visulize_annotation.py --output_dir $output_dir
