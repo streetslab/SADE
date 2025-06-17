@@ -32,8 +32,8 @@ fi
 
 
 # MODULE 2. Annotate peaks with functional regions 
-annotation_subdir="${output_dir}/annotation"
-annStats_peaks=$annotation_subdir/"annStats_peaks.txt"
+annotation_subdir=${output_dir}/annotation
+annStats_peaks=$annotation_subdir/annStats_peaks.txt
 if [ ! -f $annStats_peaks ] ; then
     bash ${SCRIPT_DIR}/annotate_peaks.sh -d $output_dir -g $genome_name
 fi
