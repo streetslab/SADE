@@ -50,6 +50,12 @@ if [ ! -f $frag_file ] ; then
 fi
 
 
+# sometimes fragments.tsv from CR does not have the correct record.. 
+mv $frag_file ${output_dir}/_fragments.tsv
+awk -F '\t' '{if (NF == 5) print $0}' ${output_dir}/_fragments.tsv > ${frag_file}
+rm ${output_dir}/_fragments.tsv
+
+
 # MODULE 1:  Calculate entropies of each barcode
 source ${PYTHON_ENV}
 
