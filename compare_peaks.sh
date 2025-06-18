@@ -16,13 +16,13 @@ while getopts ":d:" opt; do
 done
 
 
-comparison_subdir="${output_dir}/peaks_comparison"
+comparison_subdir=${output_dir}/peaks_comparison
 mkdir -p $comparison_subdir
 
 
 # those sub_dir were pre-difined in process.sh
-entropy_peak_calling_subdir="${output_dir}/peaks_entropy_filtered"
-peak_calling_subdir="${output_dir}/peaks"
+entropy_peak_calling_subdir=${output_dir}/peaks_entropy_filtered
+peak_calling_subdir=${output_dir}/peaks
 
 
 peaks_file=$peak_calling_subdir/peaks.bed
