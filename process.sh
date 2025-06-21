@@ -49,6 +49,11 @@ if [ ! -f $frag_file ] ; then
     gunzip -c $fragment_file > ${frag_file}
 fi
 
+# make sure fragment file has file name 'fragments.tsv'
+if [[ $(basename $frag_file) != "fragments.tsv" ]] ; then
+    mv ${frag_file} ${output_dir}/fragments.tsv
+    frag_file=${output_dir}/fragments.tsv
+fi
 
 # sometimes fragments.tsv from CR does not have the correct record.. 
 mv $frag_file ${output_dir}/_fragments.tsv
