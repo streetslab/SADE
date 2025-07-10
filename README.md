@@ -17,3 +17,5 @@ bash process.sh
 bash compare.sh
 ### STEP 3. 
 bash check.sh
+### STEP 4. 
+bash downstream_analysis.sh
