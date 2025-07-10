@@ -5,6 +5,7 @@ import os
 
 #%%
 MininumFragments = 1000
+precision = 1e-10  # to avoid log(entropy==0) issues
 
 
 
@@ -14,10 +15,23 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Visualize fragment overlaps with peaks.")
     parser.add_argument("--res_dir", required=True, type=str, help="Directory to results.")
+    parser.add_argument('--chromosome', type=str, default='chr1', help='Chromosome to analyze.')
     
     args = parser.parse_args()
     output_dir = args.res_dir
+    chromosome = args.chromosome
     
+    #%%
+    import pickle
+    # Load entropy data
+    entropy_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy.pickle')
+    
+    with open(entropy_file, 'rb') as f:
+        entropy_data = pickle.load(f)
+    
+    #%% 
+    entropy_df = pd.DataFrame.from_dict(entropy_data, orient='index', columns=['entropy'])
+    #%% 
     # Create subdirectory for fragments overlap peaks    
     figure_subdir = os.path.join(output_dir, 'figures', 'fragments_overlap_peaks')
     if not os.path.exists(figure_subdir):
@@ -70,3 +84,58 @@ if __name__ == "__main__":
     fig.legend()
     fig_file = os.path.join(figure_subdir, 'fragments_overlap_peaks.png')
     fig.savefig(fig_file, dpi=300, bbox_inches='tight')
+    
+    
+    #%% 
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.scatter(
+        np.log10(overlap_peaks_df['total_fragments'].values),
+        overlap_peaks_df['frag_overlap_peaks%'].values,
+        s=2, alpha=0.5, label='Overlap with Peaks', color='blue'
+    )
+    ax.scatter(
+        np.log10(overlap_entropy_peaks_df['total_fragments'].values),
+        overlap_entropy_peaks_df['frag_overlap_entropy_peaks%'].values,
+        s=2, alpha=0.5, label='Overlap with Entropy Peaks', color='orange'
+    )
+    ax.set_xlabel('Log10 of total fragments')
+    ax.set_ylabel('Percentage of fragments overlapping with peaks')
+    fig.legend()
+    fig_file = os.path.join(figure_subdir, 'fragments_overlap_peaks_scatter.png')
+    fig.savefig(fig_file, dpi=300, bbox_inches='tight')
+
+# %%
+
+    overlap_peaks_entropy = overlap_peaks_df.join(entropy_df, how='left')
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.scatter(
+        np.log10(overlap_peaks_entropy['total_fragments'].values),
+        overlap_peaks_entropy['frag_overlap_peaks%'].values,
+        s=4, 
+        c=np.log10(overlap_peaks_entropy['entropy'].values + precision),
+        cmap='viridis'
+    )
+    ax.set_xlabel('Log10 of total fragments')
+    ax.set_ylabel('Percentage of fragments overlapping with peaks')
+    ax.set_title('Fragments Overlap with Peaks Colored by Entropy')
+    fig.colorbar(ax.collections[0], ax=ax, label='Log10 Entropy')
+    fig_file = os.path.join(figure_subdir, 'fragments_overlap_peaks_colorentropy.png')
+    fig.savefig(fig_file, dpi=300, bbox_inches='tight')
+# %%
+    overlap_entropy_peaks_entropy = overlap_entropy_peaks_df.join(entropy_df, how='left')
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.scatter(
+        np.log10(overlap_entropy_peaks_entropy['total_fragments'].values),
+        overlap_entropy_peaks_entropy['frag_overlap_entropy_peaks%'].values,
+        s=4, 
+        c=np.log10(overlap_entropy_peaks_entropy['entropy'].values + precision),
+        cmap='viridis'
+    )
+    ax.set_xlabel('Log10 of total fragments')
+    ax.set_ylabel('Percentage of fragments overlapping with peaks')
+    ax.set_title('Fragments Overlap with Entropy Peaks Colored by Entropy')
+    fig.colorbar(ax.collections[0], ax=ax, label='Log10 Entropy')
+    fig_file = os.path.join(figure_subdir, 'fragments_overlap_entropypeaks_colorentropy.png')
+    fig.savefig(fig_file, dpi=300, bbox_inches='tight')
+# %%

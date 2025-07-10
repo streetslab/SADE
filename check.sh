@@ -1,4 +1,8 @@
 #!/bin/bash 
+
+chromosome='chr1'
+# << GLOBAL VARIABLES >>
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source ${SCRIPT_DIR}/config.sh
@@ -28,7 +32,7 @@ fi
 
 # MODULE 2. Make plots of fragments overlapping with peaks
 source ${PYTHON_ENV}
-python ${SCRIPT_DIR}/fragments_overlap_peaks.py --res_dir $output_dir
+python ${SCRIPT_DIR}/fragments_overlap_peaks.py --res_dir $output_dir --chromosome $chromosome
 
 
 
