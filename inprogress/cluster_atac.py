@@ -5,9 +5,10 @@ import pandas as pd
 import scvi
 import torch
 # %%
-
-bc_peak_count_h5 = '/mnt/hdd_bob/syy/adipose/atac/res/NK_ATAC_MAPLE013_SC/DownstreamReanalysis/bc_peak_count.h5ad'
-bc_peak_peakVI_h5 = '/mnt/hdd_bob/syy/adipose/atac/res/NK_ATAC_MAPLE013_SC/DownstreamReanalysis/peakvi.h5ad'
+# import file
+bc_peak_count_h5 = '/mnt/hdd_bob/syy/adipose/atac/res/NK_ATAC_MAPLE013_CS/DownstreamReanalysis/bc_peak_count.h5ad'
+# save file
+bc_peak_peakVI_h5 = '/mnt/hdd_bob/syy/adipose/atac/res/NK_ATAC_MAPLE013_CS/DownstreamReanalysis/peakvi.h5ad'
 
 # %%
 bc_peak_count_adata = sc.read_h5ad(bc_peak_count_h5)
@@ -24,10 +25,10 @@ PEAKVI_CLUSTERS_KEY = "clusters_peakvi"
 
 #%%
 # filter regions with less than 3% of the cells
-print("# regions before filtering:", bc_peak_count_adata.shape[-1])
+# print("# regions before filtering:", bc_peak_count_adata.shape[-1])
 
-sc.pp.filter_genes(bc_peak_count_adata, min_cells=10)
-print("# regions after filtering:", bc_peak_count_adata.shape[-1])
+# sc.pp.filter_genes(bc_peak_count_adata, min_cells=10)
+# print("# regions after filtering:", bc_peak_count_adata.shape[-1])
 
 # train PEAKVI model on bc_peak_count_adata
 scvi.model.PEAKVI.setup_anndata(bc_peak_count_adata)
