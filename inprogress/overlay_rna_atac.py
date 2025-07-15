@@ -68,7 +68,7 @@ if __name__ == "__main__":
     sc.pl.umap(peakvi_adata, color=['cell_type', 'clusters_peakvi'], ncols=1,  title='RNA-cell-type on atac peaks latent space', \
             size=30, na_color='None', save='umap_peakvi.png')
     entropy_peakvi_fig_file = os.path.join(figure_dir, 'umap_entropy_peakvi.png')
-    sc.pl.umap(entropy_peakvi_adata, color=['cell_type', 'clusters_peakvi'], ncols=1,  title='RNA-cell-type on atac peaks latent space',  \
+    sc.pl.umap(entropy_peakvi_adata, color=['cell_type', 'clusters_peakvi'], ncols=1,  title='RNA-cell-type on atac entropy peaks latent space',  \
             size=30, na_color='None', save='umap_entropy_peakvi.png')
 
 # %%
