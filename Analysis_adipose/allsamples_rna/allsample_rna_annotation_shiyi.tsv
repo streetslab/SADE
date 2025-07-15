@@ -1,0 +1,14 @@
+cluster	celltype	Markers	confident
+"0"	Adipocytes	"ADIPOQ,PLIN1,"	
+"1"	ASPC	PDGFRA	
+"2"	Macrophages	CD163	
+"3"	Endothelial	VWF	
+"4"	Mesothelial	MSLN	
+"6"	Pericytes/SMC	TAGLN	
+"10"	Endothelial	VWF	No
+"11"	"B cells, T cells"	MS4A1	
+"12"	Endothelial (lymph.)	FLT4	
+"15"	Mast cells	KIT	
+"16"	Mesen	"DCN,CLDN1,PTCH1"	No
+"17"	Schwann	"NRXN1,CDH19"	No
+"18"	BrownAdipocytes	"COBL,TBATA,PPARGC1A,PLIN5,PDE3B,ADIPOQ"	No
