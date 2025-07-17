@@ -177,7 +177,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
     
     entropies = np.array(list(barcode_entropy.values()))
-    entropies.sort() # sort in place and acending order 
+    entropies.sort() # sort in place and ascending order 
     fig, ax = plt.subplots()
     ax.plot(entropies[::-1], marker='o', linestyle='-', markersize=2)
     ax.set_xlabel('Cell Barcode Index (sorted by entropy)')

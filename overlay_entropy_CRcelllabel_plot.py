@@ -1,6 +1,7 @@
 #### GLOBAL VARIABLES >>
 EntropyThreshold = 0.000609
 EntropyThreshold = 0.001
+precision = 1e-10
 
 #### GLOBAL VARIABLES << 
 
@@ -30,6 +31,7 @@ if __name__ == "__main__":
     import pandas as pd
     import pickle
     import os
+    import numpy as np
     
     with open(entropy_file, 'rb') as f:
         entropy_dict = pickle.load(f)
@@ -71,6 +73,21 @@ if __name__ == "__main__":
     ax[1].axhline(y=EntropyThreshold, color='r', linestyle='-', label=f'{EntropyThreshold}')
     fig.legend()
     fig_file = os.path.join(res_dir, 'figures', 'entropy_violin_EmptyvsCell.png')
+    fig.savefig(fig_file)
+    
+    
+    cr_bc_entropy['log10_entropy'] = np.log10(cr_bc_entropy['entropy'] + precision)
+    cr_empty_entropy['log10_entropy'] = np.log10(cr_empty_entropy['entropy'] + precision)
+    fig, ax = plt.subplots(1, 2, sharey=True)
+    ax[0].violinplot(cr_bc_entropy['log10_entropy'],  showmeans=True, showmedians=True, bw_method=0.1)
+    ax[1].violinplot(cr_empty_entropy['log10_entropy'],  showmeans=True, showmedians=True, bw_method=0.1)
+    ax[0].set_ylabel('log10 Entropy')
+    ax[0].set_xlabel('CR cell barcodes')
+    ax[1].set_xlabel('CR empty barcodes')
+    ax[0].axhline(y=np.log10(EntropyThreshold + precision), color='r', linestyle='-', label=f'{EntropyThreshold}')
+    ax[1].axhline(y=np.log10(EntropyThreshold + precision), color='r', linestyle='-', label=f'{EntropyThreshold}')
+    fig.legend()
+    fig_file = os.path.join(res_dir, 'figures', 'log10_entropy_violin_EmptyvsCell.png')
     fig.savefig(fig_file)
 
     #%% 
