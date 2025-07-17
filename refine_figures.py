@@ -32,10 +32,11 @@ if __name__ == "__main__":
     entropy.sort() # sort the entropy values
 
     # %%
+    # Knee plot for entropy
     figure_subdir = os.path.join(output_dir, 'figures')
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(np.log10(entropy[::-1] + precision), '-', color='blue', alpha=0.5, label='Entropy')
-    ax.axhline(y=np.log10(EntropyThreshold + precision), color='red', linestyle='--', label='Precision Threshold')
+    ax.axhline(y=np.log10(EntropyThreshold + precision), color='red', linestyle='--', label=f'log10("{EntropyThreshold}")')
     ax.set_ylabel('Entropy (log10-scaled)')
     ax.set_xlabel('Barcode Rank')
     fig.legend()

@@ -98,7 +98,7 @@ entropy_peakvi_adata.obs = entropy_peakvi_adata.obs.merge(atac_rna_barcode_map, 
 
 #%%
 ## load cell type annotation analyzed using RNA only 
-rna_celltype_annotation_file = '/home/syyang/GitRepo/atac/Analysis_adipose/allsamples_rna/allsample_rna_celltype_asign_shiyi.tsv'
+rna_celltype_annotation_file = '/home/syyang/GitRepo/atac/Analysis_adipose/allsamples_rna/allsample_rna_celltype_asign_sean.tsv'
 rna_celltype_annotation = pd.read_csv(rna_celltype_annotation_file, sep='\t', index_col=0)
 rna_celltype_annotation['Sample'] = rna_celltype_annotation['sample'].apply(lambda x: x.upper()) # make it sample name upper case
 rna_celltype_annotation['rna_barcodes'] = rna_celltype_annotation.apply(lambda x: x.name.split('-')[0], axis = 1)
