@@ -72,6 +72,12 @@ if __name__ == "__main__":
     overlap_entropy_peaks_df = frag_overlap_entropypeaks_df[frag_overlap_entropypeaks_df['total_fragments'] > MininumFragments].sort_values(by='frag_overlap_entropy_peaks%', ascending=False)
 
     #%%
+    # Save the processed dataframes as summary statistics 
+    frag_overlap_peaks_df.to_csv(os.path.join(fragments_overlap_subdir, 'summary_statistics_frag_overlap_peaks.csv'), sep='\t')
+    frag_overlap_entropypeaks_df.to_csv(os.path.join(fragments_overlap_subdir, 'summary_statistics_frag_overlap_entropypeaks.csv'), sep='\t')
+
+
+    #%%
     
 
     import matplotlib.pyplot as plt

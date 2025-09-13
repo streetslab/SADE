@@ -10,3 +10,7 @@ bash process.sh -f /mnt/hdd_bob/syy/adipose/atac/cr_atac_results/NK_ATAC_MAPLE01
 
 
  bash GitRepo/atac/compare.sh   -d /mnt/hdd_bob/syy/adipose/atac/res/pbmc_1k/ -g hg38
+
+
+## run check 
+bash /home/syyang/GitRepo/atac/check.sh -d  /mnt/hdd_bob/syy/adipose/atac/res/pbmc_1k/ 
