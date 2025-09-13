@@ -85,7 +85,9 @@ if __name__ == "__main__":
     entropy = np.array(list(entropy_dict.values()))
     entropy.sort() # sort the entropy values
 
+
     # %%
+    ### >>>> This chunk of code could be deleted (in calculate_entropy.py file too)
     # Knee plot for entropy
     figure_subdir = os.path.join(output_dir, 'figures')
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -96,7 +98,8 @@ if __name__ == "__main__":
     fig.legend()
     fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_knee_plot_logscale.png')
     fig.savefig(fig_file, bbox_inches='tight')
-    
+    ### <<<< This chunk of code could be deleted (in calculate_entropy.py file too)
+
     
     #%%
     #histogram of log10(entropy) values -- for (potentially) Gaussian mixture model fitting

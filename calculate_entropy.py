@@ -106,6 +106,7 @@ if __name__ == "__main__":
     parser.add_argument("--frag_file", type=str, required=True, help="TSV file of fragments from CR output.")
     parser.add_argument("--genome_chromsize", type=str, required=True, help="TSV file of human/species genome chromosome size.")
     parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome to analyze, default is chr1.")
+    parser.add_argument("--windowsize", type=int, default=WindowSize, help="Window size for fragmentation, default is 0.001.")
 
     args = parser.parse_args()
     
@@ -113,6 +114,7 @@ if __name__ == "__main__":
     frag_file = args.frag_file
     genome_chromsize_file = args.genome_chromsize
     chromosome = args.chromosome
+    windowsize = args.windowsize
     
     
     print(f"Calculating entropy for \n \
@@ -146,7 +148,7 @@ if __name__ == "__main__":
 
     # Step 2. Count Tn5 insertion frequency for each cell barcode in the given chromosome
     _insert_record = defaultdict(lambda: None)
-    _  = insert_frequency(chrome_frag_file, _insert_record, chromsize_dict, chromosome)  # inplace update of the record -- save memory. IDK why returning record is not memory efficient.
+    _  = insert_frequency(chrome_frag_file, _insert_record, chromsize_dict, chromosome, windowsize)  # inplace update of the record -- save memory. IDK why returning record is not memory efficient.
     
     # convert defaultdict to dict  and save result
     insert_record = {k: v for k, v in _insert_record.items() } 
@@ -170,7 +172,8 @@ if __name__ == "__main__":
     with open(barcode_entropy_file, 'wb') as file:
         pickle.dump(barcode_entropy, file, protocol=pickle.HIGHEST_PROTOCOL)
         
-    # Step 4 (optional -- visualization). Make Knee plot of entropies 
+    # Step 4 (optional -- visualization). 
+    ## Make Knee plot of entropies 
     figure_subdir = os.path.join(res_dir, 'figures')
     if not os.path.exists(figure_subdir):
         os.makedirs(figure_subdir)
@@ -185,3 +188,15 @@ if __name__ == "__main__":
     fig.suptitle(f'Entropy distribution for {chromosome}')
     fig.savefig(os.path.join(figure_subdir, f'{chromosome}_entropy_knee_plot.png'))
     plt.close(fig)  
+    
+    
+    ## Make Knee plot of entropies on log10 scale
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(np.log10(entropies[::-1] + precision), '-', color='blue', alpha=0.5, label='Entropy')
+    ax.set_ylabel('Entropy (log10-scaled)')
+    ax.set_xlabel('Barcode Rank')
+    fig.legend()
+    fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_knee_plot_logscale.png')
+    fig.savefig(fig_file, bbox_inches='tight')
+    
+    

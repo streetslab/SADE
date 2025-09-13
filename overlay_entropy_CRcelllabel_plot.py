@@ -18,7 +18,8 @@ if __name__ == "__main__":
     parser.add_argument("--res_dir", type=str, required=True, help="Directory to save results.")
     parser.add_argument("--entropy_file", type=str, required=True, help="pickle file of calculated entropies.")
     parser.add_argument("--crbarcode_file", type=str, required=True, help="CellRanger barcode file, i.e., barcodes labeled to contain cells.")
-    parser.add_argument("--frag_file", type=str, default=EntropyThreshold, help="Fragment file to filter on barcodes that passed entropy threshold.")
+    parser.add_argument("--frag_file", type=str, required=True, help="Fragment file to filter on barcodes that passed entropy threshold.")
+    parser.add_argument('--entropythreshold', type=float, default=EntropyThreshold, help='Entropy threshold for filtering barcodes.')
     
     
     args = parser.parse_args()
@@ -26,6 +27,7 @@ if __name__ == "__main__":
     entropy_file = args.entropy_file
     crbarcode_file = args.crbarcode_file
     frag_file = args.frag_file
+    entropythreshold = args.entropythreshold
     # %%
 
     import pandas as pd
@@ -56,7 +58,7 @@ if __name__ == "__main__":
         f.write("Entropy statistics for CR_labeled cells:\n")
         cr_bc_entropy.describe().to_string(f)
         f.write('\n')
-        f.write('EntropyThreshold: ' + str(EntropyThreshold) + '\n')
+        f.write('entropythreshold: ' + str(entropythreshold) + '\n')
         f.write('\n')
         f.write("Entropy statistics for CR_empty barcodes:\n")
         cr_empty_entropy.describe().to_string(f)
@@ -69,8 +71,8 @@ if __name__ == "__main__":
     ax[0].set_ylabel('Entropy')
     ax[0].set_xlabel('CR cell barcodes')
     ax[1].set_xlabel('CR empty barcodes')
-    ax[0].axhline(y=EntropyThreshold, color='r', linestyle='-', label=f'{EntropyThreshold}')
-    ax[1].axhline(y=EntropyThreshold, color='r', linestyle='-', label=f'{EntropyThreshold}')
+    ax[0].axhline(y=entropythreshold, color='r', linestyle='-', label=f'{entropythreshold}')
+    ax[1].axhline(y=entropythreshold, color='r', linestyle='-', label=f'{entropythreshold}')
     fig.legend()
     fig_file = os.path.join(res_dir, 'figures', 'entropy_violin_EmptyvsCell.png')
     fig.savefig(fig_file)
@@ -84,19 +86,26 @@ if __name__ == "__main__":
     ax[0].set_ylabel('log10 Entropy')
     ax[0].set_xlabel('CR cell barcodes')
     ax[1].set_xlabel('CR empty barcodes')
-    ax[0].axhline(y=np.log10(EntropyThreshold + precision), color='r', linestyle='-', label=f'log10({EntropyThreshold})')
-    ax[1].axhline(y=np.log10(EntropyThreshold + precision), color='r', linestyle='-', label=f'log10({EntropyThreshold})')
+    ax[0].axhline(y=np.log10(entropythreshold + precision), color='r', linestyle='-', label=f'log10({entropythreshold})')
+    ax[1].axhline(y=np.log10(entropythreshold + precision), color='r', linestyle='-', label=f'log10({entropythreshold})')
     fig.legend()
     fig_file = os.path.join(res_dir, 'figures', 'log10_entropy_violin_EmptyvsCell.png')
     fig.savefig(fig_file)
 
     #%% 
     # now provide only BC that pass entropy threshold
-    bc_entropy['pass'] = bc_entropy['entropy'] > EntropyThreshold
+    bc_entropy['pass'] = bc_entropy['entropy'] > entropythreshold
     
-    print(f"Entropy threshold: {EntropyThreshold}")
+    print(f"Entropy threshold: {entropythreshold}")
     print(f"Number of barcodes that pass entropy threshold: {bc_entropy['pass'].sum()}")
     print(f"Number of barcodes that do not pass entropy threshold: {(bc_entropy['pass']==False).sum()}")
+    
+    
+    with open(os.path.join(res_dir, 'stats_entropy_threshold.txt'), 'w') as f:
+        f.write(f"Entropy threshold: {entropythreshold}\n")
+        f.write(f"Number of barcodes that pass entropy threshold: {bc_entropy['pass'].sum()}\n")
+        f.write(f"Number of barcodes that do not pass entropy threshold: {(bc_entropy['pass']==False).sum()}\n")
+        f.write("\n")
 
     # save bc_entropy with pass column
     bc_pass_entropy_file = os.path.join(res_dir, 'bc_pass_entropy.tsv')
@@ -145,3 +154,5 @@ if __name__ == "__main__":
     fig_file = os.path.join(res_dir, 'figures', 'frag_df_length.png')
     fig.tight_layout()
     fig.savefig(fig_file)
+
+

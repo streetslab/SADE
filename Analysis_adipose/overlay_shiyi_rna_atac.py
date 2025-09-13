@@ -60,11 +60,16 @@ precision = 1e-10
 # import argparse
 # parser = argparse.ArgumentParser(description="Overlay RNA cell type annotation on ATAC peak latent space")
 # parser.add_argument('--res_dir', type=str, required=True, help='Directory containing the results')
+# parser.add_argument('--rna_analysis_dir', type=str, required=True, help='Directory containing the RNA results')
 # args = parser.parse_args()
 
 # output_dir = args.res_dir
-output_dir = '/home/syyang/adipose_ln/atac/res/AB_ATAC_FL_TAM_SQ'
+# corresponding_rna_dir = args.rna_analysis_dir
+output_dir = '/home/syyang/adipose_ln/atac/res/NK_ATAC_MAPLE013_CS'
+corresponding_rna_dir = '/mnt/hdd_alice/syy/adipose/rna/Analysis/QC_Process_output/NK_GEX_MAPLE013_CS'
+
 chromosome = 'chr1'
+
 
 #%%
 # load fragments overlap peaks data & entropy data 
@@ -104,7 +109,7 @@ rna_celltype_annotation['Sample'] = rna_celltype_annotation['sample'].apply(lamb
 rna_celltype_annotation['rna_barcodes'] = rna_celltype_annotation.apply(lambda x: x.name.split('-')[0], axis = 1)
 # %%
 
-sample_rna_celltype = rna_celltype_annotation[rna_celltype_annotation['Sample'] == 'AB_GEX_'+rna_sample_name].copy()
+sample_rna_celltype = rna_celltype_annotation[rna_celltype_annotation['Sample'] == sample_name.split('ATAC_')[0] + 'GEX_' +rna_sample_name].copy()
 
 #%%
 peakvi_adata.obs = peakvi_adata.obs.merge(sample_rna_celltype[['rna_barcodes', 'cell_type']],
@@ -120,12 +125,12 @@ if not os.path.exists(figure_dir):
 
 # save the adata with cell type annotation
 os.chdir(DownstreamReanalysis_dir)
-peakvi_fig_file = os.path.join(figure_dir, 'umap_peakvi.png')
 sc.pl.umap(peakvi_adata, color=['cell_type', 'clusters_peakvi'], ncols=1,  title='RNA-cell-type on atac peaks latent space', \
-        size=30, na_color='None', save='umap_peakvi.png')
-entropy_peakvi_fig_file = os.path.join(figure_dir, 'umap_entropy_peakvi.png')
+        size=30, na_color='None'
+        , save='umap_peakvi.png')
 sc.pl.umap(entropy_peakvi_adata, color=['cell_type', 'clusters_peakvi'], ncols=1,  title='RNA-cell-type on atac entropy peaks latent space',  \
-        size=30, na_color='None', save='umap_entropy_peakvi.png')
+        size=30, na_color='None'
+        , save='umap_entropy_peakvi.png')
 
 # %%
 # Overlay with entropy and fragments overlap peaks percentage
@@ -141,6 +146,7 @@ entropy_peakvi_adata.obs = entropy_peakvi_adata.obs.set_index('barcodes').join(f
 entropy_peakvi_adata.obs['log10_entropy'] = np.log10(entropy_peakvi_adata.obs['entropy'] + precision)
 
 # %%
+# Project fragments% overlap peaks and entropy on umap
 sc.pl.umap(peakvi_adata, color=['frag_overlap_peaks%', 'log10_entropy'], ncols=2, 
         title='Percentage of fragments overlapping with peaks and entropy', size=30, na_color='None', 
         save='umap_peakvi_bc_qc.png')
@@ -151,6 +157,29 @@ sc.pl.umap(entropy_peakvi_adata, color=['frag_overlap_entropy_peaks%', 'log10_en
 
 # %%
 
-# sc.pl.umap(peakvi_adata[peakvi_adata.obs['entropy']> 0.01], color=['frag_overlap_peaks%', 'cell_type'], ncols=1,
-#         title='Percentage of fragments overlapping with peaks (cells with entropy > 0.01)', size=30, na_color='None')
+
+# Load RNA doublet scores
+rna_doublet_file = os.path.join(corresponding_rna_dir, 'scds_doublets_singlets.tsv')
+rna_doublet_df = pd.read_csv(rna_doublet_file, sep='\t', index_col=0)
+rna_doublet_df['rna_barcodes'] = rna_doublet_df.apply(lambda x: x.name.split('-')[0], axis = 1)
+
+#
+peakvi_adata.obs = peakvi_adata.obs.merge(rna_doublet_df[['rna_barcodes', 'scds_score', 'scds_DropletType']], left_on='rna_barcodes', right_on='rna_barcodes', how='left')
+entropy_peakvi_adata.obs = entropy_peakvi_adata.obs.merge(rna_doublet_df[['rna_barcodes', 'scds_score', 'scds_DropletType']], left_on='rna_barcodes', right_on='rna_barcodes', how='left')
+#%%
+# Project doublet scores on umap
+
+sc.pl.umap(entropy_peakvi_adata, color=['scds_score', 'scds_DropletType', 'total_fragments', 'log10_entropy'], ncols=2,
+        title='doublet score on entropy peak atac', size=30, na_color='None',
+        save='umap_entropy_peakvi_overlay_rnadoublet.png')
+# %%
+fig_file = os.path.join(figure_dir, 'violin_entropy_rnadoublet.png')
+fig, ax = plt.subplots(ncols=   2, sharey=True)
+ax[0].violinplot(peakvi_adata.obs[peakvi_adata.obs['scds_DropletType'] == 'doublet']['log10_entropy'], showmeans=True, showmedians=True, bw_method=0.1)
+ax[1].violinplot(peakvi_adata.obs[~ (peakvi_adata.obs['scds_DropletType'] == 'doublet')]['log10_entropy'], showmeans=True, showmedians=True, bw_method=0.1)
+ax[0].set_xlabel('doublet')
+ax[1].set_xlabel('singlet')
+ax[0].set_ylabel('log10 Entropy')
+fig.legend()
+fig.savefig(fig_file)
 # %%
