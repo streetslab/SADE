@@ -199,4 +199,20 @@ if __name__ == "__main__":
     fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_knee_plot_logscale.png')
     fig.savefig(fig_file, bbox_inches='tight')
     
+
+    #histogram of log10(entropy) values -- for (potentially) Gaussian mixture model fitting
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.hist(np.log10(entropies + precision), bins=100, color='blue',  label='log10(Entropy)')
+    ax.set_ylabel('Frequency')
+    ax.set_xlabel('log10(Entropy)')
+    fig.legend()
+    fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_histogram.png')
+    fig.savefig(fig_file, bbox_inches='tight')
     
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.hist(np.log10(entropies + precision), bins=100, color='blue',  log=True, label='log10(Entropy)')
+    ax.set_ylabel('log10(Frequency)')
+    ax.set_xlabel('log10(Entropy)')
+    fig.legend()
+    fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_histogram_logFreq.png')
+    fig.savefig(fig_file, bbox_inches='tight')
