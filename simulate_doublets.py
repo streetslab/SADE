@@ -152,18 +152,18 @@ if __name__ == "__main__":
     ## plot them together but freq is log scale for ref data 
     fig, ax = plt.subplots(3, 1, sharex=True, sharey=False, figsize=(8, 6))
     ax[0].hist(np.log10(np.array(bc_entropies) + precision), 
-               bins=50, color='gray', alpha=0.7, log=True)
+               bins=50, color='gray',  log=True)
     ax[0].tick_params(labelbottom=True)
     ax[0].set_title(f'Barcode entropies for {chromosome}')
     ax[0].set_xlabel('log10(Entropy)')
     ax[0].set_ylabel('Frequency')
     
-    ax[1].hist(np.log10(np.array(entropies_sim_doublets) + precision), bins=50, color='gray', alpha=0.7)
+    ax[1].hist(np.log10(np.array(entropies_sim_doublets) + precision), bins=50, color='gray')
     ax[1].set_title(f'Simulated doublet entropies for {chromosome}')
     ax[1].set_ylabel('Frequency')
     ax[1].set_xlabel('log10(Entropy)')
 
-    ax[2].hist(np.log10(np.array(entropies_sim_doublets_samepop) + precision), bins=50, color='gray', alpha=0.7)
+    ax[2].hist(np.log10(np.array(entropies_sim_doublets_samepop) + precision), bins=50, color='gray')
     ax[2].set_title(f'Simulated doublet entropies from the same population for {chromosome}')
     ax[2].set_ylabel('Frequency')
     ax[2].set_xlabel('log10(Entropy)')

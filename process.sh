@@ -95,7 +95,6 @@ rm ${output_dir}/_fragments.tsv
 # Record parameters used in this run
 echo "Parameters used in this run:" > ${output_dir}/parameters.csv
 echo "species,${species}" >> ${output_dir}/parameters.csv
-echo "entropy_threshold,${entropy_threshold}" >> ${output_dir}/parameters.csv
 echo "chromosome,${chromosome}" >> ${output_dir}/parameters.csv
 echo "window_size,${window_size}" >> ${output_dir}/parameters.csv
 
@@ -115,6 +114,10 @@ if [ ! -f ${entropy_file} ] ; then
         --windowsize ${window_size}
 fi
 
+
+
+
+
 # MODULE 2:  Plot entropy of each barcode and overlay with CR cell-calling labels
 filtered_frag_file=${output_dir}/filtered_fragments.tsv  #check-point for MODULE 2
 filtered_bc_file=${output_dir}/temp_bc_CBZ.txt  #check-point for MODULE 2
@@ -127,6 +130,8 @@ if [ ! -f ${filtered_frag_file} ] ; then
         --entropythreshold ${entropy_threshold}
 fi 
 
+# record entropy threshold used in this run
+echo "entropy_threshold,${entropy_threshold}" >> ${output_dir}/parameters.csv
 
 
 
