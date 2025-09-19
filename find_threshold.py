@@ -4,7 +4,7 @@
 # Set default parameters
 _k = 1
 _cutoff = 6e-8
-_spline_s = 100
+_spline_s = 77
 _spline_k = 3
 
 #%%
@@ -80,5 +80,5 @@ if __name__ == "__main__":
     ax[2].set_title('second derivative')
 
     fig.tight_layout()
-    fig.savefig(os.path.join(figure_subdir, f"{chromosome}_entropy_threshold_fitting_k{_k}.png"))
+    fig.savefig(os.path.join(figure_subdir, f"{chromosome}_entropy_threshold_fitting_k{_k}_s{_spline_s}.png"))
     plt.close(fig)

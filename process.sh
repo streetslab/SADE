@@ -17,7 +17,7 @@ source ${SCRIPT_DIR}/config.sh
 
 
 ## BEFORE ANYTHING ELSE: process options 
-while  getopts "f:o:b:s:e:c:w:" opt; do
+while  getopts "f:o:b:s:e:c:w:g:" opt; do
   case $opt in
     f) 
       fragment_file="$OPTARG"
@@ -40,6 +40,10 @@ while  getopts "f:o:b:s:e:c:w:" opt; do
       ;;
     w)
       window_size="$OPTARG"
+      ;;
+    g)
+      species="$OPTARG"
+      # currently: 'human', 'mouse'
       ;;
     \?) 
       echo "Invalid option: -$OPTARG" >&2
@@ -90,20 +94,23 @@ rm ${output_dir}/_fragments.tsv
 
 # Record parameters used in this run
 echo "Parameters used in this run:" > ${output_dir}/parameters.csv
+echo "species,${species}" >> ${output_dir}/parameters.csv
 echo "entropy_threshold,${entropy_threshold}" >> ${output_dir}/parameters.csv
 echo "chromosome,${chromosome}" >> ${output_dir}/parameters.csv
 echo "window_size,${window_size}" >> ${output_dir}/parameters.csv
+
 
 
 # MODULE 1:  Calculate entropies of each barcode
 source ${PYTHON_ENV}
 
 entropy_file="${output_dir}/${chromosome}_barcode_entropy.pickle"  #check-point  for MODULE 1
+species_genome_size_file="${species}_genome_chromsize.tsv"
 if [ ! -f ${entropy_file} ] ; then
     python ${SCRIPT_DIR}/calculate_entropy.py \
         --res_dir $output_dir \
         --frag_file $frag_file \
-        --genome_chromsize "${SCRIPT_DIR}/ref/human_genome_chromsize.tsv" \
+        --genome_chromsize "${SCRIPT_DIR}/ref/${species_genome_size_file}" \
         --chromosome "${chromosome}"  \
         --windowsize ${window_size}
 fi
@@ -121,8 +128,7 @@ if [ ! -f ${filtered_frag_file} ] ; then
 fi 
 
 
-echo "Testing on windowsize" 
-exit 0 
+
 
 # MODULE 3:  Filter BAM file with barcodes passed the entropy threshold
 filtered_bam_file=${output_dir}/entropy_filtered.bam #check-point for MODULE 3
