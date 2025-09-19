@@ -33,7 +33,7 @@ while  getopts "f:o:b:s:e:c:w:g:" opt; do
       bam_file="$OPTARG"
       ;;
     e)
-      entropy_threshold="$OPTARG"
+      entropy_threshold="$OPTARG"  # TODO: Need to remove
       ;;
     c)
       chromosome="$OPTARG"
@@ -99,7 +99,6 @@ echo "chromosome,${chromosome}" >> ${output_dir}/parameters.csv
 echo "window_size,${window_size}" >> ${output_dir}/parameters.csv
 
 
-
 # MODULE 1:  Calculate entropies of each barcode
 source ${PYTHON_ENV}
 
@@ -116,12 +115,23 @@ fi
 
 
 
+# ++MODULE 1.5: automatically determine entropy threshold based on knee plot
+auto_entropy_file="${output_dir}/entropy_cutoff.csv"
+if [ ! -f ${auto_entropy_file} ] ; then
+    python find_threshold.py \
+        --output_dir ${output_dir} \
+        --chromosome ${chromosome}
+fi
+
 
 
 # MODULE 2:  Plot entropy of each barcode and overlay with CR cell-calling labels
 filtered_frag_file=${output_dir}/filtered_fragments.tsv  #check-point for MODULE 2
 filtered_bc_file=${output_dir}/temp_bc_CBZ.txt  #check-point for MODULE 2
 if [ ! -f ${filtered_frag_file} ] ; then 
+    # retrieve entropy value from knee method 
+    entropy_threshold=$(head -n 1 ${auto_entropy_file}  | awk -F ',' '{print $2}')
+
     python ${SCRIPT_DIR}/overlay_entropy_CRcelllabel_plot.py \
         --res_dir $output_dir \
         --frag_file $frag_file \
@@ -132,6 +142,9 @@ fi
 
 # record entropy threshold used in this run
 echo "entropy_threshold,${entropy_threshold}" >> ${output_dir}/parameters.csv
+
+# FOR DEBUGGING TODO: remove this line later
+echo "entropy_threshold used: ${entropy_threshold}"
 
 
 
