@@ -32,7 +32,7 @@ if __name__ == '__main__':
     import os
     annotation_dir = os.path.join(output_dir, 'annotation')
 
-    figures_subdir = os.path.join(annotation_dir, 'figures')
+    figures_subdir = os.path.join(output_dir, 'figures', 'peak_annotation')
     if not os.path.exists(figures_subdir):
         os.makedirs(figures_subdir)
     # %%
