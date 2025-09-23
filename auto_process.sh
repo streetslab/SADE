@@ -36,10 +36,10 @@ while  getopts "f:o:b:s:e:c:w:g:" opt; do
       entropy_threshold="$OPTARG"  # TODO: Need to remove
       ;;
     c)
-      chromosome="$OPTARG"
+      chromosome="$OPTARG" # has default value
       ;;
     w)
-      window_size="$OPTARG"
+      window_size="$OPTARG"  # has default value
       ;;
     g)
       species="$OPTARG"
@@ -65,6 +65,11 @@ fi
 ## size window size 
 if [[ -z ${window_size} ]]; then
     window_size=${_WindowSize}
+fi
+##
+if [[ -z ${species} ]]; then
+    echo "Please provide species with -g"
+    exit 1
 fi
 
 
@@ -118,7 +123,7 @@ fi
 # ++MODULE 1.5: automatically determine entropy threshold based on knee plot
 auto_entropy_file="${output_dir}/entropy_cutoff.csv"
 if [ ! -f ${auto_entropy_file} ] ; then
-    python find_threshold.py \
+    python ${SCRIPT_DIR}/find_threshold.py \
         --output_dir ${output_dir} \
         --chromosome ${chromosome}
 fi
