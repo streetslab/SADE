@@ -30,8 +30,8 @@ mkdir -p $frag_peak_overlap_subdir
 
 frag_overlap_lostpeaks_file=$frag_peak_overlap_subdir/overlap_lost_peaks.bed
 
-# Remove # lines from the fragments file and count the number of unique fragments per barocode
-sed '/^#/d' $frag_file| cut -f4 | sort | uniq -c > $frag_peak_overlap_subdir/total_fragments_counts.txt
+# Remove # lines from the fragments file and count the number of unique fragments per barocode ## TODO: Delete this line
+sed '/^#/d' $frag_file| cut -f4 | sort | uniq -c > $frag_peak_overlap_subdir/total_fragments_counts.txt ## TODO: Delete this line
 
 bedtools intersect -a $frag_file -b $lost_peaks_file -wa -u > $frag_overlap_lostpeaks_file
 # count the number of fragments overlapping with lost peaks per each 
@@ -45,7 +45,7 @@ cut -f4 $frag_peak_overlap_subdir/overlap_entropy_peaks.bed | sort | uniq -c > $
 
 
 # inplace trailing off the leading spaces in the output files
-sed -i 's/^[ ]*//'  $frag_peak_overlap_subdir/total_fragments_counts.txt
+sed -i 's/^[ ]*//'  $frag_peak_overlap_subdir/total_fragments_counts.txt ## TODO: Delete this line
 sed -i 's/^[ ]*//'  $frag_peak_overlap_subdir/overlap_lost_peaks_counts.txt  
 sed -i 's/^[ ]*//'  $frag_peak_overlap_subdir/overlap_peaks_counts.txt
 sed -i 's/^[ ]*//'  $frag_peak_overlap_subdir/overlap_entropy_peaks_counts.txt

@@ -18,7 +18,7 @@ def get_frag_overlap_peaks_df(output_dir, chromosome='chr1'):
         fragments_overlap_subdir = os.path.join(output_dir, 'fragments_overlap_peaks')
 
 
-        total_frag_counts_file = os.path.join(fragments_overlap_subdir, 'total_fragments_counts.txt')
+        total_frag_counts_file = os.path.join(output_dir, 'total_fragments_counts.txt')
         overlap_peaks_counts_file = os.path.join(fragments_overlap_subdir, 'overlap_peaks_counts.txt')
         overlap_entropy_peaks_counts_file = os.path.join(fragments_overlap_subdir, 'overlap_entropy_peaks_counts.txt')
 
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     EntropyThreshold = args.entropythreshold
     crbarcode_file = args.crbarcode_file
 
-    
+    #%%
     import os 
     figure_subdir = os.path.join(output_dir, 'figures')
 
@@ -142,8 +142,22 @@ if __name__ == "__main__":
     fig.legend()
     fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_knee_plot_color_crbc.png')
     fig.savefig(fig_file, bbox_inches='tight')
+
+    #%%
+    Nbcs_to_plot = 30000  # 10x can only process up to 20k cells
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.scatter(bc_entropy_sort['index'][:Nbcs_to_plot], np.log10(bc_entropy_sort['entropy'][:Nbcs_to_plot] + precision), \
+                c=bc_entropy_sort['cr_cell'][:Nbcs_to_plot].map({True: 'blue', False: 'orange'}), \
+                marker= '.', alpha=0.4, label='CR Cell Barcodes', s=1)
+    ax.axhline(y=np.log10(EntropyThreshold + precision), color='red', linestyle='--', label=f'log10({EntropyThreshold})')
+    ax.set_ylabel('Entropy (log10-scaled)')
+    ax.set_xlabel('Barcode Rank')
+    fig.legend()
+    fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_knee_plot_color_crbc_sub30k.png')
+    fig.savefig(fig_file, bbox_inches='tight')
     
     
+    #%%
     ### >>>> This chunk of code could be deleted (in overlay_entropy_CRcelllabel_plot.py file too)
     # Violin plot of entropy values for CellRanger labeled cells vs empty barcodes
     cr_bc_entropy = bc_entropy.merge(cr_bc, left_index=True, right_on=0, how='right')
@@ -192,5 +206,41 @@ if __name__ == "__main__":
     ax.set_ylabel('Total Fragments')
     fig_file = os.path.join(figure_subdir, f'entropy_vs_total_fragments.png')
     fig.savefig(fig_file)
+    
+    #%%
+    fig, ax = plt.subplots(figsize=(10, 6))
+    p = ax.scatter(frag_overlap_entropypeaks_df['log10_entropy'], np.log10(frag_overlap_entropypeaks_df['frag_overlap_entropy_peaks'] + precision), c=frag_overlap_entropypeaks_df['log10_total_fragments'], \
+        cmap='viridis', alpha=0.6, s=10)
+    fig.colorbar(p, ax=ax, label='log10(Total Fragments)')
+    ax.set_xlabel('log10(Entropy)')
+    ax.set_ylabel('log10(Fragment Overlap Entropy Peaks)')
+    fig_file = os.path.join(figure_subdir, f'log10_entropy_vs_fragOverlapEntropyPeaks.png')
+    fig.savefig(fig_file)
+    
+
+    #%% 
+    # Color by CellRanger cell-calling
+    frag_overlap_entropypeaks_df['cr_cell'] = False
+    frag_overlap_entropypeaks_df.loc[frag_overlap_entropypeaks_df.index.isin(cr_bc[0]), 'cr_cell'] = True
+    fig, ax = plt.subplots(figsize=(10, 6))
+    p = ax.scatter(frag_overlap_entropypeaks_df[ 'log10_entropy'], 
+                   np.log10(frag_overlap_entropypeaks_df['frag_overlap_entropy_peaks'] + precision), \
+                   c=frag_overlap_entropypeaks_df['cr_cell'], alpha=0.6, s=10)
+    ax.set_xlabel('log10(Entropy)')
+    ax.set_ylabel('log10(Fragment Overlap Entropy Peaks)')
+    ax.legend(*p.legend_elements(), title="CR Cell", loc='lower right')
+    fig_file = os.path.join(figure_subdir, f'log10_entropy_vs_fragOverlapEntropyPeaks_CRCalling.png')
+    fig.savefig(fig_file)
+
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    p = ax.scatter(frag_overlap_entropypeaks_df['log10_total_fragments'], frag_overlap_entropypeaks_df['log10_entropy'], c=frag_overlap_entropypeaks_df['cr_cell'], \
+        cmap='viridis', alpha=0.6, s=10)
+    ax.legend(*p.legend_elements(), title="CR Cell", loc='lower right')
+    ax.set_ylabel('log10(Entropy)')
+    ax.set_xlabel('log10(Total Fragments)')
+    fig_file = os.path.join(figure_subdir, f'log10_entropy_vs_total_fragments_CRCalling.png')
+    fig.savefig(fig_file)
+
 
 # %%

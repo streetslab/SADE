@@ -40,7 +40,7 @@ if __name__ == "__main__":
     fragments_overlap_subdir = os.path.join(output_dir, 'fragments_overlap_peaks')
 
 
-    total_frag_counts_file = os.path.join(fragments_overlap_subdir, 'total_fragments_counts.txt')
+    total_frag_counts_file = os.path.join(output_dir, 'total_fragments_counts.txt')
     overlap_peaks_counts_file = os.path.join(fragments_overlap_subdir, 'overlap_peaks_counts.txt')
     overlap_entropy_peaks_counts_file = os.path.join(fragments_overlap_subdir, 'overlap_entropy_peaks_counts.txt')
 
