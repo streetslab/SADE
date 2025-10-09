@@ -99,6 +99,14 @@ echo "chromosome,${chromosome}" >> ${output_dir}/parameters.csv
 echo "window_size,${window_size}" >> ${output_dir}/parameters.csv
 
 
+# MODULE 0:  PREPEARATION for global variables and files to plot
+## Remove # lines from the fragments file and count the number of unique fragments per barocode
+sed '/^#/d' $frag_file| cut -f4 | sort | uniq -c > ${output_dir}/total_fragments_counts.txt
+## inplace trailing off the leading spaces in the output files
+sed -i 's/^[ ]*//'  ${output_dir}/total_fragments_counts.txt 
+
+
+exit 0
 
 # MODULE 1:  Calculate entropies of each barcode
 source ${PYTHON_ENV}
@@ -113,8 +121,6 @@ if [ ! -f ${entropy_file} ] ; then
         --chromosome "${chromosome}"  \
         --windowsize ${window_size}
 fi
-
-
 
 
 
