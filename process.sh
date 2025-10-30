@@ -106,8 +106,6 @@ sed '/^#/d' $frag_file| cut -f4 | sort | uniq -c > ${output_dir}/total_fragments
 sed -i 's/^[ ]*//'  ${output_dir}/total_fragments_counts.txt 
 
 
-exit 0
-
 # MODULE 1:  Calculate entropies of each barcode
 source ${PYTHON_ENV}
 

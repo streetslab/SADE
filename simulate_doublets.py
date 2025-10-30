@@ -1,6 +1,6 @@
 #%%
 
-Nsim = 1000  # number of simulated doublets
+Nsim = 2000  # number of simulated doublets
 precision = 1e-10  # precision to avoid log(0)
         
         
@@ -67,8 +67,8 @@ if __name__ == "__main__":
     entropies_sim_doublets_samepop = []
     for i in range(Nsim):
         # randomly select one barcode from each population
-        bc1 = np.random.choice(cluster1_barcode_list)
-        bc2 = np.random.choice(cluster1_barcode_list)
+        bc1 = np.random.choice(cluster2_barcode_list)
+        bc2 = np.random.choice(cluster2_barcode_list)
         # simulate doublet insertions -- add insertion frequencies
         sim_insertions = insert_record[bc1].toarray() + insert_record[bc2].toarray()
         # calculate entropy 
@@ -129,13 +129,14 @@ if __name__ == "__main__":
     ## plot them together
     fig, ax = plt.subplots(3, 1, sharex=True, sharey=False, figsize=(8, 6))
     ax[0].hist(np.log10(np.array(bc_entropies) + precision), 
-               bins=50, color='gray', alpha=0.7)
+               bins=50, color='gray')
     ax[0].tick_params(labelbottom=True)
     ax[0].set_title(f'Barcode entropies for {chromosome}')
     ax[0].set_xlabel('log10(Entropy)')
     ax[0].set_ylabel('Frequency')
     
-    ax[1].hist(np.log10(np.array(entropies_sim_doublets) + precision), bins=50, color='gray', alpha=0.7)
+    ax[1].hist(np.log10(np.array(entropies_sim_doublets) + precision), bins=50, color='gray')
+    ax[1].tick_params(labelbottom=True)    
     ax[1].set_title(f'Simulated doublet entropies for {chromosome}')
     ax[1].set_ylabel('Frequency')
     ax[1].set_xlabel('log10(Entropy)')
@@ -148,7 +149,7 @@ if __name__ == "__main__":
     fig.tight_layout()
     fig.savefig(os.path.join(figures_subdir, f'{chromosome}_simulated_doublet_entropies_comparison.png'))
     
-
+    #%%
     ## plot them together but freq is log scale for ref data 
     fig, ax = plt.subplots(3, 1, sharex=True, sharey=False, figsize=(8, 6))
     ax[0].hist(np.log10(np.array(bc_entropies) + precision), 
@@ -159,6 +160,7 @@ if __name__ == "__main__":
     ax[0].set_ylabel('Frequency')
     
     ax[1].hist(np.log10(np.array(entropies_sim_doublets) + precision), bins=50, color='gray')
+    ax[1].tick_params(labelbottom=True)
     ax[1].set_title(f'Simulated doublet entropies for {chromosome}')
     ax[1].set_ylabel('Frequency')
     ax[1].set_xlabel('log10(Entropy)')
