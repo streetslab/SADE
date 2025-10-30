@@ -41,4 +41,4 @@ fi
 
 # MODULE 3. Make plots of peaks comparisons
 source ${PYTHON_ENV}
-python ${SCRIPT_DIR}/visulize_annotation.py --output_dir $output_dir
+python ${SCRIPT_DIR}/visualize_annotation.py --output_dir $output_dir

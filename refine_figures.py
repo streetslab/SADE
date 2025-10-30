@@ -82,9 +82,12 @@ if __name__ == "__main__":
     
     with open(entropy_file, 'rb') as f:
         entropy_dict = pickle.load(f)
-        
-        
-    entropy = np.array(list(entropy_dict.values()))
+    
+    # remove None values    
+    noNone_entropies = {k: v for k, v in entropy_dict.items() if v is not None}
+
+    
+    entropy = np.array(list(noNone_entropies.values()))
     entropy.sort() # sort the entropy values
 
 
@@ -101,21 +104,21 @@ if __name__ == "__main__":
     # fig.savefig(fig_file, bbox_inches='tight')
     # #%%
     #histogram of log10(entropy) values -- for (potentially) Gaussian mixture model fitting
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.hist(np.log10(entropy + precision), bins=100, color='blue',  label='log10(Entropy)')
-    ax.set_ylabel('Frequency')
-    ax.set_xlabel('log10(Entropy)')
-    fig.legend()
-    fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_histogram.png')
-    fig.savefig(fig_file, bbox_inches='tight')
+    # fig, ax = plt.subplots(figsize=(10, 6))
+    # ax.hist(np.log10(entropy + precision), bins=100, color='blue',  label='log10(Entropy)')
+    # ax.set_ylabel('Frequency')
+    # ax.set_xlabel('log10(Entropy)')
+    # fig.legend()
+    # fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_histogram.png')
+    # fig.savefig(fig_file, bbox_inches='tight')
     
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.hist(np.log10(entropy + precision), bins=100, color='blue',  log=True, label='log10(Entropy)')
-    ax.set_ylabel('log10(Frequency)')
-    ax.set_xlabel('log10(Entropy)')
-    fig.legend()
-    fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_histogram_logFreq.png')
-    fig.savefig(fig_file, bbox_inches='tight')
+    # fig, ax = plt.subplots(figsize=(10, 6))
+    # ax.hist(np.log10(entropy + precision), bins=100, color='blue',  log=True, label='log10(Entropy)')
+    # ax.set_ylabel('log10(Frequency)')
+    # ax.set_xlabel('log10(Entropy)')
+    # fig.legend()
+    # fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_histogram_logFreq.png')
+    # fig.savefig(fig_file, bbox_inches='tight')
     # ### <<<< This chunk of code could be deleted (in calculate_entropy.py file too)
 
     # %%
