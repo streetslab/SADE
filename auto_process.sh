@@ -1,8 +1,7 @@
 #!/bin/bash 
 
 _CHROMOSOME='chr1'
-_EntropyThreshold=0.001
-_WindowSize=250
+_WindowSize=3000 # default window size
 # << GLOBAL VARIABLES >>
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,7 +16,7 @@ source ${SCRIPT_DIR}/config.sh
 
 
 ## BEFORE ANYTHING ELSE: process options 
-while  getopts "f:o:b:s:e:c:w:g:" opt; do
+while  getopts "f:o:b:s:c:w:g:" opt; do
   case $opt in
     f) 
       fragment_file="$OPTARG"
@@ -31,9 +30,6 @@ while  getopts "f:o:b:s:e:c:w:g:" opt; do
       ;;
     s)
       bam_file="$OPTARG"
-      ;;
-    e)
-      entropy_threshold="$OPTARG"  # TODO: Need to remove
       ;;
     c)
       chromosome="$OPTARG" # has default value
@@ -54,10 +50,6 @@ done
 
 
 # set default value if not provided
-## set entropy threshold 
-if [[ -z ${entropy_threshold} ]]; then
-    entropy_threshold=${_EntropyThreshold}
-fi
 ## set chromosome
 if [[ -z ${chromosome} ]]; then
     chromosome=${_CHROMOSOME}
@@ -151,10 +143,11 @@ if [ ! -f ${filtered_frag_file} ] ; then
         --entropy_file $entropy_file \
         --crbarcode_file $crbarcode_file \
         --entropythreshold ${entropy_threshold}
+
+    # record entropy threshold used in this run
+    echo "entropy_threshold,${entropy_threshold}" >> ${output_dir}/parameters.csv
 fi 
 
-# record entropy threshold used in this run
-echo "entropy_threshold,${entropy_threshold}" >> ${output_dir}/parameters.csv
 
 # FOR DEBUGGING TODO: remove this line later
 echo "entropy_threshold used: ${entropy_threshold}"

@@ -25,6 +25,7 @@ def fit_spline_and_find_cutoff(x: np.ndarray, y: np.ndarray, k: int=2,  spline_s
     
     """
     # only consider up to limit barcodes for spline fitting (as even the highest throughput datasets have < 20k cells)
+    limit = min(limit, len(x))
     x = x[:limit]
     y = y[:limit]
     cs = make_splrep(x, y, k=spline_k, s=spline_s)
@@ -83,37 +84,5 @@ def get_x_y_from_pickle_helper(pickle_path: str):
     rank = range(len(barcodes))
     return np.array(list(rank)), np.array(np.log10(list(values)))
 
-#%%
-def make_plots(pickle_path, save_path):
-    x, y = get_x_y_from_pickle_helper(pickle_path)
-    rank_cutoff, entr_cutoff, cs = fit_spline_and_find_cutoff(x, y)
 
-    spl_y = cs(x)
-    deriv = {}
-    for i in range(1, 3):
-        deriv[i] = cs.derivative(i)(x)
-
-    fig, ax = plt.subplots(3, 1, figsize=(10,10), dpi=300)
-    ax[0].plot(x, y, 'o', label='data')
-    ax[0].plot(x, spl_y, label='spline')
-    ax[1].plot(x, deriv[1], label='first derivative')
-    ax[2].plot(x, deriv[2], label='second derivative')
-
-    ax[1].set_ylim(-0.001, 0.001)
-    ax[2].set_ylim(-1e-7, 1e-7)
-
-    for i in range(3):
-        ax[i].axvline(rank_cutoff, color='pink', linestyle='--', label='rank_cutoff')
-        if i == 0:
-            ax[i].axhline(entr_cutoff, color='pink', linestyle='--', label='entr_cutoff')
-
-    ax[0].set_xlabel('rank')
-    ax[0].set_ylabel('log 10 entropy')
-    ax[0].set_title('fit spline')
-    ax[1].set_title('first derivative')
-    ax[2].set_title('second derivative')
-
-    plt.tight_layout()
-    fig.savefig(save_path)
-    
     
