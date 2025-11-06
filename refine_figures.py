@@ -64,7 +64,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Refine figures.")
     parser.add_argument('--output_dir', type=str, required=True, help='Output directory for figures.')
     parser.add_argument('--chromosome', type=str, default='chr1', help='Chromosome to analyze.')
-    parser.add_argument('--entropythreshold', type=float, default=0.001, help='Entropy threshold for filtering.')
+    parser.add_argument('--entropythreshold', type=float, default=None, help='Entropy threshold for filtering.')
     parser.add_argument("--crbarcode_file", type=str, required=True, help="CellRanger barcode file, i.e., barcodes labeled to contain cells.")
 
 
@@ -76,6 +76,15 @@ if __name__ == "__main__":
 
     #%%
     import os 
+    
+    if EntropyThreshold is None:
+        entropy_cutoff_file = os.path.join(output_dir, f"entropy_cutoff.csv")
+        with open(entropy_cutoff_file, 'r') as f:
+            line = f.readline()  # first line has entropy cutoff info
+            if 'entropy cutoff' not in line:
+                raise ValueError("File entropy_cutoff.csv format incorrect.")
+            EntropyThreshold = float(line.strip('\n').split(',')[1])
+    
     figure_subdir = os.path.join(output_dir, 'figures')
 
     entropy_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy.pickle')

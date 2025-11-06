@@ -64,7 +64,7 @@ if __name__ == '__main__':
     ax.set_title('Peak Score Comparison')
     ax.set_xlabel('Peak rank')
     ax.set_ylabel('Peak Score')
-    ax.legend( loc='upper right', bbox_to_anchor=(1.2, .8))
+    ax.legend( loc='upper right', bbox_to_anchor=(1.6, .8))
     fig.tight_layout()
     fig_file = os.path.join(figures_subdir, 'peak_score_comparison.png')
     plt.savefig(fig_file)
