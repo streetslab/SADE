@@ -232,3 +232,26 @@ if __name__ == "__main__":
 
 
 # %%
+#### TODO 
+    frag_df = pd.read_csv(frag_file, sep='\t', header=None)
+    frag_df.columns = ['chrom', 'left_insert', 'right_insert', 'cb', 'support']
+    frag_df['length'] = frag_df['right_insert'] - frag_df['left_insert']
+    filter_frag_df = frag_df[frag_df['cb'].isin(bc_pass_entropy.index)]
+    garbage_frag_df = frag_df[~ frag_df['cb'].isin(filter_frag_df['cb'])]
+
+    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(10, 6), sharey=True)
+    ax[0].hist(filter_frag_df['length'], bins=100, alpha=0.5, label='fl', color='green', range=(0,500))
+    ax[0].set_xlabel('Fragment length')
+    ax[0].set_ylabel('Frequency')
+    ax[0].set_title('Fragment length distribution for filtered fragments')
+    ax[1].hist(frag_df['length'], bins=100, alpha=0.5, label='fl', color='green', range=(0,500))
+    ax[1].set_xlabel('Fragment length')
+    ax[1].set_ylabel('Frequency')
+    ax[1].set_title('Fragment length distribution for all fragments')
+    ax[2].hist(garbage_frag_df['length'], bins=100, alpha=0.5, label='fl', color='green', range=(0,500))
+    ax[2].set_xlabel('Fragment length')
+    ax[2].set_ylabel('Frequency')
+    ax[2].set_title('thrown-away fragments')
+    fig_file = os.path.join(output_dir, 'figures', 'frag_df_length.png')
+    fig.tight_layout()
+    fig.savefig(fig_file)

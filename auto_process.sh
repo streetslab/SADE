@@ -124,29 +124,33 @@ if [ ! -f ${auto_entropy_file} ] ; then
     python ${SCRIPT_DIR}/find_threshold.py \
         --output_dir ${output_dir} \
         --chromosome ${chromosome}
+
+    # Record entropy threshold into the parameters file
+    awk 'NR==1' ${auto_entropy_file} >> ${output_dir}/parameters.csv
 fi
 
 
 
-# MODULE 2:  Plot entropy of each barcode and overlay with CR cell-calling labels
+# MODULE 2:  Filter fragments based on entropy thresholdded barcodes
+#            and plot it overlaying with CR cell-calling labels
 filtered_frag_file=${output_dir}/filtered_fragments.tsv  #check-point for MODULE 2
 filtered_bc_file=${output_dir}/temp_bc_CBZ.txt  #check-point for MODULE 2
 if [ ! -f ${filtered_frag_file} ] ; then 
     # retrieve entropy value from knee method 
-    entropy_threshold=$(head -n 1 ${auto_entropy_file}  | awk -F ',' '{print $2}')
+    entropy_threshold=$(awk -F ',' 'NR==1 {print $2}'  ${auto_entropy_file}  )
 
+    # Filter fragments based on the entropy threshold
+    bash ${SCRIPT_DIR}/filter_fragments.sh \
+        -o ${output_dir} \
+        -c ${chromosome}
+  
+    # Plot [Optional]
     source ${PYTHON_ENV=}
     python ${SCRIPT_DIR}/overlay_entropy_CRcelllabel_plot.py \
-        --res_dir $output_dir \
-        --frag_file $frag_file \
-        --entropy_file $entropy_file \
-        --crbarcode_file $crbarcode_file \
-        --entropythreshold ${entropy_threshold}
-
-    # record entropy threshold used in this run
-    echo "entropy_threshold,${entropy_threshold}" >> ${output_dir}/parameters.csv
+        --output_dir $output_dir \
+        --chromosome $chromosome \
+        --crbarcode_file $crbarcode_file 
 fi 
-
 
 
 # MODULE 3:  Filter BAM file with barcodes passed the entropy threshold
