@@ -35,7 +35,7 @@ $SCRIPT_DIR/split_fragments_by_chrom.sh -o ${output_dir}
 # Step 2: Count Tn5 insertion frequency for each cell barcode
 ## This can be done in parallel for multiple chromosomes in python
 ## TODO: add parallelization 
-source ${PYTHON_ENV_PEAKVI}
+source ${PYTHON_ENV=}
 insert_frequency_file="${output_dir}/{chromosome}_insert_frequency.pickle"
 species_genome_size_file="${species}_genome_chromsize.tsv"
 if [[ ! -f ${insert_frequency_file} ]]; then
@@ -48,7 +48,7 @@ fi
 
 
 # Step 3: Calculate entropy for each chromosome separately
-source ${PYTHON_ENV_PEAKVI}
+source ${PYTHON_ENV=}
 barcode_entropy_df_file="${output_dir}/${chromosome}_barcode_entropy_df.tsv"
 if [[ ! -f ${barcode_entropy_df_file} ]]; then
     # Calculate entropy for the specified chromosome

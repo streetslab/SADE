@@ -65,7 +65,6 @@ if [[ -z ${species} ]]; then
 fi
 
 
-
 # make sure to only execute the script on the fragment file that's within the output directory
 frag_file=${output_dir}/$(basename $fragment_file)
 if [[  $fragment_file == *.gz ]]; then
@@ -73,7 +72,9 @@ if [[  $fragment_file == *.gz ]]; then
 fi
 
 if [ ! -f $frag_file ] ; then
+    figures_subdir="${output_dir}/figures"
     mkdir -p $output_dir
+    mkdir -p $figures_subdir
     gunzip -c $fragment_file > ${frag_file}
 fi
 
@@ -119,6 +120,7 @@ fi
 # ++MODULE 1.5: automatically determine entropy threshold based on knee plot
 auto_entropy_file="${output_dir}/entropy_cutoff.csv"
 if [ ! -f ${auto_entropy_file} ] ; then
+    source ${PYTHON_ENV=}
     python ${SCRIPT_DIR}/find_threshold.py \
         --output_dir ${output_dir} \
         --chromosome ${chromosome}
@@ -133,6 +135,7 @@ if [ ! -f ${filtered_frag_file} ] ; then
     # retrieve entropy value from knee method 
     entropy_threshold=$(head -n 1 ${auto_entropy_file}  | awk -F ',' '{print $2}')
 
+    source ${PYTHON_ENV=}
     python ${SCRIPT_DIR}/overlay_entropy_CRcelllabel_plot.py \
         --res_dir $output_dir \
         --frag_file $frag_file \
