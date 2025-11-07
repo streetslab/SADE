@@ -106,18 +106,14 @@ sed -i 's/^[ ]*//'  ${output_dir}/total_fragments_counts.txt
 
 
 # MODULE 1:  Calculate entropies of each barcode
-source ${PYTHON_ENV}
-entropy_file="${output_dir}/${chromosome}_barcode_entropy.pickle"  #check-point  for MODULE 1
-species_genome_size_file="${species}_genome_chromsize.tsv"
-if [ ! -f ${entropy_file} ] ; then
-    python ${SCRIPT_DIR}/calculate_entropy.py \
-        --res_dir $output_dir \
-        --frag_file $frag_file \
-        --genome_chromsize "${SCRIPT_DIR}/ref/${species_genome_size_file}" \
-        --chromosome "${chromosome}"  \
-        --windowsize ${window_size}
-fi
-
+barcode_entropy_df_file="${output_dir}/${chromosome}_barcode_entropy_df.tsv"
+if [ ! -f ${barcode_entropy_df_file} ] ; then
+  bash ${SCRIPT_DIR}/calculate_entropy.sh \
+          -o $output_dir \
+          -g ${species} \
+          -c ${chromosome}  \
+          -w ${window_size}
+fi 
 
 
 # ++MODULE 1.5: automatically determine entropy threshold based on knee plot
@@ -147,10 +143,6 @@ if [ ! -f ${filtered_frag_file} ] ; then
     # record entropy threshold used in this run
     echo "entropy_threshold,${entropy_threshold}" >> ${output_dir}/parameters.csv
 fi 
-
-
-# FOR DEBUGGING TODO: remove this line later
-echo "entropy_threshold used: ${entropy_threshold}"
 
 
 

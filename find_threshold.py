@@ -3,7 +3,7 @@
 #%% 
 # Set default parameters
 _k = 2
-_spline_s = 10
+_spline_s = 1
 _spline_k = 3
 
 #%%
@@ -20,7 +20,7 @@ import numpy as np
 
 #%%
 # Use the current directory for imports
-from autothreshold_kevintopush import   fit_spline_and_find_cutoff,  get_x_y_from_pickle_helper,  make_plots
+from autothreshold_kevintopush import   fit_spline_and_find_cutoff,  get_x_y_from_pickle_helper
 
 
 #%%
