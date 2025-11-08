@@ -12,6 +12,7 @@ export Renv_Conda='seuratv5'
 # samtools
 # genrich 
 # bedtools 
+# ripgrep (multi-thread grep) if filtering bam files on Barcodes that passed entropy threshold
 # annotatePeaks.pl (from HOMER)
 
 

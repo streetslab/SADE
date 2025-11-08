@@ -1,7 +1,6 @@
 #%%
 #### GLOBAL VARIABLES >>
-precision = 1e-10
-
+precision = 1e-10 # for plot
 #### GLOBAL VARIABLES << 
 
 #%%
