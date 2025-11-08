@@ -32,9 +32,11 @@ samtools view -H $BAM_FILE > $filtered_sam_file
 
 # Filter alignments using filter.txt. Use LC_ALL=C to set C locale instead of UTF-8
 # samtools view $BAM_FILE | LC_ALL=C grep -F -f $FILTER_BC_FILE >> $filtered_sam_file
+echo "  Filtering alignments in BAM file ............"
 time { samtools view $BAM_FILE | LC_ALL=C rg -j 0 -F -f $FILTER_BC_FILE >> $filtered_sam_file ;  } # multi-threaded grep using ripgrep
 # Convert filtered.sam to BAM format
-samtools view -b $filtered_sam_file > $filtered_bam_file
+echo "  Converting filtered.sam to BAM format ............"
+time { samtools view -b $filtered_sam_file > $filtered_bam_file ; }
 
 
 rm $filtered_sam_file
