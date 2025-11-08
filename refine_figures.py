@@ -53,7 +53,7 @@ if __name__ == "__main__":
     # %%
     # Knee plot for entropy
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.plot(np.log10(entropy[::-1] + precision), '-', color='blue', alpha=0.5, label='Entropy', s=3)
+    ax.plot(np.log10(entropy[::-1] + precision), '-', color='blue', alpha=0.5, label='Entropy')
     ax.axhline(y=np.log10(EntropyThreshold + precision), color='green', linestyle='--', label=f'log10({EntropyThreshold:.4f})')
     ax.set_ylabel('Entropy (log10-scaled)')
     ax.set_xlabel('Barcode Rank')

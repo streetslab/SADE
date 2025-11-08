@@ -42,7 +42,7 @@ entropy_threshold=$(awk -F',' 'NR==1 {print $2}' "${entropy_cutoff_file}")
 # Only keep barcodes with entropy >= threshold
 echo "Filtering fragments corresponding to barcodes passed the entropy threshold............"
 
-temp_bc_file="${output_dir}/temp_bc.txt"
+temp_bc_file="${output_dir}/bc_pass_entropy.tsv"
 awk -v threshold="${entropy_threshold}" 'NR==1 || $7 >= threshold'  ${entropy_df_file} > ${filtered_bc_df_file}
 awk 'NR>1 {print $1}' ${filtered_bc_df_file} > ${temp_bc_file}
 grep -f ${temp_bc_file} ${fragment_file} > ${filtered_fragments_file}
@@ -51,8 +51,6 @@ awk -v OFS='' -v prefix='CB:Z:' '{{print prefix, $1}}' ${temp_bc_file} > ${outpu
 echo "Done filtering fragments."
 
 
-# Clean up temporary files
-rm ${temp_bc_file}
 
 
 
