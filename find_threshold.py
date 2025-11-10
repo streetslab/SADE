@@ -61,7 +61,7 @@ if __name__ == "__main__":
     
     deriv[2] = deriv[2] / np.abs(deriv[2]).max()  # normalize second derivative for better visualization    
 
-    fig, ax = plt.subplots(3, 1, figsize=(10,10), dpi=300)
+    fig, ax = plt.subplots(3, 1, figsize=(8,6), dpi=800)
     ax[0].plot(rank_list, sorted_log10entropy_list, 'o', label='data')
     ax[0].plot(rank_list, spl_y, label='spline')
     ax[1].plot(rank_list, deriv[1], label='first derivative')
@@ -71,15 +71,18 @@ if __name__ == "__main__":
     ax[1].set_ylim(-d1_limit*1.1, d1_limit*1.1)
 
     for i in range(3):
-        ax[i].axvline(rank_cutoff, color='pink', linestyle='--', label='rank_cutoff')
+        ax[i].axvline(rank_cutoff, color='pink', linestyle='--', label='rank_cutoff', lw=2)
         if i == 0:
-            ax[i].axhline(log10_entry_cutoff, color='pink', linestyle='--', label='entry_cutoff')
+            ax[i].axhline(log10_entry_cutoff, color='pink', linestyle='--', label='entry_cutoff', lw=2)
 
-    ax[0].set_xlabel('rank')
-    ax[0].set_ylabel('log 10 entropy')
-    ax[0].set_title('fit spline')
-    ax[1].set_title('first derivative')
-    ax[2].set_title('second derivative')
+
+    ax[0].set_ylabel('Entropy(log10)\n', fontsize=10)
+    ax[0].set_title('Fit spline', fontsize=12)
+    ax[1].set_ylabel('First derivative', fontsize=10)
+    # ax[1].set_title('First derivative', fontsize=12)
+    ax[2].set_ylabel('Second derivative', fontsize=10)
+    # ax[2].set_title('Second derivative', fontsize=12)
+    ax[2].set_xlabel('Barcode rank', fontsize=10)
     fig.tight_layout()
     
     fig.savefig(os.path.join(figure_subdir, f"{chromosome}_entropy_threshold_fitting_k{_k}_s{_spline_s}.png"))
