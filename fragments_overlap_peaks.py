@@ -81,6 +81,7 @@ if __name__ == "__main__":
     
 
     import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
 
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(np.sort(overlap_peaks_df['frag_overlap_peaks%'].values)[::-1], label='Overlap with Peaks', color='blue', marker='.', markersize=2, alpha=0.5)
@@ -89,11 +90,12 @@ if __name__ == "__main__":
     ax.set_ylabel('Percentage of fragments')
     fig.legend()
     fig_file = os.path.join(figure_subdir, 'fragments_overlap_peaks.png')
-    fig.savefig(fig_file, dpi=300, bbox_inches='tight')
+    fig.savefig(fig_file, dpi=800, bbox_inches='tight')
     
     
     #%% 
     fig, ax = plt.subplots(figsize=(10, 6))
+    color_map = {'Overlap with Peaks':'blue', 'Overlap with Entropy Peaks':'orange'}
     ax.scatter(
         np.log10(frag_overlap_peaks_df['total_fragments'].values),
         frag_overlap_peaks_df['frag_overlap_peaks%'].values,
@@ -104,11 +106,15 @@ if __name__ == "__main__":
         frag_overlap_entropypeaks_df['frag_overlap_entropy_peaks%'].values,
         s=2, alpha=0.5, label='Overlap with Entropy Peaks', color='orange'
     )
-    ax.set_xlabel('Log10 of total fragments')
-    ax.set_ylabel('Percentage of fragments overlapping with peaks')
-    fig.legend()
+    ax.set_xlabel('Log10 of total fragments', fontsize=14)
+    ax.set_ylabel(f'Fragments% overlapping with peaks', fontsize=14)
+    fig.legend(handles=[Line2D([0], [0], marker='o', color='w', label='Overlap with Peaks',
+                          markerfacecolor='blue', markersize=10),
+                 Line2D([0], [0], marker='o', color='w', label='Overlap with Entropy Peaks',
+                           markerfacecolor='orange', markersize=10)],
+           bbox_to_anchor=(1.02, 1), loc='upper left')
     fig_file = os.path.join(figure_subdir, 'fragments_overlap_peaks_scatter.png')
-    fig.savefig(fig_file, dpi=300, bbox_inches='tight')
+    fig.savefig(fig_file, dpi=800, bbox_inches='tight')
 
 # %%
 
@@ -127,7 +133,7 @@ if __name__ == "__main__":
     ax.set_title('Fragments Overlap with Peaks Colored by Entropy')
     fig.colorbar(ax.collections[0], ax=ax, label='Log10 Entropy')
     fig_file = os.path.join(figure_subdir, 'fragments_overlap_peaks_colorentropy.png')
-    fig.savefig(fig_file, dpi=300, bbox_inches='tight')
+    fig.savefig(fig_file, dpi=800, bbox_inches='tight')
 # %%
     frag_overlap_entropypeaks_df = frag_overlap_entropypeaks_df.join(entropy_df, how='left')
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -143,5 +149,5 @@ if __name__ == "__main__":
     ax.set_title('Fragments Overlap with Entropy Peaks Colored by Entropy')
     fig.colorbar(ax.collections[0], ax=ax, label='Log10 Entropy')
     fig_file = os.path.join(figure_subdir, 'fragments_overlap_entropypeaks_colorentropy.png')
-    fig.savefig(fig_file, dpi=300, bbox_inches='tight')
+    fig.savefig(fig_file, dpi=800, bbox_inches='tight')
 # %%
