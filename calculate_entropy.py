@@ -17,7 +17,7 @@ from tqdm import tqdm
 from scipy.special import lambertw
 from scipy.stats import poisson 
 
-
+precision = 1e-7 # avoid nan in lambert W function calculation
 
 # %%
 
@@ -33,38 +33,26 @@ from utils import return_none
 
 ## MLE estimation of Poisson distribution parameter with Zero-Truncation Poisson observations
 def mle_estimate(tn5_insert_array:scipy.sparse, print_debug:bool=False, return_freq:bool=False):
-    flag = None
+    
     Mtotal = tn5_insert_array.shape[1] # total number of windows
     
-    row_indices, col_indices =tn5_insert_array.nonzero()
-    non0_insert = tn5_insert_array[row_indices, col_indices].toarray().flatten()
+    row_indices, col_indices, non0_insert =scipy.sparse.find(tn5_insert_array)
     Mp = non0_insert.shape[0]
     
-    cur, freq = np.unique(non0_insert, return_counts=True)
     
     non0_insert_adjusted = (non0_insert + 1) // 2 # adjust for paired-end sequencing
     cur_adjusted, freq_adjusted = np.unique(non0_insert_adjusted, return_counts=True)
     
     p_non0 = freq_adjusted / Mp
-    mean_adjusted = np.sum( cur_adjusted * p_non0 )
+    mean_adjusted = np.sum( cur_adjusted * p_non0 ) + precision # make mean > 1 for lambertw function
 
-    # Lambert W function requires (-M1 * exp(-M1)) >= -1/e
-    if mean_adjusted <= 1:
-        mle_lambda = None
-        P0 = None
-        if return_freq:
-            return Mtotal, Mp, mean_adjusted, mle_lambda, P0, cur_adjusted, freq_adjusted, cur, freq, flag
-        return Mtotal, Mp, mean_adjusted, mle_lambda, P0, cur_adjusted, freq_adjusted, cur, freq, flag
-
+    # Lambert W function requires (-M1 * exp(-M1)) > -1/e --> mean_adjusted > 1 
     mle_lambda = lambertw( -mean_adjusted * np.exp(-mean_adjusted) , k=0).real + mean_adjusted
     P0 = np.exp(-mle_lambda)
     
-    if mle_lambda <= 0:
-        P0 = None
-    
     if return_freq:
-        return Mtotal, Mp, mean_adjusted, mle_lambda, P0, cur_adjusted, freq_adjusted, cur, freq, flag
-    return Mtotal, Mp, mean_adjusted, mle_lambda, P0, cur_adjusted, freq_adjusted, cur, freq, flag
+        return Mtotal, Mp, mle_lambda, P0, cur_adjusted, freq_adjusted
+    return Mtotal, Mp, mle_lambda, P0, cur_adjusted, freq_adjusted
 
 
 def kl_divergence(mle_lambda, cur, freq):
@@ -83,43 +71,34 @@ def kl_divergence(mle_lambda, cur, freq):
 
 # Calculate Entropy using MLE estimate 
 def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
-    Mtotal, Mp, mean_non0, mle_lambda, p0, cur_adjusted, freq_adjusted,  cur, freq, flag = mle_estimate(tn5_insert_array, return_freq=True)
+    Mtotal, Mp, mle_lambda, p0, cur_adjusted, freq_adjusted = mle_estimate(tn5_insert_array, return_freq=True)
 
     if p0 is None:
-        Entropy_mixturedist = None
-        Entropy_open_region = None
-        Entropy_open_region_noadj = None
-        divergence = None
-        p_closed_state = None
+        Entropy_mixturedist = Entropy_open_region = divergence = p_closed_state = None
+        return Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state
     else:
-        Nwindows_0inser_open_region = np.floor(Mp / ( 1- p0) * p0 )
-        Nwindows_0inser_open_region = np.min((Nwindows_0inser_open_region, Mtotal - Mp))
-        Nwindows_closed_region = Mtotal - Mp - Nwindows_0inser_open_region
+        Nwindows_0inser_open_region = Mp / ( 1- p0) * p0 
+        Nwindows_closed_region = Mtotal - Mp - Nwindows_0inser_open_region  # what if negative?
 
-        #total_freq = np.concatenate(([Nwindows_closed_region, Nwindows_0inser_open_region], freq_adjusted))
-
+        if Nwindows_closed_region < 0:
+            Entropy_mixturedist = Entropy_open_region = divergence = p_closed_state = None
+            return Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state
+        
+        
         # calculate entropy of mix states
         p_closed_state = Nwindows_closed_region / Mtotal
-        p_states = np.array([p_closed_state, 1 - p_closed_state])
-        Entropy_state = -np.sum(p_states * np.log2(p_states))
+        Entropy_state = - p_closed_state * np.log2(p_closed_state) - (1 - p_closed_state) * np.log2(1 - p_closed_state)
         
         # calculate entropy as a mixture distribution 
-        if Nwindows_0inser_open_region > 0:
-            open_region_p = np.concatenate( ([Nwindows_0inser_open_region ], freq_adjusted) )
-        else:
-            open_region_p = freq_adjusted
-        open_region_p = open_region_p / (Mp + Nwindows_0inser_open_region)
-        Entropy_open_region = -np.sum(open_region_p * np.log2(open_region_p))
-
-        # # Calculate the open region entropy using unadjusted freq (for comparison)
-        p = freq/Mp
-        Entropy_open_region_noadj = -np.sum(p * np.log2(p))
+        open_region_p = freq_adjusted / Mp * (1 - p0)
+        Entropy_open_region = -np.matmul(open_region_p, np.log2(open_region_p)) - p0 * np.log2(p0)
+        
         
         Entropy_mixturedist = Entropy_state + (1 - p_closed_state) * Entropy_open_region
-        # flag =  Entropy_state + (1 - p_closed_state) * Entropy_open_region_noadj # to test the difference
-        #Entropy_mixturedist = Entropy_state + (1 - p_closed_state) * entropy_non0_part # without adjusted
-        divergence = kl_divergence(mle_lambda, cur_adjusted, freq_adjusted)
-    return Entropy_mixturedist, Entropy_open_region, Entropy_open_region_noadj, mle_lambda, p0, p_closed_state, divergence
+
+
+        #divergence = kl_divergence(mle_lambda, cur_adjusted, freq_adjusted)
+    return Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state#, divergence
 
 
 
@@ -171,15 +150,14 @@ if __name__ == "__main__":
     ])
     
     for bc, v in tqdm(insert_record.items(), desc="Calculating entropy for each cell barcode"):
-        Entropy_mixturedist, Entropy_open_region, Entropy_open_region_noadj, mle_lambda, p0, p_closed_state, divergence = mixdist_mle_entropy(v)
+        Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(v)
         barcode_entropy[bc] = Entropy_mixturedist
         entropy_df.loc[bc, 'Entropy'] = Entropy_mixturedist
         entropy_df.loc[bc, 'Entropy_open_region'] = Entropy_open_region
-        entropy_df.loc[bc, 'Entropy_open_region_noadj'] = Entropy_open_region_noadj
+        entropy_df.loc[bc, 'Mp'] = Mp
         entropy_df.loc[bc, 'mle_lambda'] = mle_lambda
         entropy_df.loc[bc, 'P0_open_region'] = p0
         entropy_df.loc[bc, 'P_closed_state'] = p_closed_state
-        entropy_df.loc[bc, 'kl_divergence'] = divergence
 
 
     # save entropy results
