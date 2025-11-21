@@ -32,7 +32,7 @@ from utils import return_none
 #############################################
 
 ## MLE estimation of Poisson distribution parameter with Zero-Truncation Poisson observations
-def mle_estimate(tn5_insert_array:scipy.sparse, print_debug:bool=False, return_freq:bool=False):
+def mle_estimate(tn5_insert_array:scipy.sparse):
     
     Mtotal = tn5_insert_array.shape[1] # total number of windows
     
@@ -50,8 +50,6 @@ def mle_estimate(tn5_insert_array:scipy.sparse, print_debug:bool=False, return_f
     mle_lambda = lambertw( -mean_adjusted * np.exp(-mean_adjusted) , k=0).real + mean_adjusted
     P0 = np.exp(-mle_lambda)
     
-    if return_freq:
-        return Mtotal, Mp, mle_lambda, P0, cur_adjusted, freq_adjusted
     return Mtotal, Mp, mle_lambda, P0, cur_adjusted, freq_adjusted
 
 
@@ -71,7 +69,7 @@ def kl_divergence(mle_lambda, cur, freq):
 
 # Calculate Entropy using MLE estimate 
 def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
-    Mtotal, Mp, mle_lambda, p0, cur_adjusted, freq_adjusted = mle_estimate(tn5_insert_array, return_freq=True)
+    Mtotal, Mp, mle_lambda, p0, cur_adjusted, freq_adjusted = mle_estimate(tn5_insert_array)
 
     if p0 is None:
         Entropy_mixturedist = Entropy_open_region = divergence = p_closed_state = None
@@ -95,7 +93,6 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
         
         
         Entropy_mixturedist = Entropy_state + (1 - p_closed_state) * Entropy_open_region
-
 
         #divergence = kl_divergence(mle_lambda, cur_adjusted, freq_adjusted)
     return Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state#, divergence
