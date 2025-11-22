@@ -148,7 +148,7 @@ if __name__ == "__main__":
     # %%
     # Step 2. Calculate entropy for each cell barcode for the given chromosome 
     barcode_entropy = {}
-    barcode_entropy_df_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy_df.csv')
+    barcode_entropy_df_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy_df.tsv')
 
     
     #%%
