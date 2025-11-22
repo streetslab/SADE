@@ -84,8 +84,8 @@ if __name__ == "__main__":
     from matplotlib.lines import Line2D
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(np.sort(overlap_peaks_df['frag_overlap_peaks%'].values)[::-1], label='Overlap with Peaks', color='blue', marker='.', markersize=2, alpha=0.5)
-    ax.plot(np.sort(overlap_entropy_peaks_df['frag_overlap_entropy_peaks%'].values)[::-1], label='Overlap with Entropy Peaks', color='orange', marker='.', markersize=2, alpha=0.5)
+    ax.plot(np.sort(overlap_peaks_df['frag_overlap_peaks%'].values)[::-1], label='Overlap with Peaks', color='orange', marker='.', markersize=2, alpha=0.5)
+    ax.plot(np.sort(overlap_entropy_peaks_df['frag_overlap_entropy_peaks%'].values)[::-1], label='Overlap with Entropy Peaks', color='blue', marker='.', markersize=2, alpha=0.5)
     ax.set_xlabel('Rank of barcodes ')
     ax.set_ylabel('Percentage of fragments')
     fig.legend()

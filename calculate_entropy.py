@@ -32,6 +32,7 @@ from utils import return_none
 #############################################
 
 ## MLE estimation of Poisson distribution parameter with Zero-Truncation Poisson observations
+# @not-in-use 
 def mle_estimate(tn5_insert_array:scipy.sparse):
     
     Mtotal = tn5_insert_array.shape[1] # total number of windows
@@ -52,7 +53,7 @@ def mle_estimate(tn5_insert_array:scipy.sparse):
     
     return Mtotal, Mp, mle_lambda, P0, cur_adjusted, freq_adjusted
 
-
+# @not-in-use 
 def kl_divergence(mle_lambda, cur, freq):
     """ Compute KL divergence D_KL(P||Q) for discrete distributions
         p and q are arrays of the same length representing probability distributions
@@ -69,33 +70,43 @@ def kl_divergence(mle_lambda, cur, freq):
 
 # Calculate Entropy using MLE estimate 
 def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
-    Mtotal, Mp, mle_lambda, p0, cur_adjusted, freq_adjusted = mle_estimate(tn5_insert_array)
+    
+    Mtotal = tn5_insert_array.shape[1] # total number of windows
+    
+    row_indices, col_indices, non0_insert =scipy.sparse.find(tn5_insert_array)
+    Mnon0 = non0_insert.shape[0]
+    
+    
+    non0_insert_adjusted = (non0_insert + 1) // 2 # adjust for paired-end sequencing
+    cur_adj, freq_adj = np.unique(non0_insert_adjusted, return_counts=True)
+    
+    ZTP_prob = freq_adj / Mnon0
+    mean_adj = np.matmul(cur_adj, ZTP_prob) 
 
-    if p0 is None:
-        Entropy_mixturedist = Entropy_open_region = divergence = p_closed_state = None
-        return Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state
-    else:
-        Nwindows_0inser_open_region = Mp / ( 1- p0) * p0 
-        Nwindows_closed_region = Mtotal - Mp - Nwindows_0inser_open_region  # what if negative?
+    if mean_adj <= 1:
+        return None, None, Mnon0, None, None, None
 
-        if Nwindows_closed_region < 0:
-            Entropy_mixturedist = Entropy_open_region = divergence = p_closed_state = None
-            return Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state
-        
-        
-        # calculate entropy of mix states
-        p_closed_state = Nwindows_closed_region / Mtotal
-        Entropy_state = - p_closed_state * np.log2(p_closed_state) - (1 - p_closed_state) * np.log2(1 - p_closed_state)
-        
-        # calculate entropy as a mixture distribution 
-        open_region_p = freq_adjusted / Mp * (1 - p0)
-        Entropy_open_region = -np.matmul(open_region_p, np.log2(open_region_p)) - p0 * np.log2(p0)
-        
-        
-        Entropy_mixturedist = Entropy_state + (1 - p_closed_state) * Entropy_open_region
+    # Lambert W function requires (-M1 * exp(-M1)) > -1/e --> mean_adj > 1 
+    mle_lambda = lambertw( -mean_adj * np.exp(-mean_adj) , k=0).real + mean_adj
+    P0 = np.exp(-mle_lambda)
+    
+    M0_openregion = Mnon0 / ( 1- P0) * P0
+    p_closestate = 1 -  (M0_openregion + Mnon0) / Mtotal
+    
+    if p_closestate < 0:
+        return None, None, Mnon0, mle_lambda, P0, p_closestate
 
-        #divergence = kl_divergence(mle_lambda, cur_adjusted, freq_adjusted)
-    return Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state#, divergence
+    # Entropy of mix states
+    p_openstate = 1 - p_closestate
+    Entropy_states = -np.log2( p_closestate ) * p_closestate - p_openstate * np.log2( p_openstate )
+    
+    # Entropy only for open regions under Poisson model
+    Poisson_prob = ZTP_prob * (1 - P0) # Only for non-zero windows in open region
+    Entropy_openregion = -np.matmul(Poisson_prob, np.log2(Poisson_prob)) - P0 * np.log2(P0) 
+    
+    Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion
+    
+    return Entropy_mixturedist, Entropy_openregion, Mnon0, mle_lambda, P0, p_closestate
 
 
 
@@ -137,24 +148,44 @@ if __name__ == "__main__":
     # %%
     # Step 2. Calculate entropy for each cell barcode for the given chromosome 
     barcode_entropy = {}
-    entropy_df = pd.DataFrame( columns=[
-        'entropy_open_region', 
-        'Entropy_open_region_noadj', 
-        'mle_lambda', 
-        'P0_open_region', 
-        'P_closed_state',
-        'kl_divergence'
-    ])
+    barcode_entropy_df_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy_df.csv')
+
     
-    for bc, v in tqdm(insert_record.items(), desc="Calculating entropy for each cell barcode"):
-        Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(v)
-        barcode_entropy[bc] = Entropy_mixturedist
-        entropy_df.loc[bc, 'Entropy'] = Entropy_mixturedist
-        entropy_df.loc[bc, 'Entropy_open_region'] = Entropy_open_region
-        entropy_df.loc[bc, 'Mp'] = Mp
-        entropy_df.loc[bc, 'mle_lambda'] = mle_lambda
-        entropy_df.loc[bc, 'P0_open_region'] = p0
-        entropy_df.loc[bc, 'P_closed_state'] = p_closed_state
+    #%%
+    ## Multiprocessing implementation
+    if os.cpu_count() and os.cpu_count() >4:
+        num_cpus = 4
+        
+        # Wrapper function for multiprocessing
+        def mp_wrapper(bc):
+            Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(insert_record[bc])
+            return ( bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state )
+        
+        from multiprocessing import Pool
+        pool = Pool(processes=num_cpus)         # start num_cpus worker processes
+        keys = list(insert_record.keys())
+        res = pool.imap_unordered(mp_wrapper, keys, chunksize=4000)
+        
+        with open(barcode_entropy_df_file, 'w') as f:
+            f.write("Barcode,Entropy_mixturedist,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_closed_state\n")
+            for r in tqdm(res, total=len(keys), desc="Calculating entropy for each cell barcode"):
+                bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = r
+                if Entropy_mixturedist is None:
+                    continue
+                barcode_entropy[bc] = Entropy_mixturedist
+                f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_closed_state}\n")
+            
+
+    ## Single-threaded implementation 
+    else:
+        with open(barcode_entropy_df_file, 'w') as f:
+            f.write("Barcode,Entropy_mixturedist,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_closed_state\n")
+            for bc, v in tqdm(insert_record.items(), desc="Calculating entropy for each cell barcode"):
+                Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(v)
+                if Entropy_mixturedist is None:
+                    continue
+                barcode_entropy[bc] = Entropy_mixturedist
+                f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mp},{mle_lambda},{p0},{p_closed_state}\n")
 
 
     # save entropy results
@@ -162,6 +193,4 @@ if __name__ == "__main__":
     with open(barcode_entropy_file, 'wb') as file:
         pickle.dump(barcode_entropy, file, protocol=pickle.HIGHEST_PROTOCOL)
         
-    barcode_entropy_df_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy_df.tsv')
-    entropy_df.to_csv(barcode_entropy_df_file, sep='\t')
-        
+
