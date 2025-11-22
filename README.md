@@ -12,7 +12,7 @@ compare_peaks.sh does analysis on comparing peak results before-v.s.-post_entrop
 
 
 ### STEP 1. 
-bash process.sh 
+bash auto_process.sh 
 ### STEP 2. 
 bash compare.sh
 ### STEP 3. 
