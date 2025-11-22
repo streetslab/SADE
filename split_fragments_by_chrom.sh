@@ -45,3 +45,8 @@ while IFS=' ' read -r count chrom; do
     chrom_frag_file="${chromosome_fragment_dir}/${chrom}_fragments.tsv"
     head -n ${head_n} ${fragment_file} | tail -n ${tail_n} > ${chrom_frag_file}
 done < ${chrom_counts_file}
+
+
+# create finish file 
+finish_file=${chromosome_fragment_dir}/.split_fragments_by_chromosome.finished
+touch ${finish_file}

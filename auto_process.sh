@@ -120,7 +120,7 @@ fi
 # ++MODULE 1.5: automatically determine entropy threshold based on knee plot
 auto_entropy_file="${output_dir}/entropy_cutoff.csv"
 if [ ! -f ${auto_entropy_file} ] ; then
-    source ${PYTHON_ENV=}
+    source ${PYTHON_ENV}
     python ${SCRIPT_DIR}/find_threshold.py \
         --output_dir ${output_dir} \
         --chromosome ${chromosome}
@@ -145,7 +145,7 @@ if [ ! -f ${filtered_frag_file} ] ; then
         -c ${chromosome}
   
     # Plot [Optional]
-    source ${PYTHON_ENV=}
+    source ${PYTHON_ENV}
     python ${SCRIPT_DIR}/overlay_entropy_CRcelllabel_plot.py \
         --output_dir $output_dir \
         --chromosome $chromosome \

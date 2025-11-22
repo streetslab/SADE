@@ -57,10 +57,10 @@ if __name__ == '__main__':
 
 
     fig, ax = plt.subplots(figsize=(9, 5))
-    ax.plot(peaks_annot['Peak Score'].sort_values(ascending=False), '-', color='red', alpha=0.5, label='Peaks', lw=3)
-    ax.plot(entropy_peaks_annot['Peak Score'].sort_values(ascending=False), '-', color='blue', alpha=0.5, label='Entropy Peaks', lw=3)
-    ax.plot(lost_peaks_annot['Peak Score'].sort_values(ascending=False), '-', color='gray', alpha=0.5, label='Lost Peaks', lw=3)
-    ax.plot(newly_discovered_peaks_annot['Peak Score'].sort_values(ascending=False), '-', color='green', alpha=0.5, label='Newly Discovered Peaks', lw=3)
+    ax.plot(peaks_annot['Peak Score'].sort_values(ascending=False), '-', color='orange', alpha=0.5, label='Peaks', lw=4)
+    ax.plot(entropy_peaks_annot['Peak Score'].sort_values(ascending=False), '-', color='blue', alpha=0.5, label='Entropy Peaks', lw=4)
+    ax.plot(lost_peaks_annot['Peak Score'].sort_values(ascending=False), '-', color='gray', alpha=0.5, label='Lost Peaks', lw=4)
+    ax.plot(newly_discovered_peaks_annot['Peak Score'].sort_values(ascending=False), '-', color='green', alpha=0.5, label='Newly Discovered Peaks', lw=4)
     ax.set_title('Peak Score Comparison', fontsize=14)
     ax.set_xlabel('Peak rank', fontsize=14)
     ax.set_ylabel('Peak Score', fontsize=14)
@@ -81,11 +81,11 @@ if __name__ == '__main__':
     }).fillna(0)
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    freq_df.plot(kind='bar', width=0.8, alpha=0.7, ax=ax, fontsize=14)
+    freq_df.plot(kind='bar', width=0.8, alpha=0.9, ax=ax, color=['orange', 'blue'], fontsize=14)
     ax.set_title('Peak Annotation Frequency Comparison', fontsize=16)
     ax.set_xlabel('Annotation', fontsize=16)
     ax.set_ylabel('Frequency', fontsize=16)
-    ax.legend( )
+    ax.legend()
     fig.tight_layout()
     fig_file = os.path.join(figures_subdir, 'peak_annotation_frequency.png')
     plt.savefig(fig_file)
