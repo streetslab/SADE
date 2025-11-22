@@ -65,29 +65,23 @@ if [[ -z ${species} ]]; then
 fi
 
 
+figures_subdir="${output_dir}/figures"
+mkdir -p $figures_subdir
+
 # make sure to only execute the script on the fragment file that's within the output directory
-frag_file=${output_dir}/$(basename $fragment_file)
-if [[  $fragment_file == *.gz ]]; then
-    frag_file=${frag_file%.gz} # update frag_file name
+frag_file=${output_dir}/fragments.tsv
+checkpoint_file=${output_dir}/.finish_format_fragments
+if [[ ! -f ${checkpoint_file} ]] ; then
+    echo "Checking fragments file format for entropy calculation..."
+    # sometimes fragments.tsv from CR does not have the correct record.. 
+    gunzip -c $fragment_file > ${output_dir}/_fragments.tsv
+    awk -F '\t' '{if (NF == 5) print $0}' ${output_dir}/_fragments.tsv > ${frag_file}
+    rm ${output_dir}/_fragments.tsv 
+    touch ${checkpoint_file}  # create empty file as checkpoint for fragment formatting
 fi
 
-if [ ! -f $frag_file ] ; then
-    figures_subdir="${output_dir}/figures"
-    mkdir -p $output_dir
-    mkdir -p $figures_subdir
-    gunzip -c $fragment_file > ${frag_file}
-fi
 
-# make sure fragment file has file name 'fragments.tsv'
-if [[ $(basename $frag_file) != "fragments.tsv" ]] ; then
-    mv ${frag_file} ${output_dir}/fragments.tsv
-    frag_file=${output_dir}/fragments.tsv
-fi
 
-# sometimes fragments.tsv from CR does not have the correct record.. 
-mv $frag_file ${output_dir}/_fragments.tsv
-awk -F '\t' '{if (NF == 5) print $0}' ${output_dir}/_fragments.tsv > ${frag_file}
-rm ${output_dir}/_fragments.tsv
 
 
 # Record parameters used in this run
@@ -99,9 +93,13 @@ echo "window_size,${window_size}" >> ${output_dir}/parameters.csv
 
 # MODULE 0:  PREPEARATION for global variables and files to plot
 ## Remove # lines from the fragments file and count the number of unique fragments per barocode
-sed '/^#/d' $frag_file| cut -f4 | sort | uniq -c > ${output_dir}/total_fragments_counts.txt
-## inplace trailing off the leading spaces in the output files
-sed -i 's/^[ ]*//'  ${output_dir}/total_fragments_counts.txt 
+checkpoint_file="${output_dir}/.finish_module_0"
+if [[ ! -f ${checkpoint_file} ]] ; then
+  sed '/^#/d' $frag_file| cut -f4 | sort | uniq -c > ${output_dir}/total_fragments_counts.txt
+  ## Inplace trailing off the leading spaces in the output files
+  sed -i 's/^[ ]*//'  ${output_dir}/total_fragments_counts.txt 
+  touch ${checkpoint_file}  # create empty file as checkpoint for MODULE 0
+fi
 
 
 
