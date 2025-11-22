@@ -31,21 +31,21 @@ if __name__ == "__main__":
 
     #%%
     import os 
-    
+
     figure_subdir = os.path.join(output_dir, 'figures')
-    
+
     fragment_file = os.path.join(output_dir, 'fragments.tsv')
-        
+
     entropy_cutoff_file = os.path.join(output_dir, 'entropy_cutoff.csv')
     with open(entropy_cutoff_file, 'r') as f:
         line = f.readline()
         EntropyThreshold = float(line.strip().split(',')[1])
-        
-    
+
+
     entropy_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy_df.tsv')
     entropy_df = pd.read_csv(entropy_file, sep='\t', header=0, index_col=0)
     entropy_df['pass'] = entropy_df['Entropy'] > EntropyThreshold
-    
+
     entropy = entropy_df['Entropy'].dropna().values # remove None values   
     entropy.sort() # sort the entropy values
 
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     fig_file = os.path.join(output_dir, 'figures', 'frag_length_distribution.png')
     fig.tight_layout()
     fig.savefig(fig_file)
-    
+
     #%%
     # Scatter plot of log10(entropy) vs log10(total fragments) colored by frag% overlap peaks
     # load fragments overlap peaks data & entropy data 
@@ -120,8 +120,8 @@ if __name__ == "__main__":
     ax.set_xlabel('log10(Total Fragments)')
     fig_file = os.path.join(figure_subdir, f'log10_entropy_vs_total_fragments.png')
     fig.savefig(fig_file)
-    
-    
+
+
     #%%
     fig, ax = plt.subplots(figsize=(10, 6))
     p = ax.scatter(frag_overlap_entropypeaks_df['log10_entropy'], np.log10(frag_overlap_entropypeaks_df['frag_overlap_entropy_peaks'] + precision), c=frag_overlap_entropypeaks_df['log10_total_fragments'], \
@@ -131,36 +131,5 @@ if __name__ == "__main__":
     ax.set_ylabel('log10(Fragment Overlap Entropy Peaks)')
     fig_file = os.path.join(figure_subdir, f'log10_entropy_vs_fragOverlapEntropyPeaks.png')
     fig.savefig(fig_file)
-    
-
-    #%% 
 
 
-    ##  # TODO: move this to a separate script? >>>
-    #fragments distribution 
-    # cr_bc = pd.read_csv(crbarcode_file, sep='\t', header=None)
-    
-    # frag_overlap_entropypeaks_df['cr_cell'] = frag_overlap_entropypeaks_df.index.isin(cr_bc[0])
-
-
-    # fig, ax = plt.subplots(figsize=(10, 6))
-    # p = ax.scatter(frag_overlap_entropypeaks_df[ 'log10_entropy'], 
-    #                np.log10(frag_overlap_entropypeaks_df['frag_overlap_entropy_peaks'] + precision), \
-    #                c=frag_overlap_entropypeaks_df['cr_cell'], alpha=0.6, s=10)
-    # ax.set_xlabel('log10(Entropy)')
-    # ax.set_ylabel('log10(Fragment Overlap Entropy Peaks)')
-    # ax.legend(*p.legend_elements(), title="CR Cell", loc='lower right')
-    # fig_file = os.path.join(figure_subdir, f'log10_entropy_vs_fragOverlapEntropyPeaks_CRCalling.png')
-    # fig.savefig(fig_file)
-
-
-    # fig, ax = plt.subplots(figsize=(10, 6))
-    # p = ax.scatter(frag_overlap_entropypeaks_df['log10_total_fragments'], frag_overlap_entropypeaks_df['log10_entropy'], c=frag_overlap_entropypeaks_df['cr_cell'], \
-    #     cmap='viridis', alpha=0.6, s=10)
-    # ax.legend(*p.legend_elements(), title="CR Cell", loc='lower right')
-    # ax.set_ylabel('log10(Entropy)')
-    # ax.set_xlabel('log10(Total Fragments)')
-    # fig_file = os.path.join(figure_subdir, f'log10_entropy_vs_total_fragments_CRCalling.png')
-    # fig.savefig(fig_file)
-    
-    ##  # TODO: move this to a separate script? <<<<<<
