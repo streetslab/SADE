@@ -43,24 +43,11 @@ entropy_threshold=$(awk -F',' 'NR==1 {print $2}' "${entropy_cutoff_file}")
 echo "Filtering fragments corresponding to barcodes passed the entropy threshold............"
 
 temp_bc_file="${output_dir}/bc_pass_entropy.tsv"
-awk -v threshold="${entropy_threshold}" 'NR==1 || $7 >= threshold'  ${entropy_df_file} > ${filtered_bc_df_file}
-awk 'NR>1 {print $1}' ${filtered_bc_df_file} > ${temp_bc_file}
+awk -F',' -v threshold="${entropy_threshold}" 'NR==1 || $2 >= threshold'  ${entropy_df_file} > ${filtered_bc_df_file}
+awk -F',' 'NR>1 {print $1}' ${filtered_bc_df_file} > ${temp_bc_file}
 grep -f ${temp_bc_file} ${fragment_file} > ${filtered_fragments_file}
 awk -v OFS='' -v prefix='CB:Z:' '{{print prefix, $1}}' ${temp_bc_file} > ${output_dir}/temp_bc_CBZ.txt
 
 echo "Done filtering fragments."
 
 
-
-
-
-    # print(f"Entropy threshold: {entropythreshold}")
-    # print(f"Number of barcodes that pass entropy threshold: {bc_entropy['pass'].sum()}")
-    # print(f"Number of barcodes that do not pass entropy threshold: {(bc_entropy['pass']==False).sum()}")
-    
-    
-    # with open(os.path.join(output_dir, 'stats_entropy_threshold.txt'), 'w') as f:
-    #     f.write(f"Entropy threshold: {entropythreshold}\n")
-    #     f.write(f"Number of barcodes that pass entropy threshold: {bc_entropy['pass'].sum()}\n")
-    #     f.write(f"Number of barcodes that do not pass entropy threshold: {(bc_entropy['pass']==False).sum()}\n")
-    #     f.write("\n")
