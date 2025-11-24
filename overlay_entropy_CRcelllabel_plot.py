@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # %%
 
     entropy_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy_df.tsv')
-    entropy_df = pd.read_csv(entropy_file, sep='\t', header=0, index_col=0)
+    entropy_df = pd.read_csv(entropy_file, sep=',', header=0, index_col=0)
     
     entropycutoff_file = os.path.join(output_dir, 'entropy_cutoff.csv')
     with open(entropycutoff_file, 'r') as f:

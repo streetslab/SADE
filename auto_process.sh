@@ -9,14 +9,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # environment setup
 source ${SCRIPT_DIR}/config.sh
-# load 
-#    $PYTHON_ENV
-#    $Genrich
-#echo "python_path $PYTHON_ENV" # for debugging
+
 
 
 ## BEFORE ANYTHING ELSE: process options 
-while  getopts "f:o:b:s:c:w:g:" opt; do
+while  getopts "f:o:c:w:g:" opt; do
   case $opt in
     f) 
       fragment_file="$OPTARG"
@@ -24,12 +21,6 @@ while  getopts "f:o:b:s:c:w:g:" opt; do
     o)
       output_dir="$OPTARG"
       output_dir=${output_dir%/}  # remove trailing slash if exists
-      ;;
-    b)
-      crbarcode_file="$OPTARG"
-      ;;
-    s)
-      bam_file="$OPTARG"
       ;;
     c)
       chromosome="$OPTARG" # has default value
@@ -132,7 +123,7 @@ fi
 # MODULE 2:  Filter fragments based on entropy thresholdded barcodes
 #            and plot it overlaying with CR cell-calling labels
 filtered_frag_file=${output_dir}/filtered_fragments.tsv  #check-point for MODULE 2
-filtered_bc_file=${output_dir}/temp_bc_CBZ.txt  #check-point for MODULE 2
+filtered_bc_file=${output_dir}/Entropy_filtered_bc_CBZ.txt  #check-point for MODULE 2
 if [ ! -f ${filtered_frag_file} ] ; then 
     # retrieve entropy value from knee method 
     entropy_threshold=$(awk -F ',' 'NR==1 {print $2}'  ${auto_entropy_file}  )
@@ -142,39 +133,8 @@ if [ ! -f ${filtered_frag_file} ] ; then
         -o ${output_dir} \
         -c ${chromosome}
   
-    # Plot [Optional]
-    source ${PYTHON_ENV}
-    python ${SCRIPT_DIR}/overlay_entropy_CRcelllabel_plot.py \
-        --output_dir $output_dir \
-        --chromosome $chromosome \
-        --crbarcode_file $crbarcode_file 
+
 fi 
 
 
-# MODULE 3:  Filter BAM file with barcodes passed the entropy threshold
-filtered_bam_file=${output_dir}/entropy_filtered.bam #check-point for MODULE 3
-if [ ! -f ${filtered_bam_file} ] ; then
-    bash ${SCRIPT_DIR}/filter_bam_with_barcodes.sh \
-        -s ${bam_file} \
-        -o ${output_dir} \
-        -f ${filtered_bc_file}
-fi
 
-
-# MODULE 4:  (I) peak calling on the filtered BAM file
-entropy_peak_calling_subdir="${output_dir}/peaks_entropy_filtered"
-if [ ! -f ${entropy_peak_calling_subdir}/peaks.bed ] ; then
-    bash ${SCRIPT_DIR}/call_peaks.sh \
-    -s ${filtered_bam_file} \
-    -o ${entropy_peak_calling_subdir} 
-fi
-# MODULE 4:  (II) peak calling on the original BAM file
-peak_calling_subdir="${output_dir}/peaks"
-if [ ! -f ${peak_calling_subdir}/peaks.bed ] ; then
-    bash ${SCRIPT_DIR}/call_peaks.sh \
-    -s ${bam_file} \
-    -o ${peak_calling_subdir}
-fi
-
-
-# MODULE 5:  Compare the peak calling results
