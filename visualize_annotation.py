@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from utils import get_frag_overlap_peaks_df
+
+
+precision = 1e-10
 
 #%%
 def simplify_annotation(annot_df, inplace=False):
@@ -89,6 +93,35 @@ if __name__ == '__main__':
     fig.tight_layout()
     fig_file = os.path.join(figures_subdir, 'peak_annotation_frequency.png')
     plt.savefig(fig_file)
+
+
+    #%% 
+    # Scatter plot of log10(entropy) vs log10(total fragments) colored by frag% overlap peaks
+    # load fragments overlap peaks data & entropy data 
+    _, frag_overlap_entropypeaks_df = get_frag_overlap_peaks_df(output_dir)
+
+    frag_overlap_entropypeaks_df['log10_total_fragments'] = np.log10(frag_overlap_entropypeaks_df['total_fragments'] + precision)
+    frag_overlap_entropypeaks_df['log10_entropy'] = np.log10(frag_overlap_entropypeaks_df['entropy'] + precision)
+    fig, ax = plt.subplots(figsize=(10, 6))
+    p = ax.scatter(frag_overlap_entropypeaks_df['log10_total_fragments'], frag_overlap_entropypeaks_df['log10_entropy'], c=frag_overlap_entropypeaks_df['frag_overlap_entropy_peaks%'], \
+        cmap='viridis', alpha=0.6, s=10)
+    fig.colorbar(p, ax=ax, label='Fragment Overlap Entropy Peaks %')
+    ax.set_ylabel('log10(Entropy)')
+    ax.set_xlabel('log10(Total Fragments)')
+    fig_file = os.path.join(figure_subdir, f'log10_entropy_vs_total_fragments.png')
+    fig.savefig(fig_file)
+
+
+    #%%
+    fig, ax = plt.subplots(figsize=(10, 6))
+    p = ax.scatter(frag_overlap_entropypeaks_df['log10_entropy'], np.log10(frag_overlap_entropypeaks_df['frag_overlap_entropy_peaks'] + precision), c=frag_overlap_entropypeaks_df['log10_total_fragments'], \
+        cmap='viridis', alpha=0.6, s=10)
+    fig.colorbar(p, ax=ax, label='log10(Total Fragments)')
+    ax.set_xlabel('log10(Entropy)')
+    ax.set_ylabel('log10(Fragment Overlap Entropy Peaks)')
+    fig_file = os.path.join(figure_subdir, f'log10_entropy_vs_fragOverlapEntropyPeaks.png')
+    fig.savefig(fig_file)
+
 
 
 

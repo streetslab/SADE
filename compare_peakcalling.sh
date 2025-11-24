@@ -5,14 +5,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source ${SCRIPT_DIR}/config.sh
 
 
-while getopts ":d:c:g:s:" opt; do
+while getopts ":d:g:s:" opt; do
   case $opt in
     d)
       output_dir="$OPTARG"
       output_dir=${output_dir%/}  # remove trailing slash if exists
-      ;;
-    c)
-      chromosome="$OPTARG" # has default value
       ;;
     g)
       genome_name="$OPTARG"
