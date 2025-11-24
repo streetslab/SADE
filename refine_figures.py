@@ -1,8 +1,3 @@
-#%%
-
-###
-
-precision = 1e-10  # to avoid log(entropy==0) issues for plot
 
 
 #%%
@@ -22,7 +17,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Refine figures.")
     parser.add_argument('--output_dir', type=str, required=True, help='Output directory for figures.')
     parser.add_argument('--chromosome', type=str, default='chr1', help='Chromosome to analyze.')
-    parser.add_argument("--crbarcode_file", type=str, default=None, help="CellRanger barcode file, i.e., barcodes labeled to contain cells.") # Maybe delete?? TODO
 
 
     args = parser.parse_args()
@@ -53,8 +47,8 @@ if __name__ == "__main__":
     # %%
     # Knee plot for entropy
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.plot(np.log10(entropy[::-1] + precision), '-', color='blue', alpha=0.5, label='Entropy')
-    ax.axhline(y=np.log10(EntropyThreshold + precision), color='green', linestyle='--', label=f'log10({EntropyThreshold:.4f})')
+    ax.plot(np.log10(entropy[::-1] ), '-', color='blue', alpha=0.5, label='Entropy')
+    ax.axhline(y=np.log10(EntropyThreshold ), color='green', linestyle='--', label=f'log10({EntropyThreshold:.4f})')
     ax.set_ylabel('Entropy (log10-scaled)')
     ax.set_xlabel('Barcode Rank')
     fig.legend()
@@ -63,7 +57,7 @@ if __name__ == "__main__":
     #%%
     #histogram of log10(entropy) values -- for (potentially) Gaussian mixture model fitting
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.hist(np.log10(entropy + precision), bins=100, color='blue',  label='log10(Entropy)')
+    ax.hist(np.log10(entropy ), bins=100, color='blue',  label='log10(Entropy)')
     ax.set_ylabel('Frequency')
     ax.set_xlabel('log10(Entropy)')
     # fig.legend()
@@ -71,7 +65,7 @@ if __name__ == "__main__":
     fig.savefig(fig_file, bbox_inches='tight')
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.hist(np.log10(entropy + precision), bins=100, color='blue',  log=True, label='log10(Entropy)')
+    ax.hist(np.log10(entropy), bins=100, color='blue',  log=True, label='log10(Entropy)')
     ax.set_ylabel('log10(Frequency)')
     ax.set_xlabel('log10(Entropy)')
     fig.legend()
@@ -88,7 +82,7 @@ if __name__ == "__main__":
     filter_frag_df = frag_df[frag_df['entropy_pass']]
     garbage_frag_df = frag_df[~ frag_df['entropy_pass']]
 
-    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(10, 6), sharey=True)
+    fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(15, 6), sharey=True)
     ax[0].hist(filter_frag_df['length'], bins=100, alpha=0.5, label='fl', color='green', range=(0,500))
     ax[0].set_xlabel('Fragment length')
     ax[0].set_ylabel('Frequency')
