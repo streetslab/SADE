@@ -20,7 +20,7 @@ while getopts "s:o:f:" opt; do
 done
 
 
-echo "Filter bam file with barcodes that passed the entropy threshold ----> "
+echo "Filter bam file with barcodes that passed the entropy threshold... "
 echo " ... could take a while, ..."
 
 
@@ -42,4 +42,4 @@ time { samtools view -b $filtered_sam_file > $filtered_bam_file ; }
 rm $filtered_sam_file
 
 
-echo "Filter bam file with barcodes that passed the entropy threshold ---->  Done"
+echo "Filter bam file with barcodes that passed the entropy threshold...  Done"

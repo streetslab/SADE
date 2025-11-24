@@ -75,7 +75,7 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
     Entropy_openregion = -np.matmul(Poisson_prob, np.log2(Poisson_prob)) - P0 * np.log2(P0) 
 
     #Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion
-    Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion / Mnon0 * (1 - P0) # Adjust for sample size effect
+    Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion / Mnon0 * (1 - P0) # Adjust for sample size effect (indirectly read-depth)
 
 
     return Entropy_mixturedist, Entropy_openregion, Mnon0, mle_lambda, P0, p_closestate
@@ -87,7 +87,6 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
 #############################################
 
 # %%
-
 if __name__ == "__main__":
     '''
     running example:
@@ -141,8 +140,8 @@ if __name__ == "__main__":
             f.write(",Entropy,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_closed_state\n")
             for r in tqdm(res, total=len(keys), desc="Calculating entropy for each cell barcode"):
                 bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = r
-                # if np.isnan(Entropy_mixturedist):
-                #     continue
+                if Entropy_mixturedist is None:
+                    continue
                 barcode_entropy[bc] = Entropy_mixturedist
                 f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_closed_state}\n")
 
@@ -153,8 +152,8 @@ if __name__ == "__main__":
             f.write(",Entropy,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_closed_state\n")
             for bc, v in tqdm(insert_record.items(), desc="Calculating entropy for each cell barcode"):
                 Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(v)
-                # if np.isnan(Entropy_mixturedist):
-                #     continue
+                if Entropy_mixturedist is None:
+                    continue
                 barcode_entropy[bc] = Entropy_mixturedist
                 f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mp},{mle_lambda},{p0},{p_closed_state}\n")
 

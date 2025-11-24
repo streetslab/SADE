@@ -56,7 +56,7 @@ def insert_frequency(chromosome:str,
     
     with open(fragments_file, "r") as f:
         #print(f"counting tn5 insertion frequency for {chromosome} in {os.path.basename(fragments_file)} ..........")
-        for l in tqdm(f, desc="Counting tn5 insertion frequency"):
+        for l in tqdm(f, desc="Counting Tn5 insertion frequency"):
             if l.startswith("#"):
                 continue
             chrom, left_insert, right_insert, cb, _ = l.strip().split("\t")  # cb -- cell barcode
