@@ -30,7 +30,7 @@ while  getopts "f:o:c:w:g:" opt; do
       ;;
     g)
       species="$OPTARG"
-      # currently: 'human', 'mouse'
+      # currently: 'hg38', 'mm10'
       ;;
     \?) 
       echo "Invalid option: -$OPTARG" >&2
