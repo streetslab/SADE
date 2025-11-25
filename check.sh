@@ -32,10 +32,11 @@ fi
 
 # MODULE 2. Make plots of fragments overlapping with peaks
 source ${PYTHON_ENV}
-python ${SCRIPT_DIR}/fragments_overlap_peaks.py --res_dir $output_dir --chromosome $chromosome
+python ${SCRIPT_DIR}/visualize_fragments_overlap_peaks.py --res_dir $output_dir --chromosome $chromosome
 
 
 
 
 
 
+#### TODO: ARCHIVE this file.. ALL The modules are in compare_peakcalling.sh now.  REMOVE this file later.  ####

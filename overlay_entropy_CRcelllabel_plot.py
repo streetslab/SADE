@@ -1,7 +1,4 @@
 #%%
-#### GLOBAL VARIABLES >>
-precision = 1e-10 # for plot
-#### GLOBAL VARIABLES << 
 
 # %%
 
@@ -36,7 +33,7 @@ if __name__ == "__main__":
         line = f.readline()
         entropythreshold = float(line.strip().split(',')[1])
         
-    entropy_df['log10_entropy'] = np.log10(entropy_df['Entropy'] + precision)
+    entropy_df['log10_entropy'] = np.log10(entropy_df['Entropy'] )
     entropy_df['pass'] = entropy_df['Entropy'] > entropythreshold
     
 
@@ -109,10 +106,10 @@ if __name__ == "__main__":
     
     # Knee plot for entropy and colored by CellRanger cell-calling
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.scatter(entropy_df_sort['index'], np.log10(entropy_df_sort['Entropy'] + precision), \
+    ax.scatter(entropy_df_sort['index'], np.log10(entropy_df_sort['Entropy']), \
                 c=entropy_df_sort['cr_cell'].map({True: 'blue', False: 'orange'}), \
                 marker= '.', alpha=0.4, label='CR Cell Barcodes', s=3)
-    ax.axhline(y=np.log10(entropythreshold + precision), color='green', linestyle='--', label=f'Entropy cutoff: log10({entropythreshold:.4f})', lw=2)
+    ax.axhline(y=np.log10(entropythreshold), color='green', linestyle='--', label=f'Entropy cutoff: log10({entropythreshold:.4f})', lw=2)
     ax.set_ylabel('Entropy (log10-scaled)')
     ax.set_xlabel('Barcode Rank')
     fig.legend()
@@ -122,10 +119,10 @@ if __name__ == "__main__":
     #%%
     Nbcs_to_plot = 30000  # 10x can only process up to 20k cells
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.scatter(entropy_df_sort['index'][:Nbcs_to_plot], np.log10(entropy_df_sort['Entropy'][:Nbcs_to_plot] + precision), \
+    ax.scatter(entropy_df_sort['index'][:Nbcs_to_plot], np.log10(entropy_df_sort['Entropy'][:Nbcs_to_plot]), \
                 c=entropy_df_sort['cr_cell'][:Nbcs_to_plot].map({True: 'blue', False: 'orange'}), \
                 marker= '.', alpha=0.4, label='CR Cell Barcodes', s=1)
-    ax.axhline(y=np.log10(entropythreshold + precision), color='green', linestyle='--', label=f'log10({entropythreshold:.4f})', lw=2)
+    ax.axhline(y=np.log10(entropythreshold), color='green', linestyle='--', label=f'log10({entropythreshold:.4f})', lw=2)
     ax.set_ylabel('Entropy (log10-scaled)')
     ax.set_xlabel('Barcode Rank')
     fig.legend()

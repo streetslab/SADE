@@ -78,3 +78,19 @@ fi
 # MODULE 7. Make plots of peaks comparisons
 source ${PYTHON_ENV}
 python ${SCRIPT_DIR}/visualize_annotation.py --output_dir $output_dir
+
+
+
+# MODULE 8. Compare fragments overlapping% with called peaks 
+frag_peak_overlap_subdir=${output_dir}/fragments_overlap_peaks
+frag_overlap_entropy_peaks_file=$frag_peak_overlap_subdir/overlap_entropy_peaks_counts.txt
+if [ ! -f $frag_overlap_entropy_peaks_file ] ; then
+    echo "Running fragments overlap with peaks analysis..."
+    bash ${SCRIPT_DIR}/fragments_overlap_peaks.sh -d $output_dir 
+fi 
+
+
+# MODULE 9. Make plots of fragments overlapping with peaks
+source ${PYTHON_ENV}
+python ${SCRIPT_DIR}/visualize_fragments_overlap_peaks.py --res_dir $output_dir --chromosome $chromosome
+

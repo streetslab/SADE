@@ -46,8 +46,6 @@ temp_bc_file="${output_dir}/bc_pass_entropy.tsv"
 awk -F',' -v threshold="${entropy_threshold}" 'NR==1 || $2 >= threshold'  ${entropy_df_file} > ${filtered_bc_df_file}
 awk -F',' 'NR>1 {print $1}' ${filtered_bc_df_file} > ${temp_bc_file}
 grep -f ${temp_bc_file} ${fragment_file} > ${filtered_fragments_file}
-awk -v OFS='' -v prefix='CB:Z:' '{{print prefix, $1}}' ${temp_bc_file} > ${output_dir}/temp_bc_CBZ.txt
+awk -v OFS='' -v prefix='CB:Z:' '{{print prefix, $1}}' ${temp_bc_file} > ${output_dir}/Entropy_filtered_bc_CBZ.txt
 
 echo "Done filtering fragments."
-
-
