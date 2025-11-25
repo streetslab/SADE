@@ -110,7 +110,7 @@ if __name__ == "__main__":
                 c=entropy_df_sort['cr_cell'].map({True: 'blue', False: 'orange'}), \
                 marker= '.', alpha=0.4, label='CR Cell Barcodes', s=3)
     ax.axhline(y=np.log10(entropythreshold), color='green', linestyle='--', label=f'Entropy cutoff: log10({entropythreshold:.4f})', lw=2)
-    ax.set_ylabel('Entropy (log10-scaled)')
+    ax.set_ylabel('Entropy (log10)')
     ax.set_xlabel('Barcode Rank')
     fig.legend()
     fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_knee_plot_color_crbc.png')
@@ -123,7 +123,7 @@ if __name__ == "__main__":
                 c=entropy_df_sort['cr_cell'][:Nbcs_to_plot].map({True: 'blue', False: 'orange'}), \
                 marker= '.', alpha=0.4, label='CR Cell Barcodes', s=1)
     ax.axhline(y=np.log10(entropythreshold), color='green', linestyle='--', label=f'log10({entropythreshold:.4f})', lw=2)
-    ax.set_ylabel('Entropy (log10-scaled)')
+    ax.set_ylabel('Entropy (log10)')
     ax.set_xlabel('Barcode Rank')
     fig.legend()
     fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_knee_plot_color_crbc_top30k.png')

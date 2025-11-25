@@ -50,7 +50,7 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(np.log10(entropy[::-1] ), '-', color='blue', alpha=0.5, label='Entropy')
     ax.axhline(y=np.log10(EntropyThreshold ), color='green', linestyle='--', label=f'log10({EntropyThreshold:.4f})')
-    ax.set_ylabel('Entropy (log10-scaled)')
+    ax.set_ylabel('Entropy (log10)')
     ax.set_xlabel('Barcode Rank')
     fig.legend()
     fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_knee_plot_logscale.png')

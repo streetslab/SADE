@@ -137,4 +137,9 @@ if [ ! -f ${filtered_frag_file} ] ; then
 fi 
 
 
+# Visualization 
+source ${PYTHON_ENV}
+python ${SCRIPT_DIR}/refine_figures.py \
+    --output_dir ${output_dir} \
+    --chromosome ${chromosome}
 
