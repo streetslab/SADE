@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     # histogram of log10(OpenRegion-entropy) values 
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.hist(np.log10(entropy_df['Entropy_open_region']/ entropy_df['Mp']), bins=100, color='blue',  log=False, label='log10(Entropy)')
+    ax.hist(np.log10(entropy_df['Entropy_open_region']/ entropy_df['Mp']), bins=100, color='blue',  log=False, label='log10(Open-region Entropy)')
     ax.set_ylabel('log10(Frequency)')
     ax.set_xlabel('log10(Open-region Entropy)')
     fig.legend()
