@@ -20,7 +20,7 @@ import numpy as np
 
 #%%
 # Use the current directory for imports
-from autothreshold_kevintopush import   fit_spline_and_find_cutoff,  get_x_y_from_pickle_helper
+from autothreshold import   fit_spline_and_find_cutoff,  get_x_y_from_pickle_helper
 
 
 #%%
