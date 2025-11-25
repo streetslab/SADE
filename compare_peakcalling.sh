@@ -17,6 +17,9 @@ while getopts ":d:g:s:" opt; do
     s)
       bam_file="$OPTARG"
       ;;
+    c)
+      chromosome="$OPTARG" # has default value
+      ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
       exit 1
