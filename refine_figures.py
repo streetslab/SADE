@@ -62,15 +62,16 @@ if __name__ == "__main__":
     ax.set_ylabel('Frequency')
     ax.set_xlabel('log10(Entropy)')
     # fig.legend()
-    fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_histogram.png')
+    fig_file = os.path.join(figure_subdir, f'{chromosome}_Entropy_histogram.png')
     fig.savefig(fig_file, bbox_inches='tight')
 
+    # histogram of log10(OpenRegion-entropy) values 
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.hist(np.log10(entropy), bins=100, color='blue',  log=True, label='log10(Entropy)')
+    ax.hist(np.log10(entropy_df['Entropy_open_region']/ entropy_df['Mp']), bins=100, color='blue',  log=False, label='log10(Entropy)')
     ax.set_ylabel('log10(Frequency)')
-    ax.set_xlabel('log10(Entropy)')
+    ax.set_xlabel('log10(Open-region Entropy)')
     fig.legend()
-    fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_histogram_logFreq.png')
+    fig_file = os.path.join(figure_subdir, f'{chromosome}_OpenregionEntropy_histogram.png')
     fig.savefig(fig_file, bbox_inches='tight')
 
     # %%
