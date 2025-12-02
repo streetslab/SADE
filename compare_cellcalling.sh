@@ -28,6 +28,7 @@ done
 
 # Plot entropy values of barcodes overlaying with CellRanger cell-calling labels
 source ${PYTHON_ENV}
+echo "Make figures comparing Entropy cell-calling with CellRanger cell-calling .... "  && \
 python ${SCRIPT_DIR}/overlay_entropy_CRcelllabel_plot.py \
     --output_dir $output_dir \
     --chromosome $chromosome \

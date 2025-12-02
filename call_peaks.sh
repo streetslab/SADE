@@ -20,8 +20,8 @@ done
 
 mkdir -p $output_dir
 
-output_peak_file="${output_dir}/peaks.bed"
-output_bedgraph_file="${output_dir}/begraph.bed"
+output_peak_file="${output_dir}/peaks_w_blacklistregion.bed"
+output_bedgraph_file="${output_dir}/bedgraph.bed"
 output_bed_file="${output_dir}/intervals.bed"
 
 echo "Call peaks with Genrich .... "  && \

@@ -4,8 +4,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source ${SCRIPT_DIR}/config.sh
 
+usage="Usage: $0 -d <output_dir> -g <genome_name> -s <bam_file>   -c  Chromosome"
 
-while getopts ":d:g:s:" opt; do
+while getopts ":d:g:s:c:" opt; do
   case $opt in
     d)
       output_dir="$OPTARG"
@@ -21,7 +22,7 @@ while getopts ":d:g:s:" opt; do
       chromosome="$OPTARG" # has default value
       ;;
     \?)
-      echo "Invalid option: -$OPTARG" >&2
+      echo -e "Invalid option: -$OPTARG. \n Usage: $usage" >&2
       exit 1
       ;;
   esac
@@ -43,7 +44,7 @@ fi
 
 # MODULE 4:  (I) peak calling on the filtered BAM file
 entropy_peak_calling_subdir="${output_dir}/peaks_entropy_filtered"
-if [ ! -f ${entropy_peak_calling_subdir}/peaks.bed ] ; then
+if [ ! -f ${entropy_peak_calling_subdir}/peaks_w_blacklistregion.bed ] ; then
     bash ${SCRIPT_DIR}/call_peaks.sh \
     -s ${filtered_bam_file} \
     -o ${entropy_peak_calling_subdir} 
@@ -51,11 +52,18 @@ fi
 
 # MODULE 4:  (II) peak calling on the original BAM file
 peak_calling_subdir="${output_dir}/peaks"
-if [ ! -f ${peak_calling_subdir}/peaks.bed ] ; then
+if [ ! -f ${peak_calling_subdir}/peaks_w_blacklistregion.bed ] ; then
     bash ${SCRIPT_DIR}/call_peaks.sh \
     -s ${bam_file} \
     -o ${peak_calling_subdir}
 fi
+
+
+# MODULE 4: Remove blacklist regions from called peaks
+bash ${SCRIPT_DIR}/remove_blacklist_region.sh \
+    -o ${output_dir} \
+    -g ${genome_name}
+
 
 
 # Now ---  Compare the peak calling results
