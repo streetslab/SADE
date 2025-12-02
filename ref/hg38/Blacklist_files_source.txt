@@ -1,0 +1,4 @@
+# blacklist bed files were downloaded from 
+https://github.com/Boyle-Lab/Blacklist.git
+
+hg38-blacklist.bed:  from file in the git repo:   lists/hg38-blacklist.v2.bed.gz
