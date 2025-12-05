@@ -8,11 +8,9 @@ _spline_k = 3
 
 #%%
 import matplotlib.pyplot as plt
-#import numpy as np
 import pickle
 
 import scipy
-#from scipy.interpolate import BSpline, CubicSpline, make_interp_spline, make_splrep, splev, make_interp_spline
 from typing import Iterable
 import os
 import numpy as np

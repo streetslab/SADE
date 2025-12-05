@@ -3,18 +3,19 @@
 #%%
 
 
-import pandas as pd
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+import argparse
+import os 
 
 
 #%%
 
 
 if __name__ == "__main__":
-    import argparse
+
     parser = argparse.ArgumentParser(description="Refine figures.")
     parser.add_argument('--output_dir', type=str, required=True, help='Output directory for figures.')
     parser.add_argument('--chromosome', type=str, default='chr1', help='Chromosome to analyze.')
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     chromosome = args.chromosome
 
     #%%
-    import os 
+
 
     figure_subdir = os.path.join(output_dir, 'figures')
 
