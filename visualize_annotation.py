@@ -20,7 +20,7 @@ def simplify_annotation(annot_df, inplace=False):
         annot_df['simple_annotation'] = annot_df['Annotation'].apply(lambda x: str(x).split('(')[0])  
         
 
-
+#%%
 
 if __name__ == '__main__':
     import argparse
