@@ -10,7 +10,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # environment setup
 source ${SCRIPT_DIR}/config.sh
 
-
+IFS='' read -r -d '' usage << EndofMsg
+Usage: $0 -f <fragments_file. Required> 
+          -o <output_dir. Required> 
+          -g <genome_used_for_mapping_fragments. Required: 'hg38', 'mm10' etc.> 
+          [-c <chromosome>. Default: ${_CHROMOSOME}] 
+          [-w <window_size>. Default: ${_WindowSize}]
+EndofMsg
 
 ## BEFORE ANYTHING ELSE: process options 
 while  getopts "f:o:c:w:g:" opt; do
@@ -33,7 +39,7 @@ while  getopts "f:o:c:w:g:" opt; do
       # currently: 'hg38', 'mm10'
       ;;
     \?) 
-      echo "Invalid option: -$OPTARG" >&2
+      echo -e "Invalid option: -$OPTARG \n$usage" >&2
       exit 1
       ;;
   esac
@@ -49,9 +55,16 @@ fi
 if [[ -z ${window_size} ]]; then
     window_size=${_WindowSize}
 fi
+## 
+if [[ -z ${fragment_file} ]]; then
+    echo "Please provide fragments file with -f"
+    echo "$usage"
+    exit 1
+fi
 ##
 if [[ -z ${species} ]]; then
     echo "Please provide species with -g"
+    echo "$usage"
     exit 1
 fi
 
