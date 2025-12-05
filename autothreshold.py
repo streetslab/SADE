@@ -47,9 +47,9 @@ def fit_spline_and_find_cutoff(x: np.ndarray, y: np.ndarray, k: int=2, spline_s:
         elif flag and d_2 > 0:
             flag = False
             right = i
-            count += 1
             
-        inflection_regions[count] = (left, right) # store inflection region boundaries
+            inflection_regions[count] = (left, right) # store inflection region boundaries
+            count += 1
         
         if count == k: 
             break
