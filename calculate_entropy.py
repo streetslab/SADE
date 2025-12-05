@@ -13,6 +13,8 @@ from tqdm import tqdm
 from scipy.special import lambertw
 from scipy.stats import poisson 
 
+import argparse
+
 #%%
 
 from utils import return_none
@@ -97,7 +99,6 @@ if __name__ == "__main__":
     # chromosome: chromosome to analyze, default is chr1    
     '''
 
-    import argparse
 
     parser = argparse.ArgumentParser(description="Calculate entropy for cell barcodes based on fragment file.\n  Entropy calculation is for one chromosome at a time.")
     parser.add_argument("--output_dir", type=str, required=True, help="Directory to save entropy calculation results.")
