@@ -8,6 +8,18 @@ auto_process.sh Calculate per barcode entropy and auto-threshold entropy
 > [!NOTE]
 > Environment setup to run this module check [module-1 environment setup](https://github.com/Irisapo/atac/tree/c8691402345fdf6221e42f532435b6ca52d85294/EnvironmentSetup)
 
+- Usage:
+- ```
+          sample='VIB_10xmultiome_2'
+          ws=3000
+          bash path_to_this_dir/auto_process.sh -f /mnt/hdd_bob/syy/adipose/atac/protocol_benchmark/cr_results/atac/${sample}/outs/fragments.tsv.gz \
+                -o your_desired_output_directory \
+                -w ${ws} \
+                -c 'chr1' \
+                -g 'hg38'
+  
+  ```
+
 ## 
 compare_cellcalling.sh Compares CellRaner's (post-peak) cell-calling method v.s. Entropy (pre-peak) cell-calling
 
