@@ -67,6 +67,12 @@ if [[ -z ${species} ]]; then
     echo "$usage"
     exit 1
 fi
+##
+if [[ -z ${output_dir} ]]; then
+    echo "Please provide directory to save results"
+    echo "$usage"
+    exit 1
+fi
 
 
 figures_subdir="${output_dir}/figures"
