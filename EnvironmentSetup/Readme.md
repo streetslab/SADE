@@ -10,7 +10,7 @@ python -m venv you_venv1_name
 ```
 numpy
 pandas
-scipy
+scipy>=1.15.0
 tqdm
 matplotlib
 ```
