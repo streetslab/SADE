@@ -83,10 +83,44 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
     return Entropy_mixturedist, Entropy_openregion, Mnon0, mle_lambda, P0, p_closestate
 
 
-
 ############################################# 
 ## Calculate entropy for each cell barcode <<
 #############################################
+
+
+##  >>
+##  >> Move all the code before multiprocessing outside of __main__ 
+parser = argparse.ArgumentParser(description="Calculate entropy for cell barcodes based on fragment file.\n  Entropy calculation is for one chromosome at a time.")
+parser.add_argument("--output_dir", type=str, required=True, help="Directory to save entropy calculation results.")
+parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome to analyze, default is chr1.")
+
+args = parser.parse_args()
+
+output_dir = args.output_dir
+chromosome = args.chromosome
+
+
+# Step 1. Load Tn5 insertion frequency record for each cell barcode
+tn5_insert_record_file = os.path.join(output_dir, f'{chromosome}_insert_frequency.pickle')
+
+with open(tn5_insert_record_file, 'rb') as file:
+    insert_record = pickle.load(file)
+
+# %%
+# Step 2. Calculate entropy for each cell barcode for the given chromosome 
+barcode_entropy = {}
+barcode_entropy_df_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy_df.tsv')
+
+
+# Wrapper function for multiprocessing
+def mp_wrapper(bc):
+    Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(insert_record[bc])
+    return ( bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state )
+
+## << Move all the code before multiprocessing outside of __main__ 
+## <<
+
+
 
 # %%
 if __name__ == "__main__":
@@ -100,37 +134,11 @@ if __name__ == "__main__":
     '''
 
 
-    parser = argparse.ArgumentParser(description="Calculate entropy for cell barcodes based on fragment file.\n  Entropy calculation is for one chromosome at a time.")
-    parser.add_argument("--output_dir", type=str, required=True, help="Directory to save entropy calculation results.")
-    parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome to analyze, default is chr1.")
-
-    args = parser.parse_args()
-
-    output_dir = args.output_dir
-    chromosome = args.chromosome
-
-
-    # Step 1. Load Tn5 insertion frequency record for each cell barcode
-    tn5_insert_record_file = os.path.join(output_dir, f'{chromosome}_insert_frequency.pickle')
-
-    with open(tn5_insert_record_file, 'rb') as file:
-        insert_record = pickle.load(file)
-
-    # %%
-    # Step 2. Calculate entropy for each cell barcode for the given chromosome 
-    barcode_entropy = {}
-    barcode_entropy_df_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy_df.tsv')
-
-
     #%%
     ## Multiprocessing implementation
     if os.cpu_count() and os.cpu_count() >4:
         num_cpus = 4
 
-        # Wrapper function for multiprocessing
-        def mp_wrapper(bc):
-            Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(insert_record[bc])
-            return ( bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state )
 
         from multiprocessing import Pool
         pool = Pool(processes=num_cpus)         # start num_cpus worker processes

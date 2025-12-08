@@ -2,9 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 
-import scipy
-from scipy.interpolate import BSpline, CubicSpline, make_interp_spline, make_splrep, splev, make_interp_spline
-from typing import Iterable
+
+from scipy.interpolate import BSpline, make_splrep
 
 
 def fit_spline_and_find_cutoff(x: np.ndarray, y: np.ndarray, k: int=2, spline_s: int=67, spline_k: int=3, limit: int=20000) -> tuple[float, int, BSpline]:
