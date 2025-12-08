@@ -97,24 +97,12 @@ if [[ ! -f ${checkpoint_file} ]] ; then
 fi
 
 
-
-
 # Record parameters used in this run
 echo "Parameters used in this run:" > ${output_dir}/parameters.csv
 echo "species,${species}" >> ${output_dir}/parameters.csv
 echo "chromosome,${chromosome}" >> ${output_dir}/parameters.csv
 echo "window_size,${window_size}" >> ${output_dir}/parameters.csv
 
-
-# MODULE 0:  PREPEARATION for global variables and files to plot
-## Remove # lines from the fragments file and count the number of unique fragments per barocode
-checkpoint_file="${output_dir}/.finish_module_0"
-if [[ ! -f ${checkpoint_file} ]] ; then
-  sed '/^#/d' $frag_file| cut -f4 | sort | uniq -c > ${output_dir}/total_fragments_counts.txt
-  ## Inplace trailing off the leading spaces in the output files
-  sed -i 's/^[ ]*//'  ${output_dir}/total_fragments_counts.txt 
-  touch ${checkpoint_file}  # create empty file as checkpoint for MODULE 0
-fi
 
 
 
