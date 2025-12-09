@@ -39,11 +39,13 @@ head_n=0
 tail_n=0
 while IFS=' ' read -r count chrom; do
     # echo " ${chrom} ,  ${count} ."
+    chrom_frag_file="${chromosome_fragment_dir}/${chrom}_fragments.tsv"
+
     head_n=$((head_n + count ))
     tail_n=$((count))
-    
-    chrom_frag_file="${chromosome_fragment_dir}/${chrom}_fragments.tsv"
-    head -n ${head_n} ${fragment_file} | tail -n ${tail_n} > ${chrom_frag_file}
+    # head -n ${head_n} ${fragment_file} | tail -n ${tail_n} > ${chrom_frag_file}
+    # Use sed to extract would speed up the process
+    sed -n "$((head_n - tail_n + 1)),$((head_n))p" ${fragment_file} > ${chrom_frag_file}
 done < ${chrom_counts_file}
 
 
