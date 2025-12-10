@@ -43,9 +43,11 @@ while IFS=' ' read -r count chrom; do
 
     head_n=$((head_n + count ))
     tail_n=$((count))
-    # head -n ${head_n} ${fragment_file} | tail -n ${tail_n} > ${chrom_frag_file}
-    # Use sed to extract would speed up the process
-    sed -n "$((head_n - tail_n + 1)),$((head_n))p" ${fragment_file} > ${chrom_frag_file}
+    # Approach1: using head and tail
+    head -n ${head_n} ${fragment_file} | tail -n ${tail_n} > ${chrom_frag_file}
+    # Approach2: Use sed to extract -- slow
+    # sed -n "$((head_n - tail_n + 1)),$((head_n))p" ${fragment_file} > ${chrom_frag_file}
+
 done < ${chrom_counts_file}
 
 
