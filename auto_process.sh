@@ -84,11 +84,11 @@ checkpoint_file=${output_dir}/.finish_format_fragments
 if [[ ! -f ${checkpoint_file} ]] ; then
     echo "Checking fragments file format for entropy calculation..."
     if [[ ${fragment_file} == *.gz ]]; then
-        cat ${fragment_file} | zcat | awk -F '\t' '{if (NF == 5) print $0}' - > ${frag_file}
+        cat ${fragment_file} | zcat | awk -F '\t' '{if (NF == 5) print $0}' - > ${frag_file}  && \
         touch ${checkpoint_file}  # create empty file as checkpoint
     elif [[ ${fragment_file} == *.tsv ]]; then 
         # sometimes fragments.tsv from CR does not have the correct record.. 
-        awk -F '\t' '{if (NF == 5) print $0}' ${fragment_file} > ${frag_file}
+        awk -F '\t' '{if (NF == 5) print $0}' ${fragment_file} > ${frag_file}  && \
         touch ${checkpoint_file}  # create empty file as checkpoint
     else
         echo "Unsupported fragment file format. Please provide .tsv or .tsv.gz file."
