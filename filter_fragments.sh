@@ -27,15 +27,11 @@ fi
 
 
 entropy_cutoff_file="${output_dir}/entropy_cutoff.csv"
-# fragment_file="${output_dir}/fragments.tsv"
+fragment_file="${output_dir}/fragments.tsv"
 chromosome_fragment_dir=${output_dir}/chromosome_fragments
 entropy_df_file="${output_dir}/${chromosome}_barcode_entropy_df.tsv"
 
 # File to save results
-filtered_perchrom_frag_dir="${output_dir}/filtered_chromosome_fragments"
-if [ ! -d ${filtered_perchrom_frag_dir} ] ; then
-    mkdir -p ${filtered_perchrom_frag_dir}
-fi
 filtered_bc_df_file="${output_dir}/entropy_filtered_bc_df.tsv"
 filtered_fragments_file="${output_dir}/filtered_fragments.tsv"
 
@@ -52,12 +48,23 @@ awk -F',' -v threshold="${entropy_threshold}" 'NR==1 || $2 >= threshold'  ${entr
 awk -F',' 'NR>1 {print $1}' ${filtered_bc_df_file} > ${temp_bc_file}  # Remove header for grep step 
 # Approach 1 grep 
 #grep -f ${temp_bc_file} ${fragment_file} > ${filtered_fragments_file}  # Single threaded version #TODO: update command options to have both versions
+
 # Approach 2: parallel grep
+# #part 1: Create directory to hold per-chromosome fragment files
+# filtered_perchrom_frag_dir="${output_dir}/filtered_chromosome_fragments"
+# if [ ! -d ${filtered_perchrom_frag_dir} ] ; then
+#     mkdir -p ${filtered_perchrom_frag_dir}
+# fi
+# #part 2: parallel grep
 # Parallelize on chromosome_fragments files for speedup. -- Grep is still slow 
-find ${chromosome_fragment_dir} -name "*_fragments.tsv" -print0 | xargs -I{}  -0 -P 4 \
-    sh -c 'res_file=$(basename $3) ; LC_ALL=C  grep -Ff $1 $3 > "${2}/${res_file}" ' -- \
-    "${temp_bc_file}" "${filtered_perchrom_frag_dir}" {}
-cat ${filtered_perchrom_frag_dir}/*_fragments.tsv > ${filtered_fragments_file}
+# find ${chromosome_fragment_dir} -name "*_fragments.tsv" -print0 | xargs -I{}  -0 -P 4 \
+#     sh -c 'res_file=$(basename $3) ; LC_ALL=C  grep -f $1 $3 > "${2}/${res_file}" ' -- \
+#     "${temp_bc_file}" "${filtered_perchrom_frag_dir}" {}
+# cat ${filtered_perchrom_frag_dir}/*_fragments.tsv > ${filtered_fragments_file}
+
+# Approach 3: use rg (ripgrep) -- probably the fastest
+rg -f ${temp_bc_file}  ${fragment_file} > ${filtered_fragments_file}
+
 
 
 awk -v OFS='' -v prefix='CB:Z:' '{{print prefix, $1}}' ${temp_bc_file} > ${output_dir}/Entropy_filtered_bc_CBZ.txt
@@ -66,4 +73,4 @@ echo "Done filtering fragments."
 
 
 # Clean up temporary files
-rm -rf ${filtered_perchrom_frag_dir}
+# rm -rf ${filtered_perchrom_frag_dir}
