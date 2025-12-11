@@ -33,7 +33,8 @@ chromosome_fragment_dir=${output_dir}/chromosome_fragments
 finish_file=${chromosome_fragment_dir}/.split_fragments_by_chromosome.finished
 if [[ ! -f ${finish_file} ]]; then
     echo "Splitting fragments file by chromosome..."
-    bash $SCRIPT_DIR/split_fragments_by_chrom.sh -o ${output_dir}
+    bash $SCRIPT_DIR/split_fragments_by_chrom.sh -o ${output_dir}  && \
+    touch ${finish_file} # create finish file
 fi
 
 
