@@ -6,7 +6,7 @@ import scvi
 import torch
 
 
-def train_atac(adata_file, des_h5ad_file):
+def train_atac(adata_file, des_h5ad_file, des_model_dir):
     
     scvi.settings.seed = 0
     print("Last run with scvi-tools version:", scvi.__version__)
@@ -18,17 +18,18 @@ def train_atac(adata_file, des_h5ad_file):
 
     #%%
     # filter regions with less than 3% of the cells
-    # print("# regions before filtering:", bc_peak_count_adata.shape[-1])
+    # print("# regions before filtering:", peak_count_adata.shape[-1])
 
-    # sc.pp.filter_genes(bc_peak_count_adata, min_cells=10)
-    # print("# regions after filtering:", bc_peak_count_adata.shape[-1])
+    # sc.pp.filter_genes(peak_count_adata, min_cells=10)
+    # print("# regions after filtering:", peak_count_adata.shape[-1])
 
+    # Let's Use All the identified peaks for comarison (since entropy approach already has more peaks)
     # train on atac_adata
     scvi.model.PEAKVI.setup_anndata(atac_adata)
     peak_model = scvi.model.PEAKVI(atac_adata)
     peak_model.train()
-    # model_dir = os.path.join(save_dir.name, "peakvi_pbmc")
-    # model.save(model_dir, overwrite=True)
+    # save model
+    peak_model.save(des_model_dir, overwrite=True)
 
     # save latent representation back adata
     latent = peak_model.get_latent_representation()
@@ -58,18 +59,18 @@ if __name__ == "__main__":
     downstream_reanalysis_dir = os.path.join(output_dir, "DownstreamReanalysis")
     
     bc_peak_count_h5 = os.path.join(downstream_reanalysis_dir, "bc_peak_count.h5ad")
-    bc_peak_peakVI_h5 = os.path.join(downstream_reanalysis_dir, "peakvi.h5ad")
+    standard_peak_peakVI_h5 = os.path.join(downstream_reanalysis_dir, "standard_peakvi.h5ad")
+    standard_peakvi_model_dir = os.path.join(downstream_reanalysis_dir, "standard_peak_peakvi_model")
     
     entropy_bc_peak_count_h5 = os.path.join(downstream_reanalysis_dir, 'entropy_bc_peak_count.h5ad')
-    entropy_bc_peak_peakVI_h5 = os.path.join(downstream_reanalysis_dir, 'entropy_peakvi.h5ad')
-    
-    # train peakvi on bc_peak_count_h5
-    train_atac(bc_peak_count_h5, bc_peak_peakVI_h5)
-    
-    # train peakvi on entropy_bc_peak_count_h5
-    train_atac(entropy_bc_peak_count_h5, entropy_bc_peak_peakVI_h5)
-    
+    entropy_peak_peakVI_h5 = os.path.join(downstream_reanalysis_dir, 'entropy_peakvi.h5ad')
+    entropy_peakvi_model_dir = os.path.join(downstream_reanalysis_dir, "entropy_peak_peakvi_model")
 
+    # train peakvi on standard_peak_count_h5
+    train_atac(bc_peak_count_h5, standard_peak_peakVI_h5, standard_peakvi_model_dir)
+    
+    # train peakvi on entropy_peak_count_h5
+    train_atac(entropy_bc_peak_count_h5, entropy_peak_peakVI_h5, entropy_peakvi_model_dir)
     
 
 
