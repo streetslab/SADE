@@ -30,7 +30,7 @@ done
 
 # Step 1: Split fragments file by chromosome 
 chromosome_fragment_dir=${output_dir}/chromosome_fragments
-finish_file=${chromosome_fragment_dir}/.split_fragments_by_chromosome.finished
+finish_file=${chromosome_fragment_dir}/_finish_split_fragments_by_chromosome.log
 if [[ ! -f ${finish_file} ]]; then
     echo "Splitting fragments file by chromosome..."
     bash $SCRIPT_DIR/split_fragments_by_chrom.sh -o ${output_dir}  && \
