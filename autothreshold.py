@@ -9,12 +9,14 @@ from scipy.interpolate import BSpline, make_splrep
 def fit_spline_and_find_cutoff(x: np.ndarray, y: np.ndarray, k: int=2, spline_s: int=7, spline_k: int=3, limit: int=20000) -> tuple[float, int, BSpline]:
     """
     Takes the ranks (x) and the corresponding log 10 entropy values (y) and returns estimated entropy cutoff, the rank cutoff, and the scipy BSpline object used to fit the curve.
-    The function fits a smoothing spline to the curve, then computes the first and second derivatives on the spline. then iterating on increasing x values, finds regions where the left bound of the region is where second derivative transitions from greater than cutoff to below cutoff, and then the right bound is where second derivative goes from below cutoff to above. then takes the kth such region by ranks, and computes the greatest dropoff in the region (min second derivative). returns this point as cutoff 
+    The function fits a smoothing spline to the curve, then computes the first and second derivatives on the spline. 
+        Then iterating on increasing x values, finds regions where its 2nd derivative of left bound of the region is negative, and the right bound is positive. 
+        Then takes the kth such region by ranks, and computes the greatest dropoff in the regions (min 1st derivative). returns this point as cutoff 
 
     x: np.ndarray, the ranks (1 is highest).
     y: np.ndarray, the log_10 entropy values.
     k: int, the first k inflection points as entropy cutoff candidates.
-    spline_s: int, spline smoothing conditions, see scipy.make_splrep. Not very sensitive and need not to be sensitive so not tuned much.
+    spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. Not very sensitive and need not to be sensitive so not tuned much but has to be >= 3. 
     spline_k: int, degree of the spline fit, see scipy.make_splrep.
 
     returns: tuple[float, int, Bspline]
