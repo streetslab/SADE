@@ -13,7 +13,7 @@ source ${SCRIPT_DIR}/config.sh
 IFS='' read -r -d '' usage << EndofMsg
 Usage: $0 -f <fragments_file. Required> 
           -o <output_dir. Required> 
-          -g <genome_used_for_mapping_fragments. Required: 'hg38', 'mm10' etc.> 
+          -g <genome_used_for_read_mapping_that_resulted_fragments_file. Required: 'hg38', 'mm10' etc.> 
           [-c <chromosome>. Default: ${_CHROMOSOME}] 
           [-w <window_size>. Default: ${_WindowSize}]
 EndofMsg
@@ -80,7 +80,7 @@ mkdir -p $figures_subdir
 
 # make sure to only execute the script on the fragment file that's within the output directory
 frag_file=${output_dir}/fragments.tsv
-checkpoint_file=${output_dir}/.finish_format_fragments
+checkpoint_file=${output_dir}/_finish_format_fragments.log
 if [[ ! -f ${checkpoint_file} ]] ; then
     echo "Checking fragments file format for entropy calculation..."
     if [[ ${fragment_file} == *.gz ]]; then

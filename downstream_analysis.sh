@@ -44,8 +44,8 @@ fi
 
 ## Step 3: Analyze the PIC matrix using PEAKVI
 source ${PYTHON_ENV_PEAKVI}
-entropy_bc_peak_peakVI_h5="${DownstreamReanalysis_dir}/entropy_peakvi.h5ad"
-if [[ ! -f $entropy_bc_peak_peakVI_h5 ]]; then
+checkpoint_file="${DownstreamReanalysis_dir}/downstream_complete.log"
+if [[ ! -f $checkpoint_file ]]; then
     # Run the PEAKVI analysis script
     python ${SCRIPT_DIR}/peackvi_atac.py --res_dir="${output_dir}"
 fi
