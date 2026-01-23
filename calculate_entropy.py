@@ -160,11 +160,11 @@ if __name__ == "__main__":
         with open(barcode_entropy_df_file, 'w') as f:
             f.write(",Entropy,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_closed_state\n")
             for bc, v in tqdm(insert_record.items(), desc="Calculating entropy for each cell barcode"):
-                Entropy_mixturedist, Entropy_open_region, Mp, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(v)
+                Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(v)
                 if Entropy_mixturedist is None:
                     continue
                 barcode_entropy[bc] = Entropy_mixturedist
-                f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mp},{mle_lambda},{p0},{p_closed_state}\n")
+                f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_closed_state}\n")
 
 
     # save entropy results
