@@ -22,9 +22,8 @@ if [[ -z ${output_dir} || -z ${chromosome} ]]; then
     echo "$Msg" && exit 1
 fi
 
-
-entropy_cutoff_file="${output_dir}/entropy_cutoff.csv"
 fragment_file="${output_dir}/fragments.tsv"
+entropy_cutoff_file="${output_dir}/entropy_cutoff.csv"
 chromosome_fragment_dir=${output_dir}/chromosome_fragments
 entropy_df_file="${output_dir}/${chromosome}_barcode_entropy_df.tsv"
 
@@ -34,8 +33,16 @@ filtered_fragments_file="${output_dir}/filtered_fragments.tsv"
 
 
 
-entropy_threshold=$(awk -F',' 'NR==1 {print $2}' "${entropy_cutoff_file}")
+# Validate required input files exist
+for file in "${fragment_file}" "${entropy_cutoff_file}" "${entropy_df_file}"; do
+    if [[ ! -f "${file}" ]]; then
+        echo "ERROR: Required file not found: ${file}"
+        echo "Please ensure upstream pipeline steps completed successfully."
+        exit 1
+    fi
+done
 
+entropy_threshold=$(awk -F',' 'NR==1 {print $2}' "${entropy_cutoff_file}")
 
 # Only keep barcodes with entropy >= threshold
 echo "Filtering fragments corresponding to barcodes passed the entropy threshold............"
@@ -44,7 +51,7 @@ temp_bc_file="${output_dir}/bc_pass_entropy.tsv"
 awk -F',' -v threshold="${entropy_threshold}" 'NR==1 || $2 >= threshold'  ${entropy_df_file} > ${filtered_bc_df_file}
 awk -F',' 'NR>1 {print $1}' ${filtered_bc_df_file} > ${temp_bc_file}  # Remove header for grep step 
 # ###### Approach 1 grep 
-# grep -f ${temp_bc_file} ${fragment_file} > ${filtered_fragments_file}  # Single threaded version #TODO: update command options to have both versions
+# grep -f ${temp_bc_file} ${fragment_file} > ${filtered_fragments_file}  # Single threaded version 
 # ###### Approach 2: parallel grep
 # #part 1: Create directory to hold per-chromosome fragment files
 # filtered_perchrom_frag_dir="${output_dir}/filtered_chromosome_fragments"
