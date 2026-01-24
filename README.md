@@ -56,7 +56,7 @@ bash path_to_this_dir/auto_process.sh -o your_desired_output_directory \
   * **Output**:   
           **fragments.tsv**  A copy of input frament file.   
           **filtered_fragments.tsv**  Fragments corresponding to quality nuclei by entropy criterion. This file should be used for downstream analysis in replace of fragments file.   
-          **entropy_filtered_bc_df.tsv**  File with filtered barcodes as row indices, columns having entropy calculation metrics. First row has column names.
+          **entropy_filtered_bc_df.tsv**  File with filtered barcodes as row indices, columns having entropy calculation metrics. First row has column names.  
           **figures (subfolder)**
     
 ------ 
