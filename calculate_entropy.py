@@ -140,19 +140,19 @@ if __name__ == "__main__":
         num_cpus = 4
 
 
-        from multiprocessing import Pool
-        pool = Pool(processes=num_cpus)         # start num_cpus worker processes
+        from multiprocessing import Pool       # start num_cpus worker processes
         keys = list(insert_record.keys())
-        res = pool.imap_unordered(mp_wrapper, keys, chunksize=4000)
+        with Pool(processes=num_cpus)  as pool:
+            res = pool.imap_unordered(mp_wrapper, keys, chunksize=4000)
 
-        with open(barcode_entropy_df_file, 'w') as f:
-            f.write(",Entropy,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_closed_state\n")
-            for r in tqdm(res, total=len(keys), desc="Calculating entropy for each cell barcode"):
-                bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = r
-                if Entropy_mixturedist is None:
-                    continue
-                barcode_entropy[bc] = Entropy_mixturedist
-                f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_closed_state}\n")
+            with open(barcode_entropy_df_file, 'w') as f:
+                f.write(",Entropy,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_closed_state\n")
+                for r in tqdm(res, total=len(keys), desc="Calculating entropy for each cell barcode"):
+                    bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = r
+                    if Entropy_mixturedist is None:
+                        continue
+                    barcode_entropy[bc] = Entropy_mixturedist
+                    f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_closed_state}\n")
 
 
     ## Single-threaded implementation 
