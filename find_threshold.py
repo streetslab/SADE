@@ -27,7 +27,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Find threshold for selecting barcodes based on entropy values')
     parser.add_argument('--output_dir', type=str, required=True, help='Path to output directory')
-    parser.add_argument('--chromosome', type=str, required=True, default='entropies.pickle', help='Path to pickle file with entropy values')
+    parser.add_argument('--chromosome', type=str, required=True, help='Path to pickle file with entropy values')
     
     
     args = parser.parse_args()
