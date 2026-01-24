@@ -59,19 +59,19 @@ if [[ -z ${window_size} ]]; then
 fi
 ## 
 if [[ -z ${fragment_file} ]]; then
-    echo "Please provide fragments file with -f"
+    echo "Please provide fragments file with -f" >&2
     echo "$usage"
     exit 1
 fi
 ##
 if [[ -z ${species} ]]; then
-    echo "Please provide species with -g"
+    echo "Please provide species with -g" >&2
     echo "$usage"
     exit 1
 fi
 ##
 if [[ -z ${output_dir} ]]; then
-    echo "Please provide directory to save results"
+    echo "Please provide directory to save results" >&2
     echo "$usage"
     exit 1
 fi
@@ -93,8 +93,7 @@ if [[ ! -f ${checkpoint_file} ]] ; then
         awk -F '\t' '{if (NF == 5) print $0}' "${fragment_file}" > "${frag_file}"  && \
         touch "${checkpoint_file}"  # create empty file as checkpoint
     else
-        echo "Unsupported fragment file format. Please provide .tsv or .tsv.gz file."
-        exit 1
+        echo "Unsupported fragment file format. Please provide .tsv or .tsv.gz file." >&2
     fi
 fi
 
