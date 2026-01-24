@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 Msg="Usage: $0 -o output_dir -c chromosome"
 
 while getopts "o:c:" opt; do
@@ -24,7 +23,6 @@ fi
 
 fragment_file="${output_dir}/fragments.tsv"
 entropy_cutoff_file="${output_dir}/entropy_cutoff.csv"
-chromosome_fragment_dir=${output_dir}/chromosome_fragments
 entropy_df_file="${output_dir}/${chromosome}_barcode_entropy_df.tsv"
 
 # File to save results
@@ -36,8 +34,8 @@ filtered_fragments_file="${output_dir}/filtered_fragments.tsv"
 # Validate required input files exist
 for file in "${fragment_file}" "${entropy_cutoff_file}" "${entropy_df_file}"; do
     if [[ ! -f "${file}" ]]; then
-        echo "ERROR: Required file not found: ${file}"
-        echo "Please ensure upstream pipeline steps completed successfully."
+        echo "ERROR: Required file not found: ${file}" >&2
+        echo "Please ensure upstream pipeline steps completed successfully." >&2
         exit 1
     fi
 done
@@ -48,8 +46,8 @@ entropy_threshold=$(awk -F',' 'NR==1 {print $2}' "${entropy_cutoff_file}")
 echo "Filtering fragments corresponding to barcodes passed the entropy threshold............"
 
 temp_bc_file="${output_dir}/bc_pass_entropy.tsv"
-awk -F',' -v threshold="${entropy_threshold}" 'NR==1 || $2 >= threshold'  ${entropy_df_file} > ${filtered_bc_df_file}
-awk -F',' 'NR>1 {print $1}' ${filtered_bc_df_file} > ${temp_bc_file}  # Remove header for grep step 
+awk -F',' -v threshold="${entropy_threshold}" 'NR==1 || $2 >= threshold'  "${entropy_df_file}" > "${filtered_bc_df_file}"
+awk -F',' 'NR>1 {print $1}' "${filtered_bc_df_file}" > "${temp_bc_file}"  # Remove header for grep step 
 # ###### Approach 1 grep 
 # grep -f ${temp_bc_file} ${fragment_file} > ${filtered_fragments_file}  # Single threaded version 
 # ###### Approach 2: parallel grep
@@ -60,6 +58,7 @@ awk -F',' 'NR>1 {print $1}' ${filtered_bc_df_file} > ${temp_bc_file}  # Remove h
 # fi
 # #part 2: parallel grep
 # Parallelize on chromosome_fragments files for speedup. -- Grep is still slow 
+# chromosome_fragment_dir="${output_dir}/chromosome_fragments"
 # find ${chromosome_fragment_dir} -name "*_fragments.tsv" -print0 | xargs -I{}  -0 -P 4 \
 #     sh -c 'res_file=$(basename $3) ; LC_ALL=C  grep -f $1 $3 > "${2}/${res_file}" ' -- \
 #     "${temp_bc_file}" "${filtered_perchrom_frag_dir}" {}
@@ -68,7 +67,7 @@ awk -F',' 'NR>1 {print $1}' ${filtered_bc_df_file} > ${temp_bc_file}  # Remove h
 # rm -rf ${filtered_perchrom_frag_dir}
 
 # ###### Approach 3: use rg (ripgrep) -- fastest
-rg -f ${temp_bc_file}  ${fragment_file} > ${filtered_fragments_file}
+rg -f "${temp_bc_file}"  "${fragment_file}" > "${filtered_fragments_file}"
 
 
 
