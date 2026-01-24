@@ -6,14 +6,14 @@ import pickle
 from scipy.interpolate import BSpline, make_splrep
 
 
-def fit_spline_and_find_cutoff(x: np.ndarray, y: np.ndarray, k: int=2, spline_s: int=7, spline_k: int=3, limit: int=20000) -> tuple[float, int, BSpline]:
+def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline_k: int=3, limit: int=20000) -> tuple[float, int, BSpline]:
     """
     Takes the ranks (x) and the corresponding log 10 entropy values (y) and returns estimated entropy cutoff, the rank cutoff, and the scipy BSpline object used to fit the curve.
     The function fits a smoothing spline to the curve, then computes the first and second derivatives on the spline. 
         Then iterating on increasing x values, finds regions where its 2nd derivative of left bound of the region is negative, and the right bound is positive. 
         Then takes the kth such region by ranks, and computes the greatest dropoff in the regions (min 1st derivative). returns this point as cutoff 
 
-    x: np.ndarray, the ranks (1 is highest).
+
     y: np.ndarray, the log_10 entropy values.
     k: int, the first k inflection points as entropy cutoff candidates.
     spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. Not very sensitive and need not to be sensitive so not tuned much but has to be >= 3. 
@@ -23,8 +23,9 @@ def fit_spline_and_find_cutoff(x: np.ndarray, y: np.ndarray, k: int=2, spline_s:
             [entropy cutoff, rank cutoff, spline fit result].
     """
     # only consider up to limit barcodes for spline fitting (as even the highest throughput datasets have < 20k cells)
-    x = x[:limit]
     y = y[:limit]
+    x = np.arange(len(y))
+    
     cs = make_splrep(x, y, k=spline_k, s=spline_s)
     
     first_deriv = cs.derivative(1)(x)
@@ -67,19 +68,23 @@ def fit_spline_and_find_cutoff(x: np.ndarray, y: np.ndarray, k: int=2, spline_s:
     
     return rank, y[rank], cs
 
-def get_x_y_from_pickle_helper(pickle_path: str):
+def get_sorted_entropy_helper(pickle_path: str):
     with open(pickle_path, 'rb') as f:
         entropies = pickle.load(f)
 
     sorted_entropies = dict(sorted(entropies.items(), key=lambda item: item[1], reverse=True))
     barcodes = sorted_entropies.keys()
     values = sorted_entropies.values()
-    rank = range(len(barcodes))
-    return np.array(list(rank)), np.array(np.log10(list(values)))
+    # rank = range(len(barcodes))
+    # return np.array(list(rank)), np.array(np.log10(list(values)))
+    return np.array(np.log10(list(values)))  # only return sorted entropy values
+
+
 
 def make_plots(pickle_path, save_path):
-    x, y = get_x_y_from_pickle_helper(pickle_path)
-    rank_cutoff, entr_cutoff, cs = fit_spline_and_find_cutoff(x, y)
+    y= get_sorted_entropy_helper(pickle_path)
+    x = np.arange(len(y))
+    rank_cutoff, entr_cutoff, cs = fit_spline_and_find_cutoff(y)
 
     spl_y = cs(x)
     deriv = {}
