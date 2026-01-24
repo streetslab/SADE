@@ -1,8 +1,5 @@
 #!/bin/bash
 
-output_dir='/mnt/hdd_bob/syy/adipose/atac/res/VIB_10xmultiome_2_WS3000_mixD'
-chromosome='chr1'
-
 
 Msg="Usage: $0 -o output_dir -c chromosome"
 
