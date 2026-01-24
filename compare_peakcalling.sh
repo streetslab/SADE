@@ -1,4 +1,6 @@
 #!/bin/bash 
+set -e # exit on error and dont continue
+set -o pipefail # catch errors in piped commands
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 

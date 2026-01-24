@@ -1,4 +1,6 @@
 #!/bin/bash 
+set -e # exit on error and dont continue
+set -o pipefail # catch errors in piped commands
 
 _CHROMOSOME='chr1'
 _WindowSize=3000 # default window size
