@@ -18,7 +18,7 @@ import numpy as np
 
 #%%
 # Use the current directory for imports
-from autothreshold import   fit_spline_and_find_cutoff,  get_x_y_from_pickle_helper
+from autothreshold import   fit_spline_and_find_cutoff,  get_sorted_entropy_helper
 
 
 #%%
@@ -38,10 +38,10 @@ if __name__ == "__main__":
     figure_subdir = os.path.join(output_dir, "figures")    
     
     # Entropy is at log10 scale
-    rank_list, sorted_log10entropy_list = get_x_y_from_pickle_helper(pickle_path)
+    sorted_log10entropy_list = get_sorted_entropy_helper(pickle_path)
     
     # Find threshold using Spline fitting
-    rank_cutoff, log10_entry_cutoff, cs = fit_spline_and_find_cutoff(rank_list, sorted_log10entropy_list, k=_k, spline_s=_spline_s, spline_k=_spline_k)
+    rank_cutoff, log10_entry_cutoff, cs = fit_spline_and_find_cutoff(sorted_log10entropy_list, k=_k, spline_s=_spline_s, spline_k=_spline_k)
 
     print(f"Rank cutoff: {rank_cutoff}, log10 Entropy cutoff: {log10_entry_cutoff}")
 
@@ -52,6 +52,7 @@ if __name__ == "__main__":
         
     
     # Make plots
+    rank_list = np.arange(len(sorted_log10entropy_list))
     spl_y = cs(rank_list)
     deriv = {}
     for i in range(1, 3):
