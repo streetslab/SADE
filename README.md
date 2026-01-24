@@ -1,13 +1,12 @@
 # SADE
 **S**hannon-entropy to filter noisy reads on single-cell **A**TAC-seq for sensitive accessible region **de**tection
 
-
+------
+## Run module-1  [auto_process.sh]
 > [!note]
 **auto_process.sh** : Calculate per barcode entropy, auto-threshold entropy and filter fragments based on barcodes.
 
-
-# Run module-1  [auto_process.sh]
-## Calculate per barcode entropy, auto-threshold entropy and filter fragments based on barcodes.
+### Calculate per barcode entropy, auto-threshold entropy and filter fragments based on barcodes.
 
 - **System Requirement**
 
@@ -39,8 +38,8 @@ echo "export PYTHON_ENV='absolute_path_to_you_venv1_name/bin/activate'" > config
 ```
 sample='VIB_10xmultiome_2'
 ws=3000
-bash path_to_this_dir/auto_process.sh -f /mnt/hdd_bob/syy/adipose/atac/protocol_benchmark/cr_results/atac/${sample}/outs/fragments.tsv.gz \
-      -o your_desired_output_directory \
+bash path_to_this_dir/auto_process.sh -o your_desired_output_directory \
+      -f /mnt/hdd_bob/syy/adipose/atac/protocol_benchmark/cr_results/atac/${sample}/outs/fragments.tsv.gz \
       -w ${ws} \
       -c 'chr1' \
       -g 'hg38'
@@ -48,9 +47,9 @@ bash path_to_this_dir/auto_process.sh -f /mnt/hdd_bob/syy/adipose/atac/protocol_
   
 - Command **Explanation**:
   * **Input**:   
+          **-o <output_dir. Required>**
           **-f <fragments_file. Required>**  
-          **-o <output_dir. Required>** 
-          **-g <genome_used_for_read_mapping_that_resulted_provided_fragments_file.  Required: 'hg38', 'mm10' etc.>**   
+          **-g <genome_used_for_read_mapping_that_resulted_provided_fragments_file.  Required: 'hg38', 'mm10' etc.>**  
           [-c <chromosome>. Chromosome used to calculate entropy. Default: largest chromosome, chr1 ]  
           [-w <window_size>. Windowsize on genome to look for Tn5 insertion frequencies for entropy calculation. Default: 3000]  
 
@@ -60,12 +59,14 @@ bash path_to_this_dir/auto_process.sh -f /mnt/hdd_bob/syy/adipose/atac/protocol_
           **entropy_filtered_bc_df.tsv**  File with filtered barcodes as row indices, columns having entropy calculation metrics. First row has column names.
           **figures (subfolder)**
     
-          
-# Run module-2 [compare_cellcalling.sh] TODO
-## Compares CellRaner's (post-peak) cell-calling method v.s. Entropy (pre-peak) cell-calling
+------ 
+## Run module-2 [compare_cellcalling.sh] TODO
+### Compares CellRaner's (post-peak) cell-calling method v.s. Entropy (pre-peak) cell-calling
 
-# Run module-3 [compare_peakcalling.sh] TODO
-## Compares CellRaner's (post-peak) cell-calling method v.s. Entropy (pre-peak) cell-calling
+------
+## Run module-3 [compare_peakcalling.sh] TODO
+### Compares CellRaner's (post-peak) cell-calling method v.s. Entropy (pre-peak) cell-calling
 
-# Run module-4 [downstream_analysis.sh] 
-## Compares peak featuers (before- v.s. post- Entropy filtering)'s ability for cell-type discovery 
+------
+## Run module-4 [downstream_analysis.sh] 
+### Compares peak featuers (before- v.s. post- Entropy filtering)'s ability for cell-type discovery 
