@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 
 # environment setup
-source ${SCRIPT_DIR}/config.sh
+source "${SCRIPT_DIR}/config.sh"
 
 IFS='' read -r -d '' usage << EndofMsg
 Usage: $0 -f <fragments_file. Required> 
@@ -76,20 +76,20 @@ fi
 
 
 figures_subdir="${output_dir}/figures"
-mkdir -p $figures_subdir
+mkdir -p "${figures_subdir}"
 
 # make sure to only execute the script on the fragment file that's within the output directory
-frag_file=${output_dir}/fragments.tsv
-checkpoint_file=${output_dir}/_finish_format_fragments.log
+frag_file="${output_dir}/fragments.tsv"
+checkpoint_file="${output_dir}/_finish_format_fragments.log"
 if [[ ! -f ${checkpoint_file} ]] ; then
     echo "Checking fragments file format for entropy calculation..."
     if [[ ${fragment_file} == *.gz ]]; then
-        cat ${fragment_file} | zcat | awk -F '\t' '{if (NF == 5) print $0}' - > ${frag_file}  && \
-        touch ${checkpoint_file}  # create empty file as checkpoint
+        cat "${fragment_file}" | zcat | awk -F '\t' '{if (NF == 5) print $0}' - > "${frag_file}"  && \
+        touch "${checkpoint_file}"  # create empty file as checkpoint
     elif [[ ${fragment_file} == *.tsv ]]; then 
         # sometimes fragments.tsv from CR does not have the correct record.. 
-        awk -F '\t' '{if (NF == 5) print $0}' ${fragment_file} > ${frag_file}  && \
-        touch ${checkpoint_file}  # create empty file as checkpoint
+        awk -F '\t' '{if (NF == 5) print $0}' "${fragment_file}" > "${frag_file}"  && \
+        touch "${checkpoint_file}"  # create empty file as checkpoint
     else
         echo "Unsupported fragment file format. Please provide .tsv or .tsv.gz file."
         exit 1
@@ -98,10 +98,10 @@ fi
 
 
 # Record parameters used in this run
-echo "Parameters used in this run:" > ${output_dir}/parameters.csv
-echo "species,${species}" >> ${output_dir}/parameters.csv
-echo "chromosome,${chromosome}" >> ${output_dir}/parameters.csv
-echo "window_size,${window_size}" >> ${output_dir}/parameters.csv
+echo "Parameters used in this run:" > "${output_dir}/parameters.csv"
+echo "species,${species}" >> "${output_dir}/parameters.csv"
+echo "chromosome,${chromosome}" >> "${output_dir}/parameters.csv"
+echo "window_size,${window_size}" >> "${output_dir}/parameters.csv"
 
 
 
@@ -134,24 +134,23 @@ fi
 
 # MODULE 2:  Filter fragments based on entropy thresholdded barcodes
 #            and plot it overlaying with CR cell-calling labels
-filtered_frag_file=${output_dir}/filtered_fragments.tsv  #check-point for MODULE 2
-filtered_bc_file=${output_dir}/Entropy_filtered_bc_CBZ.txt  #check-point for MODULE 2
+filtered_frag_file="${output_dir}/filtered_fragments.tsv"  #check-point for MODULE 2
+filtered_bc_file="${output_dir}/Entropy_filtered_bc_CBZ.txt"  #check-point for MODULE 2
 if [ ! -f ${filtered_frag_file} ] ; then 
     # retrieve entropy value from knee method 
-    entropy_threshold=$(awk -F ',' 'NR==1 {print $2}'  ${auto_entropy_file}  )
+    entropy_threshold=$(awk -F ',' 'NR==1 {print $2}'  "${auto_entropy_file} " )
 
     # Filter fragments based on the entropy threshold
-    bash ${SCRIPT_DIR}/filter_fragments.sh \
-        -o ${output_dir} \
-        -c ${chromosome}
-  
+    bash "${SCRIPT_DIR}/filter_fragments.sh" \
+        -o "${output_dir}" \
+        -c "${chromosome}"
 
 fi 
 
 
 # Visualization 
 source ${PYTHON_ENV}
-python ${SCRIPT_DIR}/refine_figures.py \
+python "${SCRIPT_DIR}/refine_figures.py" \
     --output_dir ${output_dir} \
     --chromosome ${chromosome}
 

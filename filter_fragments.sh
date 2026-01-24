@@ -68,7 +68,7 @@ rg -f ${temp_bc_file}  ${fragment_file} > ${filtered_fragments_file}
 
 
 
-awk -v OFS='' -v prefix='CB:Z:' '{print prefix, $1}' ${temp_bc_file} > ${output_dir}/Entropy_filtered_bc_CBZ.txt
+awk -v OFS='' -v prefix='CB:Z:' '{print prefix, $1}' "${temp_bc_file}" > "${output_dir}/Entropy_filtered_bc_CBZ.txt"
 
 echo "Done filtering fragments."
 
