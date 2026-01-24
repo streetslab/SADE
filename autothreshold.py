@@ -19,8 +19,8 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
     spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. Not very sensitive and need not to be sensitive so not tuned much but has to be >= 3. 
     spline_k: int, degree of the spline fit, see scipy.make_splrep.
 
-    returns: tuple[float, int, Bspline]
-            [entropy cutoff, rank cutoff, spline fit result].
+    returns: tuple[int,float,Bspline]
+            [rank cutoff, entropy cutoff, spline fit result].
     """
     # only consider up to limit barcodes for spline fitting (as even the highest throughput datasets have < 20k cells)
     y = y[:limit]
