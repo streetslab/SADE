@@ -66,17 +66,7 @@ bash path_to_this_dir/auto_process.sh -f /mnt/hdd_bob/syy/adipose/atac/protocol_
 ## Compares CellRaner's (post-peak) cell-calling method v.s. Entropy (pre-peak) cell-calling
 
 # Run module-3 [compare_peakcalling.sh] TODO
-## ompares CellRaner's (post-peak) cell-calling method v.s. Entropy (pre-peak) cell-calling
+## Compares CellRaner's (post-peak) cell-calling method v.s. Entropy (pre-peak) cell-calling
 
 # Run module-4 [downstream_analysis.sh] 
 ## Compares peak featuers (before- v.s. post- Entropy filtering)'s ability for cell-type discovery 
-
-# Comments to delete 
-- auto_process.sh Calculate per barcode entropy, auto-threshold entropy and filter fragments based on barcodes.
-
-- compare_cellcalling.sh Compares CellRaner's (post-peak) cell-calling method v.s. Entropy (pre-peak) cell-calling
-
-- compare_peakcalling.sh Compares peak results before- v.s. post- Entropy filtering
-
-- downstream_analysis.sh Compares peak featuers (before- v.s. post- Entropy filtering)'s ability for cell-type discovery 
-
