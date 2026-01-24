@@ -137,8 +137,6 @@ fi
 filtered_frag_file="${output_dir}/filtered_fragments.tsv"  #check-point for MODULE 2
 filtered_bc_file="${output_dir}/Entropy_filtered_bc_CBZ.txt"  #check-point for MODULE 2
 if [ ! -f ${filtered_frag_file} ] ; then 
-    # retrieve entropy value from knee method 
-    entropy_threshold=$(awk -F ',' 'NR==1 {print $2}'  "${auto_entropy_file} " )
 
     # Filter fragments based on the entropy threshold
     bash "${SCRIPT_DIR}/filter_fragments.sh" \
