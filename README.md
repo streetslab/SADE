@@ -1,6 +1,5 @@
 # SADE
-Use entropy to do cell-calling on scATAC-seq data. 
-Benefit: Increase peak signal detection sensitivity.  
+**S**hannon-entropy to filter noisy reads on single-cell **A**TAC-seq for sensitive accessible region **de**tection
 
 
 > [!note]
