@@ -31,7 +31,7 @@ pip install -r path_to_this_dir/EnvironmentSetup/requirements_auto_process.txt
 ```
 3. Locate your virtual environement and modify _config.sh_ by adding a line below
 ```
-echo "export PYTHON_ENV='absolute_path_to_you_venv1_name/bin/activate'" > config.sh
+echo "export PYTHON_ENV='absolute_path_to_you_venv1_name/bin/activate'" > path_to_this_dir/config.sh
 ```
 
 - **Usage** of **Module-1** command:
