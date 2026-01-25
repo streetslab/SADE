@@ -1,6 +1,7 @@
 #!/bin/bash 
-set -e # exit on error and dont continue
+set -o errexit # exit on error and dont continue
 set -o pipefail # catch errors in piped commands
+
 
 _CHROMOSOME='chr1'
 _WindowSize=3000 # default window size
@@ -12,13 +13,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # environment setup
 source "${SCRIPT_DIR}/config.sh"
 
-IFS='' read -r -d '' usage << EndofMsg
-Usage: $0 -f <fragments_file. Required> 
+
+Usage=" $0 -f <fragments_file. Required> 
           -o <output_dir. Required> 
           -g <genome_used_for_read_mapping_that_resulted_fragments_file. Required: 'hg38', 'mm10' etc.> 
           [-c <chromosome>. Default: ${_CHROMOSOME}] 
-          [-w <window_size>. Default: ${_WindowSize}]
-EndofMsg
+          [-w <window_size>. Default: ${_WindowSize}]"
 
 ## BEFORE ANYTHING ELSE: process options 
 while  getopts "f:o:c:w:g:" opt; do
@@ -138,12 +138,10 @@ fi
 filtered_frag_file="${output_dir}/filtered_fragments.tsv"  #check-point for MODULE 2
 filtered_bc_file="${output_dir}/Entropy_filtered_bc_CBZ.txt"  #check-point for MODULE 2
 if [ ! -f ${filtered_frag_file} ] ; then 
-
     # Filter fragments based on the entropy threshold
     bash "${SCRIPT_DIR}/filter_fragments.sh" \
         -o "${output_dir}" \
         -c "${chromosome}"
-
 fi 
 
 
