@@ -60,12 +60,34 @@ bash path_to_this_dir/auto_process.sh -o your_desired_output_directory \
           **figures (subfolder)**
     
 ------ 
-## Run module-2 [compare_cellcalling.sh] TODO
-### Compares CellRaner's (post-peak) cell-calling method v.s. Entropy (pre-peak) cell-calling
+## Run module-2 [compare_cellcalling.sh] 
+> [!note]
+**compare_cellcalling.sh** : Compares CellRaner's (post-peak) cell-calling method v.s. SADE (pre-peak) cell-calling
+
+- **Environment setup** to run **Module-2** **compare_cellcalling.sh** is the **same** as for Module-1  
+
+- **Usage** of **Module-2** command:  
+```
+bash path_to_this_dir/compare_cellcalling.sh
+  -d output_dir -b crbarcode_file [-c chromosome]
+  -d <output_dir: Directory where the output files are located from running auto_process.sh. Required>
+  -b <crbarcode_file: CellRanger cell barcode file (barcodes.tsv) to use for comparison. Required>
+```
+
 
 ------
-## Run module-3 [compare_peakcalling.sh] TODO
-### Compares CellRaner's (post-peak) cell-calling method v.s. Entropy (pre-peak) cell-calling
+## Run module-3 [compare_peakcalling.sh]
+> [!note]
+**compare_peakcalling.sh** : Compares peak-calling using all reads v.s. peak calling with SADE pre-filtering reads at barcode level.   
+
+- **Environment setup** to run **Module-3** **compare_peakcalling.sh** is the **same** as for Module-1  
+- **Usage** of **Module-3** command:
+```
+bash path_to_this_dir/compare_peakcalling.sh  -d <output_dir> -g <genome_name> -s <bam_file>
+  -d: <output_dir: Directory where the output files are located from running auto_process.sh. Required>
+  -g: <genome_used_for_read_mapping_that_resulted_fragments_file. Required: 'hg38', 'mm10' etc.> 
+  -s: <Original BAM file used for peak calling. Required>
+```
 
 ------
 ## Run module-4 [downstream_analysis.sh] 
