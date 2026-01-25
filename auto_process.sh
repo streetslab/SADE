@@ -2,10 +2,10 @@
 set -o errexit # exit on error and dont continue
 set -o pipefail # catch errors in piped commands
 
-
+# GLOBAL VARIABLES >>>
 _CHROMOSOME='chr1'
 _WindowSize=3000 # default window size
-# << GLOBAL VARIABLES >>
+# GLOBAL VARIABLES <<<
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -102,17 +102,53 @@ frag_file="${output_dir}/fragments.tsv"
 checkpoint_file="${output_dir}/_finish_format_fragments.log"
 if [[ ! -f ${checkpoint_file} ]] ; then
     echo "Checking fragments file format for entropy calculation..."
+
     if [[ ${fragment_file} == *.gz ]]; then
-        cat "${fragment_file}" | zcat | awk -F '\t' '{if (NF == 5) print $0}' - > "${frag_file}"  && \
-        touch "${checkpoint_file}"  # create empty file as checkpoint
+        cat "${fragment_file}" | zcat | awk -F '\t' '
+            BEGIN { valid=0; invalid=0 }
+            {
+                if (NF == 5) {
+                    print $0
+                    valid++
+                } else {
+                    invalid++
+                }
+            }
+            END {
+                if (valid == 0) {
+                    print "ERROR: No valid 5-column rows found in fragments file" > "/dev/stderr"
+                    exit 1
+                }
+                if (invalid > 0) {
+                    print "WARNING: Filtered out " invalid " invalid rows (" valid " valid rows kept)" > "/dev/stderr"
+                }
+            }' - > ${frag_file} && touch ${checkpoint_file} 
     elif [[ ${fragment_file} == *.tsv ]]; then 
         # sometimes fragments.tsv from CR does not have the correct record.. 
-        awk -F '\t' '{if (NF == 5) print $0}' "${fragment_file}" > "${frag_file}"  && \
-        touch "${checkpoint_file}"  # create empty file as checkpoint
+        awk -F '\t' '
+            BEGIN { valid=0; invalid=0 }
+            {
+                if (NF == 5) {
+                    print $0
+                    valid++
+                } else {
+                    invalid++
+                }
+            }
+            END {
+                if (valid == 0) {
+                    print "ERROR: No valid 5-column rows found in fragments file" > "/dev/stderr"
+                    exit 1
+                }
+                if (invalid > 0) {
+                    print "WARNING: Filtered out " invalid " invalid rows (" valid " valid rows kept)" > "/dev/stderr"
+                }
+            }' "${fragment_file}" > "${frag_file}"  &&  touch "${checkpoint_file}"  # create empty file as checkpoint
     else
-        echo "Unsupported fragment file format. Please provide .tsv or .tsv.gz file." >&2
+        echo "Unsupported fragment file format. Please provide .tsv or .tsv.gz file." >&2 && exit 1
     fi
 fi
+
 
 
 # Record parameters used in this run
