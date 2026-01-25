@@ -20,21 +20,34 @@ def get_frag_overlap_peaks_df(output_dir, chromosome='chr1'):
         # Load entropy data
         entropy_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy.pickle')
 
-        with open(entropy_file, 'rb') as f:
-                entropy_data = pickle.load(f)
-
-        
-        entropy_df = pd.DataFrame.from_dict(entropy_data, orient='index', columns=['entropy'])
-
-         
         # subdirectory for fragments overlap peaks    
         fragments_overlap_subdir = os.path.join(output_dir, 'fragments_overlap_peaks')
-
 
         total_frag_counts_file = os.path.join(output_dir, 'total_fragments_counts.txt')
         overlap_peaks_counts_file = os.path.join(fragments_overlap_subdir, 'overlap_peaks_counts.txt')
         overlap_entropy_peaks_counts_file = os.path.join(fragments_overlap_subdir, 'overlap_entropy_peaks_counts.txt')
 
+
+        # Validate all files exist
+        required_files = {
+                'entropy_file': entropy_file,
+                'total_frag_counts': total_frag_counts_file,
+                'overlap_peaks_counts': overlap_peaks_counts_file,
+                'overlap_entropy_peaks_counts': overlap_entropy_peaks_counts_file
+        }
+        for name, filepath in required_files.items():
+                if not os.path.exists(filepath):
+                        raise FileNotFoundError(
+                                f"Required file not found: {filepath}\n"
+                                f"Please ensure the previous steps completed successfully."
+                        )
+
+        # Load entropy data
+        with open(entropy_file, 'rb') as f:
+                entropy_data = pickle.load(f)
+        entropy_df = pd.DataFrame.from_dict(entropy_data, orient='index', columns=['entropy'])
+        
+        # Load fragment counts
         total_frag_counts = pd.read_csv(total_frag_counts_file, sep=" ", index_col=1, header=None)
         overlap_peaks_counts = pd.read_csv(overlap_peaks_counts_file, sep=" ", index_col=1, header=None)
         overlap_entropy_peaks_counts = pd.read_csv(overlap_entropy_peaks_counts_file, sep=" ", index_col=1, header=None)
