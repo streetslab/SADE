@@ -56,6 +56,8 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
             break
 
     # find the global minimum first derivative among the k inflection regions found
+    print(f"Found {len(inflection_regions)} inflection regions on ranked entropy curve.\n \
+        Look for the global minimum first derivative among these regions to determine entropy cutoff.")  
     regions_rank = []
     for region_index, (region) in inflection_regions.items():
         left, right = region
@@ -65,6 +67,13 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
         regions_rank.append(rank)
 
     rank = regions_rank[np.argmin(first_deriv[regions_rank])]
+    
+    
+    if rank == len(y) -1:
+        # Warning: the rank cutoff is at the end of the considered range
+        print(f"Warning: all barcodes considered have entropy above the cutoff -- this is not normal. \n \
+            And take a look at the distribution of barcode entropies -- there should be multi-modality indicating different quality barcodes.\n \
+            Suggest to check quality of the experiment. \n")
     
     return rank, y[rank], cs
 
