@@ -14,11 +14,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/config.sh"
 
 
-Usage=" $0 -f <fragments_file. Required> 
+Usage="Usage: $0 
+          -f <fragments_file. Required> 
           -o <output_dir. Required> 
           -g <genome_used_for_read_mapping_that_resulted_fragments_file. Required: 'hg38', 'mm10' etc.> 
           [-c <chromosome>. Default: ${_CHROMOSOME}] 
-          [-w <window_size>. Default: ${_WindowSize}]"
+          [-w <window_size>. Default: ${_WindowSize}]
+          "
 
 ## BEFORE ANYTHING ELSE: process options 
 while  getopts "f:o:c:w:g:" opt; do
@@ -59,21 +61,18 @@ if [[ -z ${window_size} ]]; then
 fi
 ## 
 if [[ -z ${fragment_file} ]]; then
-    echo "Please provide fragments file with -f" >&2
-    echo "$usage"
-    exit 1
+    echo "Please provide fragments file with -f"
+    echo "${Usage}" >&2  && exit 1
 fi
 ##
 if [[ -z ${species} ]]; then
-    echo "Please provide species with -g" >&2
-    echo "$usage"
-    exit 1
+    echo "Please provide species with -g"
+    echo "${Usage}" >&2  && exit 1
 fi
 ##
 if [[ -z ${output_dir} ]]; then
-    echo "Please provide directory to save results" >&2
-    echo "$usage"
-    exit 1
+    echo "Please provide directory to save results"
+    echo "${Usage}" >&2  && exit 1
 fi
 
 

@@ -6,6 +6,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source ${SCRIPT_DIR}/config.sh
 
+Usage="Usage: $0 -d <output_dir> -b <crbarcode_file>
+          -d <output_dir: Directory where the output files are located from running auto_process.sh. Required>
+          -b <crbarcode_file: CellRanger cell barcode file (barcodes.tsv) to use for comparison. Required>
+          "
+
 
 while getopts "d:b:" opt; do
   case $opt in
@@ -14,9 +19,21 @@ while getopts "d:b:" opt; do
        ;; 
     b) barcode_file="$OPTARG" 
         ;;
-    *) echo "Usage: $0 -d <output_dir> -b <barcode_file>" >&2; exit 1 ;;
+    *) echo "${Usage}" >&2 && exit 1 ;;
   esac
 done
+
+
+if [[ -z ${output_dir} ]]; then
+    echo -e "Please provide output directory with -d \n"
+    echo "${Usage}" >&2  && exit 1
+fi
+
+if [[ -z ${barcode_file} ]]; then
+    echo -e "Please provide CellRanger barcode file with -b \n"
+    echo "${Usage}" >&2  && exit 1
+fi
+
 
 
 DownstreamReanalysis_dir="${output_dir}/DownstreamReanalysis"

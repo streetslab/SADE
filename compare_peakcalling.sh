@@ -6,9 +6,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source ${SCRIPT_DIR}/config.sh
 
-usage="Usage: $0 -d <output_dir> -g <genome_name> -s <bam_file>   -c  Chromosome"
+Usage="Usage: $0 -d <output_dir> -g <genome_name> -s <bam_file>
+  -d: <output_dir: Directory where the output files are located from running auto_process.sh. Required>
+  -g: <genome_used_for_read_mapping_that_resulted_fragments_file. Required: 'hg38', 'mm10' etc.> 
+  -s: <Original BAM file used for peak calling. Required>
+  "
 
-while getopts ":d:g:s:c:" opt; do
+while getopts ":d:g:s:" opt; do
   case $opt in
     d)
       output_dir="$OPTARG"
@@ -20,17 +24,31 @@ while getopts ":d:g:s:c:" opt; do
     s)
       bam_file="$OPTARG"
       ;;
-    c)
-      chromosome="$OPTARG" # has default value
-      ;;
     \?)
-      echo -e "Invalid option: -$OPTARG. \n Usage: $usage" >&2
+      echo -e "Invalid option: -$OPTARG. \n Usage: $Usage" >&2
       exit 1
       ;;
   esac
 done
 
+if [[ -z ${output_dir} || -z ${genome_name} || -z ${bam_file} ]]; then
+    echo "Missing required arguments."
+    echo -e "$Usage" >&2
+    exit 1
+fi
 
+if [[ -z ${bam_file} ]]; then
+    echo "Please provide original BAM file used for peak calling with -s"
+    echo -e "$Usage" >&2
+    exit 1
+fi
+
+
+parameter_file="${output_dir}/parameters.csv"
+
+# extract chromosome from parameter file
+chromosome_line=$(grep "chromosome" ${parameter_file})
+chromosome=${chromosome_line#*,}
 
 
 # MODULE 3:  Filter BAM file with barcodes passed the entropy threshold
