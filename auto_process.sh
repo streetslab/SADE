@@ -76,6 +76,24 @@ if [[ -z ${output_dir} ]]; then
 fi
 
 
+# Environment validation >>>
+# Validate Python environment
+if [[ -z "${PYTHON_ENV}" ]]; then
+    echo "ERROR: PYTHON_ENV not set in config.sh"
+    echo "Please edit config.sh and set PYTHON_ENV to your Python virtual environment activate script"
+    exit 1
+fi
+
+if [[ ! -f "${PYTHON_ENV}" ]]; then
+    echo "ERROR: Python environment file not found: ${PYTHON_ENV}"
+    echo "Please check PYTHON_ENV setting in config.sh"
+    exit 1
+fi
+# Environment validation <<<
+
+
+
+
 figures_subdir="${output_dir}/figures"
 mkdir -p "${figures_subdir}"
 
