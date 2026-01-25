@@ -47,7 +47,7 @@ species_genome_size_file="${species}_genome_chromsize.tsv"
 if [[ ! -f ${insert_frequency_file} ]]; then
     python "${SCRIPT_DIR}/count_perchrom_tn5_insertions.py" \
         --output_dir="${output_dir}" \
-        --genome_chromosize_file="${SCRIPT_DIR}/ref/${species_genome_size_file}" \
+        --genome_chromsize_file="${SCRIPT_DIR}/ref/${species_genome_size_file}" \
         --chromosome="${chromosome}" \
         --windowsize="${window_size}"
 fi

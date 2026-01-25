@@ -100,14 +100,14 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Calculate entropy for cell barcodes based on fragment file.\n  Entropy calculation is for one chromosome at a time.")
     parser.add_argument("--output_dir", type=str, required=True, help="Directory to save entropy calculation results.")
-    parser.add_argument("--genome_chromosize_file", type=str, required=True, help="TSV file of human/species genome chromosome size.")
+    parser.add_argument("--genome_chromsize_file", type=str, required=True, help="TSV file of human/species genome chromosome size.")
     parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome to analyze, default is chr1.")
     parser.add_argument("--windowsize", type=int, default=WindowSize, help="Window size for fragmentation.")
 
     args = parser.parse_args()
     
     output_dir = args.output_dir
-    genome_chromsize_file = args.genome_chromosize_file
+    genome_chromsize_file = args.genome_chromsize_file
     chromosome = args.chromosome
     windowsize = args.windowsize
     
