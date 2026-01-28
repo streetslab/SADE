@@ -23,6 +23,7 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
             [rank cutoff, entropy cutoff, spline fit result].
     """
     # only consider up to limit barcodes for spline fitting (as even the highest throughput datasets have < 20k cells)
+    limit = min(limit, len(y))
     y = y[:limit]
     x = np.arange(len(y))
     
