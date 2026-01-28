@@ -2,6 +2,8 @@
 
 # %%
 
+from matplotlib.lines import Line2D
+from matplotlib.lines import Line2D
 import pandas as pd
 import os
 import numpy as np
@@ -23,18 +25,23 @@ if __name__ == "__main__":
     crbarcode_file = args.crbarcode_file
     chromosome = args.chromosome
 
-    # %%
-
+    # %%    
     entropy_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy_df.tsv')
     entropy_df = pd.read_csv(entropy_file, sep=',', header=0, index_col=0)
+
+    total_frag_counts_file = os.path.join(output_dir, 'total_fragments_counts.txt')
+    total_frag_counts = pd.read_csv(total_frag_counts_file, sep=" ", index_col=1, header=None)
+    total_frag_counts.columns = ['total_fragments']
     
+    entropy_df['total_fragment_log1p'] = np.log1p( total_frag_counts.loc[entropy_df.index, 'total_fragments'] )
+
     entropycutoff_file = os.path.join(output_dir, 'entropy_cutoff.csv')
     with open(entropycutoff_file, 'r') as f:
         line = f.readline()
         entropythreshold = float(line.strip().split(',')[1])
         
     entropy_df['log10_entropy'] = np.log10(entropy_df['Entropy'] )
-    entropy_df['pass'] = entropy_df['Entropy'] > entropythreshold
+    entropy_df['entropy_pass'] = entropy_df['Entropy'] > entropythreshold
     
 
     figure_subdir = os.path.join(output_dir, 'figures')
@@ -48,6 +55,39 @@ if __name__ == "__main__":
     entropy_df['cr_cell'] = entropy_df.index.isin(cr_bc[0])
 
 
+    entropy_df['identified_by_atac'] = entropy_df.apply(
+        lambda row: 'both' if row['entropy_pass'] and row['cr_cell'] else 
+                    ('entropy_only' if row['entropy_pass'] and not row['cr_cell'] else 
+                    ('cr_only' if not row['entropy_pass'] and row['cr_cell'] else 'none')), axis=1
+    )
+
+    
+    fig, ax = plt.subplots( figsize=(7, 4) )
+    colors = {'both':'green', 'entropy_only':'blue', 'cr_only':'orange', 'none':'gray'}
+    ax.scatter( entropy_df['total_fragment_log1p'], np.log10(entropy_df['Entropy']),  c= entropy_df['identified_by_atac'].map(colors), alpha=0.5, s=5, 
+            )
+    handles = [Line2D([0], [0], marker='o', color='w', markerfacecolor=v, label=k, markersize=8) for k, v in colors.items()]
+    ax.legend(title='color', handles=handles, bbox_to_anchor=(0.75, 0.5), loc='upper left')
+    ax.set_xlabel('Total ATAC fragments (log1p)', fontsize=12)
+    ax.set_ylabel('Entropy (log10)', fontsize=12)
+
+
+    ax.legend(handles=[Line2D([0], [0], marker='o', color='w', label='Both',
+                            markerfacecolor='green', markersize=10),
+                    Line2D([0], [0], marker='o', color='w', label='Entropy only',
+                            markerfacecolor='blue', markersize=10), 
+                    Line2D([0], [0], marker='o', color='w', label='CR only',
+                            markerfacecolor='orange', markersize=10),
+                    Line2D([0], [0], marker='o', color='w', label='None',
+                            markerfacecolor='gray', markersize=10)],
+                bbox_to_anchor=(1, -0.15), loc='upper right', ncol=4, fontsize=12)
+    fig_file = os.path.join(figure_subdir, 'scatter_entropy_vs_depth_cellcalling.png')
+    fig.tight_layout()
+    fig.savefig(fig_file)
+
+
+
+    #%% 
     cr_entropy_df = entropy_df.loc[entropy_df['cr_cell']]
     cr_empty_entropy = entropy_df[~entropy_df['cr_cell']]
 
@@ -66,9 +106,10 @@ if __name__ == "__main__":
         cr_empty_entropy['Entropy'].describe().to_string(f)
         
     print("Entropy filtering good vs bad barcodes stats: ")
-    print(f"    Number of good barcodes : {entropy_df['pass'].sum()}")
-    print(f"    Number of bad barcodes : {len(entropy_df) - entropy_df['pass'].sum()}")
+    print(f"    Number of good barcodes : {entropy_df['entropy_pass'].sum()}")
+    print(f"    Number of bad barcodes : {len(entropy_df) - entropy_df['entropy_pass'].sum()}")
     print(f"    Total number of barcodes : {len(entropy_df)} \n")
+
 
 
     # %%
