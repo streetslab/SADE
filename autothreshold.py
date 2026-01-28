@@ -6,7 +6,7 @@ import pickle
 from scipy.interpolate import BSpline, make_splrep
 
 
-def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline_k: int=3, limit: int=20000) -> tuple[float, int, BSpline]:
+def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline_k: int=3, limit: int=30000) -> tuple[float, int, BSpline]:
     """
     Takes the ranks (x) and the corresponding log 10 entropy values (y) and returns estimated entropy cutoff, the rank cutoff, and the scipy BSpline object used to fit the curve.
     The function fits a smoothing spline to the curve, then computes the first and second derivatives on the spline. 
