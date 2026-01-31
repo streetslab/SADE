@@ -6,10 +6,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source ${SCRIPT_DIR}/config.sh
 
-Usage="Usage: $0 -d <output_dir> -g <genome_name> -s <bam_file>
+Usage="Usage: $0 -d <output_dir> -g <genome_name> [-s <bam_file>]
   -d: <output_dir: Directory where the output files are located from running auto_process.sh. Required>
-  -g: <genome_used_for_read_mapping_that_resulted_fragments_file. Required: 'hg38', 'mm10' etc.> 
-  -s: <Original BAM file used for peak calling. Required>
+  -g: <genome_used_for_read_mapping_that_resulted_fragments_file. Required: 'hg38', 'mm10' etc.>
+  -s: <Original BAM file. Required for PEAK_CALLER=genrich, not needed for PEAK_CALLER=macs>
   "
 
 while getopts ":d:g:s:" opt; do
@@ -31,14 +31,15 @@ while getopts ":d:g:s:" opt; do
   esac
 done
 
-if [[ -z ${output_dir} || -z ${genome_name} || -z ${bam_file} ]]; then
+if [[ -z ${output_dir} || -z ${genome_name} ]]; then
     echo "Missing required arguments."
     echo -e "$Usage" >&2
     exit 1
 fi
 
-if [[ -z ${bam_file} ]]; then
-    echo "Please provide original BAM file used for peak calling with -s"
+# BAM file is only required for genrich peak caller
+if [[ "${PEAK_CALLER}" != "macs" && -z ${bam_file} ]]; then
+    echo "Please provide original BAM file used for peak calling with -s (required for PEAK_CALLER=${PEAK_CALLER:-genrich})"
     echo -e "$Usage" >&2
     exit 1
 fi
@@ -51,31 +52,57 @@ chromosome_line=$(grep "chromosome" ${parameter_file})
 chromosome=${chromosome_line#*,}
 
 
-# MODULE 3:  Filter BAM file with barcodes passed the entropy threshold
-filtered_bc_file=${output_dir}/Entropy_filtered_bc_CBZ.txt  #check-point for MODULE 2
-filtered_bam_file=${output_dir}/entropy_filtered.bam #check-point for MODULE 3
-if [ ! -f ${filtered_bam_file} ] ; then
-    bash ${SCRIPT_DIR}/filter_bam_with_barcodes.sh \
-        -s ${bam_file} \
-        -o ${output_dir} \
-        -f ${filtered_bc_file}
-fi
-
-
-# MODULE 4:  (I) peak calling on the filtered BAM file
 entropy_peak_calling_subdir="${output_dir}/peaks_entropy_filtered"
-if [ ! -f ${entropy_peak_calling_subdir}/peaks_w_blacklistregion.bed ] ; then
-    bash ${SCRIPT_DIR}/call_peaks.sh \
-    -s ${filtered_bam_file} \
-    -o ${entropy_peak_calling_subdir} 
-fi
-
-# MODULE 4:  (II) peak calling on the original BAM file
 peak_calling_subdir="${output_dir}/peaks"
-if [ ! -f ${peak_calling_subdir}/peaks_w_blacklistregion.bed ] ; then
-    bash ${SCRIPT_DIR}/call_peaks.sh \
-    -s ${bam_file} \
-    -o ${peak_calling_subdir}
+
+if [[ "${PEAK_CALLER}" == "macs" ]]; then
+    # MACS mode: call peaks directly from fragments files (no BAM/samtools needed)
+    filtered_fragments_file="${output_dir}/filtered_fragments.tsv"
+    all_fragments_file="${output_dir}/fragments.tsv"
+
+    # MODULE 4:  (I) peak calling on entropy-filtered fragments
+    if [ ! -f ${entropy_peak_calling_subdir}/peaks_w_blacklistregion.bed ] ; then
+        echo "Calling peaks on entropy-filtered fragments with ${MACS_VERSION:-macs3}..."
+        bash ${SCRIPT_DIR}/call_peaks_macs.sh \
+            -f ${filtered_fragments_file} \
+            -o ${entropy_peak_calling_subdir} \
+            -g ${genome_name}
+    fi
+
+    # MODULE 4:  (II) peak calling on all fragments
+    if [ ! -f ${peak_calling_subdir}/peaks_w_blacklistregion.bed ] ; then
+        echo "Calling peaks on all fragments with ${MACS_VERSION:-macs3}..."
+        bash ${SCRIPT_DIR}/call_peaks_macs.sh \
+            -f ${all_fragments_file} \
+            -o ${peak_calling_subdir} \
+            -g ${genome_name}
+    fi
+else
+    # Genrich mode: requires BAM file + samtools (original behavior)
+
+    # MODULE 3:  Filter BAM file with barcodes passed the entropy threshold
+    filtered_bc_file=${output_dir}/Entropy_filtered_bc_CBZ.txt  #check-point for MODULE 2
+    filtered_bam_file=${output_dir}/entropy_filtered.bam #check-point for MODULE 3
+    if [ ! -f ${filtered_bam_file} ] ; then
+        bash ${SCRIPT_DIR}/filter_bam_with_barcodes.sh \
+            -s ${bam_file} \
+            -o ${output_dir} \
+            -f ${filtered_bc_file}
+    fi
+
+    # MODULE 4:  (I) peak calling on the filtered BAM file
+    if [ ! -f ${entropy_peak_calling_subdir}/peaks_w_blacklistregion.bed ] ; then
+        bash ${SCRIPT_DIR}/call_peaks.sh \
+        -s ${filtered_bam_file} \
+        -o ${entropy_peak_calling_subdir}
+    fi
+
+    # MODULE 4:  (II) peak calling on the original BAM file
+    if [ ! -f ${peak_calling_subdir}/peaks_w_blacklistregion.bed ] ; then
+        bash ${SCRIPT_DIR}/call_peaks.sh \
+        -s ${bam_file} \
+        -o ${peak_calling_subdir}
+    fi
 fi
 
 
