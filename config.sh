@@ -9,8 +9,8 @@ export Genrich='/home/syyang/GitRepo/Genrich/./Genrich'
 export Renv_Conda='seuratv5'
 
 # Peak caller selection: "genrich" (requires BAM + samtools) or "macs" (uses fragments directly, no BAM needed)
-export PEAK_CALLER='genrich'
-
+#export PEAK_CALLER='genrich'
+export PEAK_CALLER='macs'
 # MACS version: "macs2" or "macs3" (only used when PEAK_CALLER=macs)
 # macs3 recommended: active maintenance, HMMRATAC for ATAC-seq, scATAC-seq barcode support
 export MACS_VERSION='macs3'
