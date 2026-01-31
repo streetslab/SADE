@@ -49,6 +49,8 @@ case "${genome}" in
         ;;
 esac
 
+source ${PYTHON_ENV}
+
 # Select MACS command based on configured version
 macs_cmd="${MACS_VERSION:-macs3}"
 if ! command -v "${macs_cmd}" &>/dev/null; then
@@ -56,31 +58,14 @@ if ! command -v "${macs_cmd}" &>/dev/null; then
     exit 1
 fi
 
-# Convert fragments to Tn5 insertion sites (BED format)
-# Each fragment has two Tn5 cut sites at the 5' ends of both reads:
-#   - Forward cut: (start, start+1)
-#   - Reverse cut: (end-1, end)
-tn5_sites_file="${output_dir}/tn5_sites.bed"
-echo "Extracting Tn5 insertion sites from fragments..."
-awk -F'\t' 'BEGIN{OFS="\t"} {print $1, $2, $2+1; print $1, $3-1, $3}' \
-    "${fragments_file}" > "${tn5_sites_file}"
 
 echo "Calling peaks with ${macs_cmd} (genome: ${macs_genome})..."
 
-# ATAC-seq MACS parameters:
-#   --nomodel: don't build the shifting model (we handle Tn5 sites explicitly)
-#   --shift -75 --extsize 150: extend 150bp centered on each Tn5 insertion site
-#   --keep-dup all: fragments are already deduplicated by upstream pipeline
-#   --call-summits: identify sub-peaks within each peak region
+# Call peaks with MACS
 ${macs_cmd} callpeak \
-    -t "${tn5_sites_file}" \
-    -f BED \
+    -t "${fragments_file}" \
+    -f FRAG \
     -g "${macs_genome}" \
-    --nomodel \
-    --shift -75 \
-    --extsize 150 \
-    --keep-dup all \
-    --call-summits \
     -n peaks \
     --outdir "${output_dir}" \
     2>&1 | tee "${output_dir}/macs_log.txt"
@@ -91,15 +76,13 @@ macs_peaks="${output_dir}/peaks_peaks.narrowPeak"
 output_peaks="${output_dir}/peaks_w_blacklistregion.bed"
 
 if [[ -f "${macs_peaks}" ]]; then
-    # Use first 6 columns (chr, start, end, name, score, strand) for BED compatibility
-    cut -f1-6 "${macs_peaks}" > "${output_peaks}"
+    # Cap the integer score at 1000 for compatibility with downstream tools. Ref from MACS docs: https://macs3-project.github.io/MACS/docs/callpeak.html
+    awk -v OFS="\t" '{$5=$5>1000?1000:$5} {print}' "${macs_peaks}" > "${output_peaks}"
     echo "Peak calling complete: $(wc -l < "${output_peaks}") peaks written to ${output_peaks}"
 else
     echo "ERROR: MACS peak file not found: ${macs_peaks}" >&2
     exit 1
 fi
 
-# Clean up intermediate Tn5 sites file
-rm -f "${tn5_sites_file}"
 
 echo "Call peaks with ${macs_cmd} .... Done"
