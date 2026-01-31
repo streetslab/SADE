@@ -50,7 +50,7 @@ fi
 
 ## Step 2: Run get_pic.r to generate the entropy peak count matrix
 # Activate the conda environment that has R 
-entropy_bc_peak_count_h5="${DownstreamReanalysis_dir}/entropy_bc_peak_count.h5"
+entropy_bc_peak_count_h5="${DownstreamReanalysis_dir}/entropy_bc_peak_count.h5ad"
 if [[ ! -f ${entropy_bc_peak_count_h5} ]]; then
     conda_dir=$(conda info | grep -i 'base environment' | awk '{print $4 }'  )
     source "${conda_dir}/etc/profile.d/conda.sh" 
