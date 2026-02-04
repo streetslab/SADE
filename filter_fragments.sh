@@ -46,7 +46,7 @@ entropy_threshold=$(awk -F',' 'NR==1 {print $2}' "${entropy_cutoff_file}")
 echo "Filtering fragments corresponding to barcodes passed the entropy threshold............"
 
 temp_bc_file="${output_dir}/bc_pass_entropy.tsv"
-awk -F',' -v threshold="${entropy_threshold}" 'NR==1 || $2 >= threshold'  "${entropy_df_file}" > "${filtered_bc_df_file}"
+awk -F',' -v threshold="${entropy_threshold}" 'NR==1 || $2 > threshold'  "${entropy_df_file}" > "${filtered_bc_df_file}"
 awk -F',' 'NR>1 {print $1}' "${filtered_bc_df_file}" > "${temp_bc_file}"  # Remove header for grep step 
 # ###### Approach 1 grep 
 # grep -f ${temp_bc_file} ${fragment_file} > ${filtered_fragments_file}  # Single threaded version 
