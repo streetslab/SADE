@@ -31,14 +31,14 @@ mkdir -p $frag_peak_overlap_subdir
 frag_overlap_lostpeaks_file=$frag_peak_overlap_subdir/overlap_lost_peaks.bed
 
 
-bedtools intersect -a $frag_file -b $lost_peaks_file -wa -u > $frag_overlap_lostpeaks_file
+bedtools intersect -a $frag_file -b $lost_peaks_file  -u > $frag_overlap_lostpeaks_file
 # count the number of fragments overlapping with lost peaks per each 
 cut -f4 $frag_overlap_lostpeaks_file | sort | uniq -c > $frag_peak_overlap_subdir/overlap_lost_peaks_counts.txt 
 
-bedtools intersect -a $frag_file -b $peaks_file -wa -u > $frag_peak_overlap_subdir/overlap_peaks.bed
+bedtools intersect -a $frag_file -b $peaks_file  -u > $frag_peak_overlap_subdir/overlap_peaks.bed
 cut -f4 $frag_peak_overlap_subdir/overlap_peaks.bed | sort | uniq -c > $frag_peak_overlap_subdir/overlap_peaks_counts.txt
 
-bedtools intersect -a $frag_file -b $entropy_peaks_file -wa -u > $frag_peak_overlap_subdir/overlap_entropy_peaks.bed
+bedtools intersect -a $frag_file -b $entropy_peaks_file  -u > $frag_peak_overlap_subdir/overlap_entropy_peaks.bed
 cut -f4 $frag_peak_overlap_subdir/overlap_entropy_peaks.bed | sort | uniq -c > $frag_peak_overlap_subdir/overlap_entropy_peaks_counts.txt
 
 
