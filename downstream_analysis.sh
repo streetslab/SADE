@@ -8,7 +8,7 @@ source ${SCRIPT_DIR}/config.sh
 
 Usage="Usage: $0 -d <output_dir> -b <crbarcode_file>
           -d <output_dir: Directory where the output files are located from running auto_process.sh. Required>
-          -b <crbarcode_file: CellRanger cell barcode file (barcodes.tsv) to use for comparison. Required>
+          -b <barcode_file: cell barcode file (barcodes.tsv) to use for comparison. Required>
           "
 
 
