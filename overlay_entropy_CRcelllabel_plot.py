@@ -26,7 +26,7 @@ if __name__ == "__main__":
     chromosome = args.chromosome
 
     # %%    
-    entropy_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy_df.tsv')
+    entropy_file = os.path.join(output_dir, f'calculated_barcode_entropy_df.tsv')
     entropy_df = pd.read_csv(entropy_file, sep=',', header=0, index_col=0)
 
     total_frag_counts_file = os.path.join(output_dir, 'total_fragments_counts.txt')

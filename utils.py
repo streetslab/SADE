@@ -18,7 +18,7 @@ def return_none():
 def get_frag_overlap_peaks_df(output_dir, chromosome='chr1'):
         import pickle
         # Load entropy data
-        entropy_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy.pickle')
+        entropy_file = os.path.join(output_dir, f'calculated_barcode_entropy.pickle')
 
         # subdirectory for fragments overlap peaks    
         fragments_overlap_subdir = os.path.join(output_dir, 'fragments_overlap_peaks')
