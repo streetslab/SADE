@@ -12,9 +12,10 @@ Usage="Usage: $0 -d <output_dir> -g <genome_name> [-s <bam_file>]
   -s: <Original BAM file. Required for PEAK_CALLER=genrich, not needed for PEAK_CALLER=macs> 
   -b: <barcode_file: filtered cell barcode file (barcodes.tsv) to use for comparison. Required>
   -r: <result_dir>. Relative path that will be appended to output_dir to store the comparison results. Default: 'comparison_results'>
+  -f: <fragment_file>: Filtered fragment file (fragments.tsv) to use for comparison. Required>
   "
 
-while getopts ":d:g:s:b:r:" opt; do
+while getopts ":d:g:s:b:r:f:" opt; do
   case $opt in
     d)
       output_dir="$OPTARG"
@@ -33,6 +34,9 @@ while getopts ":d:g:s:b:r:" opt; do
       result_subdir="$OPTARG"
       result_subdir=${result_subdir%/}  # remove trailing slash if exists
       result_dir="${output_dir}/${result_subdir}"
+      ;;
+    f) 
+      fragment_file="$OPTARG"
       ;;
     \?)
       echo -e "Invalid option: -$OPTARG. \n Usage: $Usage" >&2
@@ -130,6 +134,10 @@ fi
 source ${PYTHON_ENV}
 python ${SCRIPT_DIR}/visualize_annotation.py --output_dir $result_dir
 
+
+# filter fragments 
+filtered_fragments_file=${result_dir}/othermethod_filtered_fragments.tsv
+rg -f "${cmpbarcode_file}"  "${fragment_file}" > "${filtered_fragments_file}"
 
 
 # # MODULE 8. Compare fragments overlapping% with called peaks 
