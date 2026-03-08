@@ -53,9 +53,9 @@ if [[ ! -f ${insert_frequency_file} ]]; then
 fi
 
 
-# Step 3: Calculate entropy for each chromosome separately
+# Step 3: Calculate entropy for each barcode 
 source ${PYTHON_ENV}
-barcode_entropy_df_file="${output_dir}/${chromosome}_barcode_entropy_df.tsv"
+barcode_entropy_df_file="${output_dir}/calculated_barcode_entropy_df.tsv"
 if [[ ! -f ${barcode_entropy_df_file} ]]; then
     # Calculate entropy for the specified chromosome
     python "${SCRIPT_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}"

@@ -34,7 +34,7 @@ if __name__ == "__main__":
     output_dir = args.output_dir
     chromosome = args.chromosome
 
-    pickle_path = os.path.join(output_dir, f"{chromosome}_barcode_entropy.pickle")
+    pickle_path = os.path.join(output_dir, f"calculated_barcode_entropy.pickle")
     figure_subdir = os.path.join(output_dir, "figures")    
     
     # Entropy is at log10 scale

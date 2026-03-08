@@ -12,6 +12,8 @@ from tqdm import tqdm
 
 from scipy.special import lambertw
 from scipy.stats import poisson 
+from scipy.sparse import hstack
+from collections import defaultdict
 
 import argparse
 
@@ -97,19 +99,54 @@ parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome t
 args = parser.parse_args()
 
 output_dir = args.output_dir
-chromosome = args.chromosome
+chromosomes = args.chromosome # can be space-separated list, or a single chromosome. 
+                              # when multiple chormosomes are provided, the 1st chromosome will be used as the lead chromosome to load Tn5 insertion record, and the rest of the chromosomes will be used to update the Tn5 insertion record for each cell barcode.
+chromosomes = chromosomes.split(' ') # turning into a list 
+Nused_chromosomes = len(chromosomes)
+#%%
+
+# Step 1. Load Tn5 insertion frequency record for each cell barcode 
+if Nused_chromosomes > 1:
+    # When multiple chromosomes are used, 
+    # combine the records for all the chromosomes by concatenating the Tn5 insertion frequency arrays for each cell barcode.
+    lead_chrom = chromosomes[0]
+
+    # Load Tn5 insertion record for each chromosomes     
+    insert_record_dict = {}
+    
+    for chrom in chromosomes:
+        tn5_insert_record_file = os.path.join(output_dir, f'{chrom}_insert_frequency.pickle')
+        with open(tn5_insert_record_file, 'rb') as file:
+            insert_record_dict[chrom] = pickle.load(file)
+    
+    # Prepare records for only the barcodes that have any fragments in the leading chromosome
+    insert_record = defaultdict(return_none)
+    
+    keys = list(insert_record_dict[lead_chrom].keys())
+    
+    for bc in keys:
+        chromosome_insert_arrays = [
+            insert_record_dict[chrom].pop(bc) for chrom in chromosomes if insert_record_dict[chrom][bc] is not None
+        ]
+        if len(chromosome_insert_arrays) == Nused_chromosomes:
+            insert_record[bc] = hstack(chromosome_insert_arrays) 
+    
+else:
+    # When only one chromosome is used,
+    # just load the Tn5 insertion record for that chromosome.
+    chrom = chromosomes[0]
+    
+    tn5_insert_record_file = os.path.join(output_dir, f'{chrom}_insert_frequency.pickle')
+    with open(tn5_insert_record_file, 'rb') as file:
+        insert_record = pickle.load(file)
 
 
-# Step 1. Load Tn5 insertion frequency record for each cell barcode
-tn5_insert_record_file = os.path.join(output_dir, f'{chromosome}_insert_frequency.pickle')
-
-with open(tn5_insert_record_file, 'rb') as file:
-    insert_record = pickle.load(file)
 
 # %%
 # Step 2. Calculate entropy for each cell barcode for the given chromosome 
 barcode_entropy = {}
-barcode_entropy_df_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy_df.tsv')
+
+barcode_entropy_df_file = os.path.join(output_dir, f'calculated_barcode_entropy_df.tsv')
 
 
 # Wrapper function for multiprocessing
@@ -168,6 +205,6 @@ if __name__ == "__main__":
 
 
     # save entropy results
-    barcode_entropy_file = os.path.join(output_dir, f'{chromosome}_barcode_entropy.pickle')
+    barcode_entropy_file = os.path.join(output_dir, f'calculated_barcode_entropy.pickle')
     with open(barcode_entropy_file, 'wb') as file:
         pickle.dump(barcode_entropy, file, protocol=pickle.HIGHEST_PROTOCOL)

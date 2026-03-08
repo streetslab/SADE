@@ -162,13 +162,13 @@ echo "window_size,${window_size}" >> "${output_dir}/parameters.csv"
 
 
 # MODULE 1:  Calculate entropies of each barcode
-barcode_entropy_df_file="${output_dir}/${chromosome}_barcode_entropy_df.tsv"
+barcode_entropy_df_file="${output_dir}/calculated_barcode_entropy_df.tsv"
 if [ ! -f ${barcode_entropy_df_file} ] ; then
   bash ${SCRIPT_DIR}/calculate_entropy.sh \
-          -o $output_dir \
-          -g ${species} \
-          -c ${chromosome}  \
-          -w ${window_size}
+          -o "${output_dir}" \
+          -g "${species}" \
+          -c "${chromosome}" \
+          -w "${window_size}"
 fi 
 
 
@@ -177,8 +177,8 @@ auto_entropy_file="${output_dir}/entropy_cutoff.csv"
 if [ ! -f ${auto_entropy_file} ] ; then
     source ${PYTHON_ENV}
     python ${SCRIPT_DIR}/find_threshold.py \
-        --output_dir ${output_dir} \
-        --chromosome ${chromosome}
+        --output_dir "${output_dir}" \
+        --chromosome "${chromosome}"
 
     # Record entropy threshold into the parameters file
     awk 'NR==1' ${auto_entropy_file} >> ${output_dir}/parameters.csv
@@ -201,6 +201,6 @@ fi
 # Visualization 
 source ${PYTHON_ENV}
 python "${SCRIPT_DIR}/refine_figures.py" \
-    --output_dir ${output_dir} \
-    --chromosome ${chromosome}
+    --output_dir "${output_dir}" \
+    --chromosome "${chromosome}"
 
