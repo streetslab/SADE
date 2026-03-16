@@ -20,4 +20,4 @@ sort -k1,1 -k2,2n  ${filtered_fragments_file} > ${DownstreamReanalysis_dir}/filt
 # Compress to .gz format -- this is in-place compression 
 bgzip ${DownstreamReanalysis_dir}/filtered_fragments_sorted.tsv  
 # Create an indexed file for the sorted fragments in .tbi 
-tabix -p bed ${filtered_fragments_sorted_gz_file}
+tabix -p bed ${DownstreamReanalysis_dir}/filtered_fragments_sorted.tsv.gz
