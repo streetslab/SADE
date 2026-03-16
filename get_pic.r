@@ -33,7 +33,11 @@ entropy_bc_peak_count_h5 = file.path(DownstreamReanalysis_dir, "entropy_bc_peak_
 
 #%%
 # Load barcodes 
-barcodes_df = read.csv(barcode_file, sep='\t', col.names='barcodes')
+barcodes_df = read.csv(barcode_file, sep='\t', header=FALSE, col.names='barcodes')
+# DEBUG 
+print(head(barcodes_df))
+print(paste("Number of barcodes:", nrow(barcodes_df)))
+#DEBUG END
 barcodes = barcodes_df$barcodes
 
 
