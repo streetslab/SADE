@@ -34,7 +34,7 @@ samtools sort -n  -@ 6 $bam_file -o $sorted_bam  # use 6 threads for sorting
 $Genrich -t $sorted_bam -o $output_peak_file  \
         -k $output_bedgraph_file \
         -b $output_bed_file \
+        -v \
         -r \
         -j  && rm $sorted_bam \
-        -v \
         &&  echo "Call peaks with Genrich .... Done"
