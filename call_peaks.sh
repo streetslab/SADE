@@ -36,4 +36,5 @@ $Genrich -t $sorted_bam -o $output_peak_file  \
         -b $output_bed_file \
         -r \
         -j  && rm $sorted_bam \
+        -v \
         &&  echo "Call peaks with Genrich .... Done"
