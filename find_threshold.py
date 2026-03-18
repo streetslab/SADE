@@ -49,8 +49,8 @@ if __name__ == "__main__":
         f.write(f"entropy cutoff,{10**log10_entry_cutoff}\n")
         f.write(f"log10 entropy cutoff,{log10_entry_cutoff}\n")
         f.write(f"rank cutoff,{rank_cutoff}\n")
-        
-    
+
+
     # Make plots
     rank_list = np.arange(len(sorted_log10entropy_list))
     spl_y = cs(rank_list)
@@ -78,9 +78,7 @@ if __name__ == "__main__":
     ax[0].set_ylabel('Entropy(log10)\n', fontsize=10)
     ax[0].set_title('Fit spline', fontsize=12)
     ax[1].set_ylabel('First derivative', fontsize=10)
-    # ax[1].set_title('First derivative', fontsize=12)
     ax[2].set_ylabel('Second derivative', fontsize=10)
-    # ax[2].set_title('Second derivative', fontsize=12)
     ax[2].set_xlabel('Barcode rank', fontsize=10)
     fig.tight_layout()
     

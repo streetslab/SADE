@@ -5,6 +5,8 @@ set -o pipefail # catch errors in piped commands
 # GLOBAL VARIABLES >>>
 _CHROMOSOME='chr1'
 _WindowSize=3000 # default window size
+_GenomeSaturationCutoff=0.5 #  _GenomeSaturationCutoff := (1 - estimated_closed_region_genome_coverage). Higher value, less strict filtering of DNA-debris. 
+                            # Human cells typically have <0.7 genome coverage in scATAC-seq. this cutoff is pretty loose. 
 # GLOBAL VARIABLES <<<
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,10 +22,15 @@ Usage="Usage: $0
           -g <genome_used_for_read_mapping_that_resulted_fragments_file. Required: 'hg38', 'mm10' etc.> 
           [-c <chromosome>. Default: ${_CHROMOSOME}] 
           [-w <window_size>. Default: ${_WindowSize}]
+          [-s <genome_saturation_cutoff>. Default: ${_GenomeSaturationCutoff}. Values above cutoff means the genome is too saturated with fragments, 
+                                          they correspond to DNA debris.
+                                          Mathematically valid value is in the range of (0, 1], but do not specify manually unless you know the 
+                                          average genome coverage in basepair (bp) of a random given cell across all cell types for the species in the sample.
+                                          Due to this reason, we manually set range to be [0.1, 1], where 1 means no filtering of DNA debris.]
           "
 
 ## BEFORE ANYTHING ELSE: process options 
-while  getopts "f:o:c:w:g:" opt; do
+while  getopts "f:o:g:c:w:s:" opt; do
   case $opt in
     f) 
       fragment_file="$OPTARG"
@@ -32,15 +39,18 @@ while  getopts "f:o:c:w:g:" opt; do
       output_dir="$OPTARG"
       output_dir=${output_dir%/}  # remove trailing slash if exists
       ;;
+    g)
+      species="$OPTARG"
+      # currently: 'hg38', 'mm10'
+      ;;
     c)
       chromosome="$OPTARG" # has default value
       ;;
     w)
       window_size="$OPTARG"  # has default value
       ;;
-    g)
-      species="$OPTARG"
-      # currently: 'hg38', 'mm10'
+    s)
+      genome_saturation_cutoff="$OPTARG" # has default value
       ;;
     \?) 
       echo -e "Invalid option: -$OPTARG \n$usage" >&2
@@ -74,7 +84,10 @@ if [[ -z ${output_dir} ]]; then
     echo "Please provide directory to save results"
     echo "${Usage}" >&2  && exit 1
 fi
-
+##
+if [[ -z ${genome_saturation_cutoff} ]]; then
+    genome_saturation_cutoff=${_GenomeSaturationCutoff}
+fi
 
 # Environment validation >>>
 # Validate Python environment
@@ -91,7 +104,17 @@ if [[ ! -f "${PYTHON_ENV}" ]]; then
 fi
 # Environment validation <<<
 
-
+# Parameter validation >>>
+cutoff=''
+cutoff=$(awk -v specified_cutoff="${genome_saturation_cutoff}"  -v default_cutoff="${_GenomeSaturationCutoff}" 'BEGIN { 
+    if (specified_cutoff < 0.1 || specified_cutoff > 1) {
+        print default_cutoff 
+    }
+}')
+if [[ ! -z ${cutoff} ]]; then
+    genome_saturation_cutoff=${_GenomeSaturationCutoff}
+fi
+# Parameter validation <<<
 
 
 figures_subdir="${output_dir}/figures"
@@ -156,8 +179,7 @@ echo "Parameters used in this run:" > "${output_dir}/parameters.csv"
 echo "species,${species}" >> "${output_dir}/parameters.csv"
 echo "chromosome,${chromosome}" >> "${output_dir}/parameters.csv"
 echo "window_size,${window_size}" >> "${output_dir}/parameters.csv"
-
-
+echo "genome_saturation_cutoff,${genome_saturation_cutoff}" >> "${output_dir}/parameters.csv"
 
 
 
@@ -194,7 +216,7 @@ if [ ! -f ${filtered_frag_file} ] ; then
     # Filter fragments based on the entropy threshold
     bash "${SCRIPT_DIR}/filter_fragments.sh" \
         -o "${output_dir}" \
-        -c "${chromosome}"
+        -s "${genome_saturation_cutoff}"
 fi 
 
 
