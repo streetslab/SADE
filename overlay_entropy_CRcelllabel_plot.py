@@ -35,13 +35,11 @@ if __name__ == "__main__":
     
     entropy_df['total_fragment_log1p'] = np.log1p( total_frag_counts.loc[entropy_df.index, 'total_fragments'] )
 
-    entropycutoff_file = os.path.join(output_dir, 'entropy_cutoff.csv')
-    with open(entropycutoff_file, 'r') as f:
-        line = f.readline()
-        entropythreshold = float(line.strip().split(',')[1])
-        
+    bc_passed_entropy_file = os.path.join(output_dir, 'bc_pass_entropy.tsv')
+    bc_pass_entropy = pd.read_csv(bc_passed_entropy_file, sep='\t', header=None, index_col=0)        
     entropy_df['log10_entropy'] = np.log10(entropy_df['Entropy'] )
-    entropy_df['entropy_pass'] = entropy_df['Entropy'] > entropythreshold
+    entropy_df['entropy_pass'] = False
+    entropy_df.loc[bc_pass_entropy.index, 'entropy_pass'] = True
     
 
     figure_subdir = os.path.join(output_dir, 'figures')
@@ -96,14 +94,7 @@ if __name__ == "__main__":
     print(f"    Number of bad barcodes: {len(cr_empty_entropy)}")
     print(f"    Number of barcodes : {len(entropy_df)} \n")
 
-    with open(os.path.join(output_dir, 'entropy_stats.txt'), 'w') as f:
-        f.write("Entropy statistics for CR_labeled cells:\n")
-        cr_entropy_df['Entropy'].describe().to_string(f)
-        f.write('\n')
-        f.write('entropythreshold: ' + str(entropythreshold) + '\n')
-        f.write('\n')
-        f.write("Entropy statistics for CR_empty barcodes:\n")
-        cr_empty_entropy['Entropy'].describe().to_string(f)
+
         
     print("Entropy filtering good vs bad barcodes stats: ")
     print(f"    Number of good barcodes : {entropy_df['entropy_pass'].sum()}")
@@ -113,6 +104,11 @@ if __name__ == "__main__":
 
 
     # %%
+    entropycutoff_file = os.path.join(output_dir, 'entropy_cutoff.csv')
+    with open(entropycutoff_file, 'r') as f:
+        line = f.readline()
+        entropythreshold = float(line.strip().split(',')[1])
+        
     # remove NaN values for plot
     fig, ax = plt.subplots(1, 2, sharey=True)
     ax[0].violinplot(cr_entropy_df['Entropy'].dropna(),  showmeans=True, showmedians=True, bw_method=0.1)
