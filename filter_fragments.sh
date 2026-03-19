@@ -52,7 +52,7 @@ temp_bc_file="${output_dir}/bc_pass_entropy.tsv"
 tmp_df_file="${output_dir}/tmp.tsv"
 # S1. Filter barcodes passed entropy threshold. 
 awk -F',' -v OFS=',' 'NR==1 {print $0}'  "${entropy_df_file}" > "${tmp_df_file}" # Write header
-awk -F ','  -v OFS=','  'NR>1 {print $0}'  "${entropy_df_file}"   | sort -k2,2 -r -t ',' | head -n "${entropy_rank_cutoff}"  >> "${tmp_df_file}"
+awk -F ','  -v OFS=','  'NR>1 {print $0}'  "${entropy_df_file}"   | sort -k2,2 -g -r -t ',' | head -n "${entropy_rank_cutoff}"  >> "${tmp_df_file}"
 # S2a. Flag barcodes "YES" for DNA debris by estimated-P_closed_state < (1 - genome_saturation_cutoff)
 awk -F',' -v OFS=',' 'NR==1 {print $0, "DNA_debris"}'  "${tmp_df_file}" > "${filtered_bc_notflag_df_file}"   # Write header
 awk -F ',' -v OFS=',' -v cutoff="${genome_saturation_cutoff}"  'NR>1  {if  ($7 < (1-cutoff))  print $0, "YES" ; else print $0, "NO" }'  "${tmp_df_file}" >> "${filtered_bc_notflag_df_file}"
