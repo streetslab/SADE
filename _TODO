@@ -1,4 +1,0 @@
-Create a yaml for environment setup 
-
-
-Do not split fragments files by chromosome , rather to do Tn5 insertion counting for each chromosome by going through the whole fragment.tsv

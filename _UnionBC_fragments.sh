@@ -1,7 +1,6 @@
 
 
 output_dir='/home/syyang/adipose_ln/atac/res/VIB_10xmultiome_2_WS3000F'
-output_dir='/home/syyang/adipose_ln/atac/res/VIB_10xmultiome_2_WS3000_test_norm'
 
 filtered_bc_file=${output_dir}/Entropy_filtered_bc_CBZ.txt
 fragment_file="${output_dir}/fragments.tsv"
