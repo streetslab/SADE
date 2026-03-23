@@ -1,8 +1,6 @@
 #!/bin/bash
 
 output_dir='/home/syyang/adipose_ln/atac/res/VIB_10xmultiome_2_WS3000F'
-output_dir='/home/syyang/adipose_ln/atac/res/VIB_10xmultiome_2_WS3000_test_norm'
-
 
 
 
