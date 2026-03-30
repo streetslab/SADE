@@ -12,11 +12,11 @@ amulet_path='/home/syyang/GitRepo/AMULET'
 amulet="${amulet_path}/AMULET.sh"
 
 
-des_dir="${output_dir}/_cell_palling_comparison"
-Union_BC_file="${des_dir}/union_filtered_bc.txt"
-filtered_fragments_file="${des_dir}/othermethod_filtered_fragments.tsv.gz"
+des_dir="${output_dir}/_cell_calling_comparison"
+Union_BC_file="${des_dir}/Union_cells_bc.txt"
+filtered_fragments_file="${des_dir}/union_bc_fragments.tsv.gz"
 
-Union_BC_csv="${des_dir}//union_filtered_bc.csv"
+Union_BC_csv="${des_dir}/union_filtered_bc.csv"
 touch "${Union_BC_file}"  # Create empty file if it doesn't exist
 echo 'barcode,is__cell_barcode' > "${Union_BC_csv}"
 awk -v OFS=',' '{print $1, 1}' "${Union_BC_file}" >> "${Union_BC_csv}"
