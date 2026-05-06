@@ -27,14 +27,18 @@ output_bed_file="${output_dir}/intervals.bed"
 echo "Call peaks with Genrich .... "  && \
 echo " ... could take a while, ..." && \
 sorted_bam="${output_dir}/sorted_bam.bam"  && \
-samtools sort -n  -@ 6 $bam_file -o $sorted_bam  # use 6 threads for sorting
+samtools sort -n  -@ 36 $bam_file -o $sorted_bam  # use 6 threads for sorting
 #TODO: Optimize on number of threads used for samtools sort
 
-
+# Call peaks with Genrich
+# remove duplicates: -r
+# remove mapq <= 30:  -m 31
+# set for ATAC-seq: -j
 $Genrich -t $sorted_bam -o $output_peak_file  \
         -k $output_bedgraph_file \
         -b $output_bed_file \
         -v \
         -r \
+        -m  31 \
         -j  && rm $sorted_bam \
         &&  echo "Call peaks with Genrich .... Done"
