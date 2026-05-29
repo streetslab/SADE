@@ -5,6 +5,7 @@ set -o pipefail # catch errors in piped commands
 # GLOBAL VARIABLES >>>
 _CHROMOSOME='chr1'
 _WindowSize=3000 # default window size
+_CandidateInflectionPoints=2    # default number of candidate inflection points to consider for entropy threshold selection.
 _GenomeSaturationCutoff=0.5 #  _GenomeSaturationCutoff := (1 - estimated_closed_region_genome_coverage). Higher value, less strict filtering of DNA-debris. 
                             # Human cells typically have <0.7 genome coverage in scATAC-seq. this cutoff is pretty loose. 
 # GLOBAL VARIABLES <<<
@@ -22,6 +23,7 @@ Usage="Usage: $0
           -g <genome_used_for_read_mapping_that_resulted_fragments_file. Required: 'hg38', 'mm10' etc.> 
           [-c <chromosome>. Default: ${_CHROMOSOME}] 
           [-w <window_size>. Default: ${_WindowSize}]
+          [-k <candidate_inflection_points>. Default: ${_CandidateInflectionPoints}]
           [-s <genome_saturation_cutoff>. Default: ${_GenomeSaturationCutoff}. Values above cutoff means the genome is too saturated with fragments, 
                                           they correspond to DNA debris.
                                           Mathematically valid value is in the range of (0, 1], but do not specify manually unless you know the 
@@ -30,7 +32,7 @@ Usage="Usage: $0
           "
 
 ## BEFORE ANYTHING ELSE: process options 
-while  getopts "f:o:g:c:w:s:" opt; do
+while  getopts "f:o:g:c:w:k:s:" opt; do
   case $opt in
     f) 
       fragment_file="$OPTARG"
@@ -48,6 +50,9 @@ while  getopts "f:o:g:c:w:s:" opt; do
       ;;
     w)
       window_size="$OPTARG"  # has default value
+      ;;
+    k)
+      candidate_inflection_points="$OPTARG" # has default value
       ;;
     s)
       genome_saturation_cutoff="$OPTARG" # has default value
@@ -68,6 +73,10 @@ fi
 ## size window size 
 if [[ -z ${window_size} ]]; then
     window_size=${_WindowSize}
+fi
+## candidate inflection points for entropy threshold selection
+if [[ -z ${candidate_inflection_points} ]]; then
+    candidate_inflection_points=${_CandidateInflectionPoints}
 fi
 ## 
 if [[ -z ${fragment_file} ]]; then
@@ -180,8 +189,7 @@ echo "species,${species}" >> "${output_dir}/parameters.csv"
 echo "chromosome,${chromosome}" >> "${output_dir}/parameters.csv"
 echo "window_size,${window_size}" >> "${output_dir}/parameters.csv"
 echo "genome_saturation_cutoff,${genome_saturation_cutoff}" >> "${output_dir}/parameters.csv"
-
-
+echo "candidate_inflection_points,${candidate_inflection_points}" >> "${output_dir}/parameters.csv"
 
 # MODULE 1:  Calculate entropies of each barcode
 barcode_entropy_df_file="${output_dir}/calculated_barcode_entropy_df.tsv"
@@ -200,7 +208,8 @@ if [ ! -f ${auto_entropy_file} ] ; then
     source ${PYTHON_ENV}
     python ${SCRIPT_DIR}/find_threshold.py \
         --output_dir "${output_dir}" \
-        --chromosome "${chromosome}"
+        --chromosome "${chromosome}" \
+        --k  "${candidate_inflection_points}"
 
     # Record entropy threshold into the parameters file
     awk 'NR==1' ${auto_entropy_file} >> ${output_dir}/parameters.csv
