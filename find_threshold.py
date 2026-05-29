@@ -5,13 +5,14 @@
 _k = 2
 _spline_s = 1
 _spline_k = 3
+# Each parameters above correspond to the the parameters in fit_spline_and_find_cutoff function in autothreshold.py below:
+# k: int, the first k inflection points as entropy cutoff candidates.
+# spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. Not very sensitive and need not to be sensitive so not tuned much but has to be >= 3. 
+# spline_k: int, degree of the spline fit, see scipy.make_splrep.
 
 #%%
 import matplotlib.pyplot as plt
-import pickle
 
-import scipy
-from typing import Iterable
 import os
 import numpy as np
 
@@ -28,11 +29,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Find threshold for selecting barcodes based on entropy values')
     parser.add_argument('--output_dir', type=str, required=True, help='Path to output directory')
     parser.add_argument('--chromosome', type=str, required=True, help='Path to pickle file with entropy values')
+    parser.add_argument('--k', type=int, default=_k, help='The first k inflection points as entropy cutoff candidates')
     
     
     args = parser.parse_args()
     output_dir = args.output_dir
     chromosome = args.chromosome
+    k_candidate_inflections = args.k
+    
+    # check type of k_candidate_inflections
+    if not isinstance(k_candidate_inflections, int) or k_candidate_inflections <= 0:
+        raise ValueError(f"Invalid value for k: {k_candidate_inflections}. k must be a positive integer.")
 
     pickle_path = os.path.join(output_dir, f"calculated_barcode_entropy.pickle")
     figure_subdir = os.path.join(output_dir, "figures")    
@@ -41,7 +48,7 @@ if __name__ == "__main__":
     sorted_log10entropy_list = get_sorted_entropy_helper(pickle_path)
     
     # Find threshold using Spline fitting
-    rank_cutoff, log10_entry_cutoff, cs = fit_spline_and_find_cutoff(sorted_log10entropy_list, k=_k, spline_s=_spline_s, spline_k=_spline_k)
+    rank_cutoff, log10_entry_cutoff, cs, _, _ = fit_spline_and_find_cutoff(sorted_log10entropy_list, k=k_candidate_inflections, spline_s=_spline_s, spline_k=_spline_k)
 
     print(f"Rank cutoff: {rank_cutoff}, log10 Entropy cutoff: {log10_entry_cutoff}")
 
@@ -79,7 +86,7 @@ if __name__ == "__main__":
     ax[0].set_title('Fit spline', fontsize=12)
     ax[1].set_ylabel('First derivative', fontsize=10)
     ax[2].set_ylabel('Second derivative', fontsize=10)
-    ax[2].set_xlabel('Barcode rank', fontsize=10)
+    ax[2].set_xlabel('Droplet rank', fontsize=10)
     fig.tight_layout()
     
     fig.savefig(os.path.join(figure_subdir, f"{chromosome}_entropy_threshold_fitting_k{_k}_s{_spline_s}.png"))

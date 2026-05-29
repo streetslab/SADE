@@ -50,6 +50,8 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
             flag = False
             right = i
             
+            # store inflection region boundaries where the second derivative changes from negative to positive
+            # right is where the second derivative changes from negative to positive, and left is the first point where the second derivative is negative.
             inflection_regions[count] = (left, right) # store inflection region boundaries
             count += 1
         
@@ -76,7 +78,8 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
             And take a look at the distribution of barcode entropies -- there should be multi-modality indicating different quality barcodes.\n \
             Suggest to check quality of the experiment. \n")
     
-    return rank, y[rank], cs
+    return rank, y[rank], cs, inflection_regions, regions_rank
+    # return rank, y[rank], cs
 
 def get_sorted_entropy_helper(pickle_path: str):
     with open(pickle_path, 'rb') as f:
