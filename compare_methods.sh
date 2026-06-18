@@ -3,7 +3,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/config.sh"
 
-while getopts ":d:b:s:g:f:" opt; do
+while getopts ":d:b:s:g:f:n" opt; do
   case $opt in
     d)
       output_dir="$OPTARG"
@@ -20,6 +20,9 @@ while getopts ":d:b:s:g:f:" opt; do
       ;;
     f)
       fragments_file_gz="$OPTARG"
+      ;;
+    n)
+      sample_name="$OPTARG"
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
