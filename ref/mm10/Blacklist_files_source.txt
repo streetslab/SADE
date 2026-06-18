@@ -1,0 +1,4 @@
+# blacklist bed files were downloaded from 
+https://github.com/Boyle-Lab/Blacklist.git
+
+mm10-blacklist.bed:  from file in the git repo:   lists/mm10-blacklist.v2.bed.gz
