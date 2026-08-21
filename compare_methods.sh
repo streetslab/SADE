@@ -3,7 +3,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/config.sh"
 
-while getopts ":d:b:s:g:f:n" opt; do
+while getopts ":d:b:s:g:f:n:" opt; do
   case $opt in
     d)
       output_dir="$OPTARG"
@@ -34,23 +34,27 @@ done
 
 
 ## CR filtering results
+echo "Copying CR filtering results to output directory..."
 mkdir -p "${output_dir}/_CR_FRIP"
 cp $crbarcode_file "${output_dir}/_CR_FRIP/barcodes.tsv"  # copy as barcodes.tsv 
 
 
 ## TSS filtering results 
+echo "Running ArchR to get TSS filtering results..."
 mkdir -p "${output_dir}/_ArchR_TSS"
+cd ${output_dir}/_ArchR_TSS 
 conda_dir=$(conda info | grep -i 'base environment' | awk '{print $4 }'  )
 source "${conda_dir}/etc/profile.d/conda.sh" 
 conda activate ${Renv_Conda} 
 # Run the R script to get ArchR filtering results 
-Rscript ${SCRIPT_DIR}/get_tss_w_archr.r -f="${fragments_file_gz}" --res_dir="${output_dir}" --sample_name="${sample_name}" --genome_name="${genome_name}"
+Rscript ${SCRIPT_DIR}/get_tss_w_archr.r --fragments_file_in_gz="${fragments_file_gz}" --res_dir="${output_dir}" --sample_name="${sample_name}" --genome_name="${genome_name}"
 
 conda deactivate
 
 
 
 ## identify raw peaks using all the reads in the experiment
+echo "Identifying raw peaks using all the reads in the experiment..."
 calling_cmp_dir="${output_dir}/_cell_calling_comparison"
 Raw_peak_dir="${calling_cmp_dir}/Rawpeaks" 
 mkdir -p "${Raw_peak_dir}"
