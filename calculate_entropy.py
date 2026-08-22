@@ -27,23 +27,77 @@ from utils import return_none
 ############################################# 
 ## Calculate entropy for each cell barcode >>
 #############################################
-# @not-in-use 
-def kl_divergence(mle_lambda, cur, freq):
-    """ Compute KL divergence D_KL(P||Q) for discrete distributions
-        p and q are arrays of the same length representing probability distributions
-    """
-    # q is from Poisson distribution with parameter mle_lambda
-    
-    p = freq / np.sum(freq)
-    log_q = np.array([poisson.logpmf(k, mle_lambda) for k in cur]) 
-    
-    divergence = np.sum( p * (np.log(p) - log_q) )
-    
-    return divergence
+def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
+    # Use insertions >=2 to calculate poisson-rate for open regions. 
+    Mtotal = tn5_insert_array.shape[1] # total number of windows
 
+    row_indices, col_indices, non0_insert =scipy.sparse.find(tn5_insert_array)
+    Mnon0 = non0_insert.shape[0]
+
+
+    non0_insert_adjusted = (non0_insert + 1) // 2 # adjust for paired-end sequencing
+    cur_adj, freq_adj = np.unique(non0_insert_adjusted, return_counts=True)
+    
+    # Use only insertions >=2 to calculate poisson-rate for open regions.
+    if cur_adj[0] < 2:
+        M1 = freq_adj[0]
+        cur_adj_2 = cur_adj[1:]
+        freq_adj_2 = freq_adj[1:]
+    else:
+        M1 = 0
+        cur_adj_2 = cur_adj
+        freq_adj_2 = freq_adj
+
+    R_l2 = (cur_adj_2 * freq_adj_2).sum() # total number of insertions in open regions (across all windows with >=2 insertions)
+    M_l2 = freq_adj_2.sum() # number of windows with >=2 insertions 
+
+    def f_lambda(_lmbda, R_l2, M_l2):
+        return (R_l2 - M_l2 * _lmbda) * np.exp(_lmbda) + ( 1+ M_l2) * _lmbda **2  - (2 - M_l2 - R_l2) * _lmbda  - R_l2
+    
+    #Newton-Raphson method can't gaurantee the non-negative solutions hence using Ridder's method to find the positive root
+    mle_lambda = scipy.optimize.ridder(f_lambda, 1e-2, 100, (R_l2, M_l2))
+    
+    P_l2_openregion = 1 - (1 - mle_lambda) * np.exp(-mle_lambda) # P(X>=2) for Poisson distribution with rate mle_lambda
+    M_est_openregion = M_l2 / P_l2_openregion # estimated number of total windows in open regions
+    M1_est_openregion = M_est_openregion * mle_lambda *np.exp(-mle_lambda) # estimated number of windows with exactly 1 insertion in open regions
+    M0_est_openregion = M1_est_openregion / mle_lambda # estimated number of windows with exactly 0 insertion in open regions
+
+    # TODO: condition control 
+    # If M1_est_openregion is >> M1 --> the model is not a good fit and is likely over-tagmentated dna
+    if M1_est_openregion > M1:
+        return None, None, None, None, mle_lambda, None, P_l2_openregion, Mnon0
+    # If M0_est_openregion ???
+    if M0_est_openregion > Mtotal - Mnon0:
+        return None, None, None, None, mle_lambda, None, P_l2_openregion, Mnon0
+
+    M0_est_closeregion = (Mtotal - Mnon0) - M0_est_openregion  
+    M1_est_closeregion = M1 - M1_est_openregion
+    lambda_closeregion = M1_est_closeregion / M0_est_closeregion # Poisson rate for closed regions (rate for background noise)
+
+    if lambda_closeregion > mle_lambda:
+        return None, None, None, None, mle_lambda, lambda_closeregion, P_l2_openregion, Mnon0
+    # Use Pi_closestate for P(states=closed)
+    Pi_closestate = 1 - M_est_openregion / Mtotal
+    Pi_openstate = 1 - Pi_closestate
+    Entropy_states = -np.log2( Pi_closestate ) * Pi_closestate - Pi_openstate * np.log2( Pi_openstate )
+
+    # Entropy only for open regions under Poisson model
+    # est_cur_adj = np.append([0, 1], cur_adj_2)
+    est_freq_adj = np.append([M0_est_openregion, M1_est_openregion], freq_adj_2)
+    Poisson_prob =  est_freq_adj / M_est_openregion  
+    Entropy_openregion = -np.matmul(Poisson_prob, np.log2(Poisson_prob)) 
+    
+    # Entropy for closed region under Background Poisson model (small rate) 
+    Poisson_prob_closeregion = np.array([M0_est_closeregion, M1_est_closeregion]) / (M0_est_closeregion + M1_est_closeregion)
+    Entropy_closeregion =   -np.matmul(Poisson_prob_closeregion, np.log2(Poisson_prob_closeregion))
+
+    Entropy_mixturedist = Entropy_states + Pi_closestate * Entropy_closeregion + Pi_openstate * Entropy_openregion / M_est_openregion # Adjust for sample size effect (indirectly read-depth)
+
+
+    return Entropy_mixturedist, Entropy_openregion, Entropy_closeregion, Pi_closestate, mle_lambda, lambda_closeregion, P_l2_openregion, Mnon0
 
 # Calculate Entropy using MLE estimate 
-def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
+def mixdist_mle_entropy_ref(tn5_insert_array:scipy.sparse):
 
     Mtotal = tn5_insert_array.shape[1] # total number of windows
 
@@ -151,8 +205,8 @@ barcode_entropy_df_file = os.path.join(output_dir, f'calculated_barcode_entropy_
 
 # Wrapper function for multiprocessing
 def mp_wrapper(bc):
-    Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(insert_record[bc])
-    return ( bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state )
+    Entropy_mixturedist, Entropy_open_region, Entropy_closeregion, Pi_closestate, mle_lambda, lambda_closeregion, p0, p_closed_state = mixdist_mle_entropy(insert_record[bc])
+    return ( bc, Entropy_mixturedist, Entropy_open_region, Entropy_closeregion, Pi_closestate, mle_lambda, lambda_closeregion, p0, p_closed_state )
 
 ## << Move all the code before multiprocessing outside of __main__ 
 ## <<
@@ -183,25 +237,26 @@ if __name__ == "__main__":
             res = pool.imap_unordered(mp_wrapper, keys, chunksize=4000)
 
             with open(barcode_entropy_df_file, 'w') as f:
-                f.write(",Entropy,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_closed_state\n")
+                f.write(",Entropy,Entropy_open_region,Entropy_closeregion,Pi_closestate,mle_lambda,lambda_closeregion,P0_open_region,P_closed_state\n")
                 for r in tqdm(res, total=len(keys), desc="Calculating entropy for each cell barcode"):
-                    bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = r
+                    bc, Entropy_mixturedist, Entropy_open_region, Entropy_closeregion, Pi_closestate, mle_lambda, lambda_closeregion, p0, p_closed_state = r
                     if Entropy_mixturedist is None:
                         continue
                     barcode_entropy[bc] = Entropy_mixturedist
-                    f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_closed_state}\n")
+                    f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Entropy_closeregion},{Pi_closestate},{mle_lambda},{lambda_closeregion},{p0},{p_closed_state}\n")
 
 
     ## Single-threaded implementation 
     else:
         with open(barcode_entropy_df_file, 'w') as f:
-            f.write(",Entropy,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_closed_state\n")
+            f.write(",Entropy,Entropy_open_region,Entropy_closeregion,Pi_closestate,mle_lambda,lambda_closeregion,P0_open_region,P_closed_state\n")
             for bc, v in tqdm(insert_record.items(), desc="Calculating entropy for each cell barcode"):
-                Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(v)
+                # Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(v)
+                Entropy_mixturedist, Entropy_open_region, Entropy_closeregion, Pi_closestate, mle_lambda, lambda_closeregion, p0, p_closed_state = mixdist_mle_entropy(v)
                 if Entropy_mixturedist is None:
                     continue
                 barcode_entropy[bc] = Entropy_mixturedist
-                f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_closed_state}\n")
+                f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Entropy_closeregion},{Pi_closestate},{mle_lambda},{lambda_closeregion},{p0},{p_closed_state}\n")
 
 
     # save entropy results
