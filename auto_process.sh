@@ -18,7 +18,7 @@ source "${SCRIPT_DIR}/config.sh"
 
 
 Usage="Usage: $0 
-          -f <fragments_file. Required> 
+          -f <scATACseq fragments_file. Required. This file has '\t' as field separator (.tsv or .bed) and has at least 4 columns "chr", "start-pos", "end-pos", and "droplet-barcode".> 
           -o <output_dir. Required> 
           -g <genome_used_for_read_mapping_that_resulted_fragments_file. Required: 'hg38', 'mm10' etc.> 
           [-c <chromosome>. Default: ${_CHROMOSOME}] 
