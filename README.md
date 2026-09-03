@@ -46,13 +46,13 @@ bash path_to_this_dir/sade.sh -o your_desired_output_directory \
           ```-k <candidate_inflection_points>```  (Optional): Number of candidate local inflection points being considered to find the global optimal inflection point on entropy value fitted cubic curve. Default: 2.  
           ```-s <genome_saturation_cutoff>``` (Optional): Upper bound of the genome portion that can possibly have experimental (i.e. Tn5 insertion) signals for any cells. Default: 0.5.  
 
-  * **Output**
-    Main:  
+  * **Output**  
+      - Main:  
           ```fragments.tsv```:   A copy of the input fragment file.  
           ```filtered_fragments.tsv```:  Fragments corresponding to quality nuclei based on the entropy criterion. Use this file for downstream analysis.  
           ```entropy_filtered_bc_df.tsv```:  A .tsv (tab-separated) file containing filtered barcodes as row indices and entropy calculation metrics as columns.  
-          ```figures```: A subfolder containing generated plots.
-    Additional:  
+          ```figures```: A subfolder containing generated plots.  
+      - Additional:   
           ```Entropy_filtered_bc_CBZ.txt```: A text file with each row being SADE identified high quality nuclei (droplet-)barcode with added CBZ tag (e.g. "CB:Z:ATTTGCAAGTATTGTG-1"). All the scATACseq datasets used are from 10x, so 10x specified tag pre-pending the filtered barcodes are saved in a file. This file can then be used to filter bam/sam file if needed. Although the filtered barcodes are in the ```entropy_filtered_bc_df.tsv``` and can be processed a different way. [TODO for myself to make it more general to other protocols on this file?]
     
   * **Note**   
