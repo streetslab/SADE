@@ -1,6 +1,8 @@
 **/res
 __pycache__/**
 **/__pycache__/**
+
+# All files/folders below should be only in manuscript branch
 EDA/
 test/
 
@@ -18,7 +20,7 @@ _compare_peakcalling_customize.sh
 compare_peaks.sh 
 call_peaks_macs.sh
 call_peaks.sh
-filter_bam_with_barcodes.sh
+#filter_bam_with_barcodes.sh
 remove_blacklist_region.sh
 annotate_peaks.sh
 visualize_annotation.py 
