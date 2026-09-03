@@ -63,9 +63,9 @@ bash path_to_this_dir/sade.sh -o your_desired_output_directory \
 ## Filter bam file (Optional)
 Filter .bam file that corresponds to the filtered fragment file at (droplet-)barcode level (if needed)  
 [samtools](https://www.htslib.org) is required and callable in the system for this step.  
-**Note**   
+* **Note**   
 Users will need the output file ```Entropy_filtered_bc_CBZ.txt``` from running ```sade.sh``` to filter bam file.   
-**Note**   
+* **Note**   
 ```filter_bam_with_barcodes.sh``` file here is adapted for filtering scATACseq bam from 10x protocols given its unique barcode tag, 
 and code in this shell script was adapted from [10x](https://kb.10xgenomics.com/s/article/360022448251-How-to-filter-the-BAM-file-produced-by-10x-pipelines-with-a-list-of-barcodes).    
 Filtering on bam files generated from other experimental protocols should be able to use this script as reference.
