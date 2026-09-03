@@ -40,7 +40,7 @@ bash path_to_this_dir/auto_process.sh -o your_desired_output_directory \
   ```   
   
 ### Command **Explanation**:
-  * **Input**:   
+  * **Input**  
           ```-o <output_dir>``` (Required): Path to the output directory.  
           ```-f <fragments_file>``` (Required): Path to the fragments file.  
           ```-g <genome>```  (Required): Genome used for read mapping (e.g., hg38, mm10).  
