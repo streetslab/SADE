@@ -53,7 +53,8 @@ bash path_to_this_dir/sade.sh -o your_desired_output_directory \
           ```entropy_filtered_bc_df.tsv```:  A .tsv (tab-separated) file containing filtered barcodes as row indices and entropy calculation metrics as columns.  
           ```figures```: A subfolder containing generated plots.  
       - Additional:   
-          ```Entropy_filtered_bc_CBZ.txt```: A text file with each row being SADE identified high quality nuclei (droplet-)barcode with added CBZ tag (e.g. "CB:Z:ATTTGCAAGTATTGTG-1"). All the scATACseq datasets used are from 10x, so 10x specified tag pre-pending the filtered barcodes are saved in a file. This file can then be used to filter bam/sam file if needed. Although the filtered barcodes are in the ```entropy_filtered_bc_df.tsv``` and can be processed a different way. [TODO for myself to make it more general to other protocols on this file?]
+          ```Entropy_filtered_bc_CBZ.txt```: A text file with each row being SADE identified high quality nuclei (droplet-)barcode with added CBZ tag (e.g. "CB:Z:ATTTGCAAGTATTGTG-1"). All the scATACseq datasets used are from 10x, so 10x specified tag pre-pending the filtered barcodes are saved in a file. This file can then be used to filter bam/sam file if needed. Although the filtered barcodes are in the ```entropy_filtered_bc_df.tsv``` and can be processed in alternative ways such as adding different tags to be compatible for other protocols.
+        <ins>**TODO for myself to make it more general/compatible to other protocols on this file?**</ins>
     
   * **Note**   
             Currently 'hg38' and 'mm10' genome reference info are pre-processed and stored in the ```ref``` subfolder in this repo.  
