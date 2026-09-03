@@ -52,7 +52,11 @@ bash path_to_this_dir/sade.sh -o your_desired_output_directory \
           ```entropy_filtered_bc_df.tsv```:  A .tsv (tab-separated) file containing filtered barcodes as row indices and entropy calculation metrics as columns.  
           ```figures```: A subfolder containing generated plots.  
     
-
+  * **Note**   
+            Currently 'hg38' and 'mm10' genome reference info are pre-processed and stored in the ```ref``` subfolder in this repo.  
+            If cells come from a different species or a different genome version needs to be used, users can refer to ```ref/get_chromosome_size.sh``` to get genome size information and store it in the same file naming convention (i.e. ```{new_species_name}_genome_chromsize.tsv```) approach to the ```ref/``` subfolder in your local path.  
+            You can then use **SADE** command demonstrated above to specify ```-g {new_species_name}``` 
+    
 ## Filter bam file (Optional)
 Filter .bam file that corresponds to the filtered fragment file at (droplet-)barcode level (if needed)  
 [samtools](https://www.htslib.org) is required for this step.
