@@ -2,3 +2,47 @@
 __pycache__/**
 **/__pycache__/**
 EDA/
+
+CODE_REVIEW*
+
+# scripts related to downstream analysis
+downstream_analysis.sh
+sort_filterd_frag.sh
+peackvi_atac.py
+get_pic.r 
+
+# scripts related to compare peak calling results
+compare_peakcalling.sh
+_compare_peakcalling_customize.sh
+compare_peaks.sh 
+call_peaks_macs.sh
+call_peaks.sh
+filter_bam_with_barcodes.sh
+remove_blacklist_region.sh
+annotate_peaks.sh
+visualize_annotation.py 
+fragments_overlap_peaks.sh
+visualize_fragments_overlap_peaks.py
+
+# script related to compare cell-calling results
+compare_cellcalling.sh
+overlay_entropy_CRcelllabel_plot.py
+
+
+## More downstream analysis 
+# script related to cCRE annotation
+_cCREs_annotate.sh
+# script related to doublet detection 
+_runAMUET.sh
+# script on running ArchR and comparison
+compare_methods.sh
+get_tss_w_archr.r
+# scripts on all 3 methods comparison
+_UnionBC_fragments.sh
+get_unique_barcodes.sh
+# script related to igv visualization
+prepare_igv.sh
+# script to run samples
+run_sample.sh
+# script related to check reads 
+_check_filteredout_reads.sh
