@@ -1,32 +1,26 @@
 # SADE
-**S**hannon-entropy to filter noisy reads on single-cell **A**TAC-seq for sensitive accessible region **de**tection
+**S**h**a**nnon-entropy **de**tection of quality nuclei in scATAC-seq.
 
-------
-## Run module-1  [auto_process.sh]
-> [!note]
-**auto_process.sh** : Calculate per barcode entropy, auto-threshold entropy and filter fragments based on barcodes.
+**SADE** quantifies the complexity of genome-wide chromatin accessibility for each droplet(-barcode) with entropy, and auto-threshold entropy values to identify droplets with quality nuclei, while filtering out empty droplets, droplets with damaged nuclei, as well as droplets with cellular-debris.  
 
-### Calculate per barcode entropy, auto-threshold entropy and filter fragments based on barcodes.
 
-- **System Requirement**
-
+## System Requirements
 [ripgrep](https://github.com/BurntSushi/ripgrep)
 
 
-- **Environment setup** to run **Module-1** **auto_process.sh**
+## Environment Setup
 
-> [!Required]
-A python3 virtual environemnt is all you need for this module to calculate per-barcode entropy and autothresholding to filter good quality barcodes. 
+To run **auto_process.sh**, a Python 3 virtual environment is required to calculate per-(droplet-)barcode entropy and perform auto-thresholding.
 1. Create a python virtual environement with required libraries
-```
+```bash
 python -m venv you_venv1_name
 ```
-2. Install below libraries within the virtual environment
-```
-# Activate your python virtual environment
+2. Activate your python virtual environment
+```bash \
 source absolute_path_to_you_venv1_name/bin/activate
-
-# install required python packages within the virtual environment
+```
+3. install required python packages within the virtual environment
+```bash
 pip install -r path_to_this_dir/EnvironmentSetup/requirements_auto_process.txt
 ```
 3. Locate your virtual environement and modify _config.sh_ by adding a line below
@@ -34,7 +28,7 @@ pip install -r path_to_this_dir/EnvironmentSetup/requirements_auto_process.txt
 echo "export PYTHON_ENV='absolute_path_to_you_venv1_name/bin/activate'" > path_to_this_dir/config.sh
 ```
 
-- **Usage** of **Module-1** command:
+- **Usage** 
 ```
 sample='VIB_10xmultiome_2'
 ws=3000
@@ -60,35 +54,3 @@ bash path_to_this_dir/auto_process.sh -o your_desired_output_directory \
           **figures (subfolder)**
     
 ------ 
-## Run module-2 [compare_cellcalling.sh] 
-> [!note]
-**compare_cellcalling.sh** : Compares CellRaner's (post-peak) cell-calling method v.s. SADE (pre-peak) cell-calling
-
-- **Environment setup** to run **Module-2** **compare_cellcalling.sh** is the **same** as for Module-1  
-
-- **Usage** of **Module-2** command:  
-```
-bash path_to_this_dir/compare_cellcalling.sh
-  -d output_dir -b crbarcode_file [-c chromosome]
-  -d <output_dir: Directory where the output files are located from running auto_process.sh. Required>
-  -b <crbarcode_file: CellRanger cell barcode file (barcodes.tsv) to use for comparison. Required>
-```
-
-
-------
-## Run module-3 [compare_peakcalling.sh]
-> [!note]
-**compare_peakcalling.sh** : Compares peak-calling using all reads v.s. peak calling with SADE pre-filtering reads at barcode level.   
-
-- **Environment setup** to run **Module-3** **compare_peakcalling.sh** is the **same** as for Module-1  
-- **Usage** of **Module-3** command:
-```
-bash path_to_this_dir/compare_peakcalling.sh  -d <output_dir> -g <genome_name> -s <bam_file>
-  -d: <output_dir: Directory where the output files are located from running auto_process.sh. Required>
-  -g: <genome_used_for_read_mapping_that_resulted_fragments_file. Required: 'hg38', 'mm10' etc.> 
-  -s: <Original BAM file used for peak calling. Required>
-```
-
-------
-## Run module-4 [downstream_analysis.sh] 
-### Compares peak featuers (before- v.s. post- Entropy filtering)'s ability for cell-type discovery 
