@@ -18,7 +18,7 @@ python -m venv you_venv1_name
 2. Activate your python virtual environment and install required python packages within the virtual environment
 ```bash
 source absolute_path_to_you_venv1_name/bin/activate
-pip install -r path_to_this_dir/EnvironmentSetup/requirements_auto_process.txt
+pip install -r path_to_this_dir/EnvironmentSetup/pip_requirements.txt
 ```
 3. Locate your virtual environement and modify _config.sh_ by adding a line below
 ```
