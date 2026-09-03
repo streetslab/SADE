@@ -66,8 +66,9 @@ Filter .bam file that corresponds to the filtered fragment file at (droplet-)bar
 **Note**   
 Users will need the output file ```Entropy_filtered_bc_CBZ.txt``` from running ```sade.sh``` to filter bam file.   
 **Note**   
-```filter_bam_with_barcodes.sh``` file here is adapted for filtering scATACseq bam from 10x protocols given its unique barcode tag,   
+```filter_bam_with_barcodes.sh``` file here is adapted for filtering scATACseq bam from 10x protocols given its unique barcode tag, 
 and code in this shell script was adapted from [10x](https://kb.10xgenomics.com/s/article/360022448251-How-to-filter-the-BAM-file-produced-by-10x-pipelines-with-a-list-of-barcodes).    
+Filtering on bam files generated from other experimental protocols should be able to use this script as reference.
 
 ```bash
 filtered_bc_file="Entropy_filtered_bc_CBZ.txt" # See SADE's output above.
