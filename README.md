@@ -53,5 +53,9 @@ bash path_to_this_dir/sade.sh -o your_desired_output_directory \
           ```figures```: A subfolder containing generated plots.  
     
 
-## Filter Bam file that correspond to the identified quality nuclei (droplets-)barcodes (If needed)
-TODO
+## Filter Bam file to correspond the filtered fragment file (if needed)
+Filter .bam file that corresponds to the identified quality nuclei (droplets-)barcodes.  
+**samtools** is required in the system. 
+
+**TODO**
+**ADD sh files back for this**
