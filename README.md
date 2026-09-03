@@ -10,17 +10,14 @@
 
 ## Environment Setup
 
-To run ```auto_process.sh```, a Python 3 virtual environment is required to calculate per-(droplet-)barcode entropy and perform auto-thresholding.
+To run ```sade.sh```, a Python 3 virtual environment is required to calculate per-(droplet-)barcode entropy and perform auto-thresholding.
 1. Create a python virtual environement with required libraries 
 ```bash 
 python -m venv you_venv1_name
 ```
-2. Activate your python virtual environment
+2. Activate your python virtual environment and install required python packages within the virtual environment
 ```bash
 source absolute_path_to_you_venv1_name/bin/activate
-```
-3. install required python packages within the virtual environment
-```bash
 pip install -r path_to_this_dir/EnvironmentSetup/requirements_auto_process.txt
 ```
 3. Locate your virtual environement and modify _config.sh_ by adding a line below
@@ -32,7 +29,7 @@ echo "export PYTHON_ENV='absolute_path_to_you_venv1_name/bin/activate'" > path_t
 ```
 sample_dir='path_to_your_sample_dir' # Need to contain fragment file (fragments.tsv or fragments.tsv.gz).
 ws=3000
-bash path_to_this_dir/auto_process.sh -o your_desired_output_directory \
+bash path_to_this_dir/sade.sh -o your_desired_output_directory \
       -f "${sample_dir}/fragments.tsv.gz" \
       -w ${ws} \
       -c 'chr1' \
