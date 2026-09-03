@@ -10,13 +10,13 @@
 
 ## Environment Setup
 
-To run **auto_process.sh**, a Python 3 virtual environment is required to calculate per-(droplet-)barcode entropy and perform auto-thresholding.
-1. Create a python virtual environement with required libraries
-```bash
+To run ```auto_process.sh```, a Python 3 virtual environment is required to calculate per-(droplet-)barcode entropy and perform auto-thresholding.
+1. Create a python virtual environement with required libraries 
+```bash 
 python -m venv you_venv1_name
 ```
 2. Activate your python virtual environment
-```bash \
+```bash
 source absolute_path_to_you_venv1_name/bin/activate
 ```
 3. install required python packages within the virtual environment
@@ -28,29 +28,29 @@ pip install -r path_to_this_dir/EnvironmentSetup/requirements_auto_process.txt
 echo "export PYTHON_ENV='absolute_path_to_you_venv1_name/bin/activate'" > path_to_this_dir/config.sh
 ```
 
-- **Usage** 
+## Usage 
 ```
-sample='VIB_10xmultiome_2'
+sample_dir='path_to_your_sample_dir' # Need to contain fragment file (fragments.tsv or fragments.tsv.gz).
 ws=3000
 bash path_to_this_dir/auto_process.sh -o your_desired_output_directory \
-      -f /mnt/hdd_bob/syy/adipose/atac/protocol_benchmark/cr_results/atac/${sample}/outs/fragments.tsv.gz \
+      -f "${sample_dir}/fragments.tsv.gz" \
       -w ${ws} \
       -c 'chr1' \
-      -g 'hg38'
+      -g 'hg38' # hg38 for the corresponding human sample
   ```   
   
-- Command **Explanation**:
+### Command **Explanation**:
   * **Input**:   
-          **-o <output_dir. Required>**
-          **-f <fragments_file. Required>**  
-          **-g <genome_used_for_read_mapping_that_resulted_provided_fragments_file.  Required: 'hg38', 'mm10' etc.>**  
-          [-c <chromosome>. Chromosome used to calculate entropy. Default: largest chromosome, chr1 ]  
-          [-w <window_size>. Windowsize on genome to look for Tn5 insertion frequencies for entropy calculation. Default: 3000]  
+          ```-o <output_dir>``` (Required): Path to the output directory.  
+          ```-f <fragments_file>``` (Required): Path to the fragments file.  
+          ```-g <genome>```  (Required): Genome used for read mapping (e.g., hg38, mm10).  
+          ```-c <chromosome>``` (Optional): Chromosome used to calculate entropy. Default: chr1.  
+          ```-w <window_size>``` (Optional): Window size on genome to count Tn5 insertion frequencies. Default: 3000.  
 
-  * **Output**:   
-          **fragments.tsv**  A copy of input frament file.   
-          **filtered_fragments.tsv**  Fragments corresponding to quality nuclei by entropy criterion. This file should be used for downstream analysis in replace of fragments file.   
-          **entropy_filtered_bc_df.tsv**  File with filtered barcodes as row indices, columns having entropy calculation metrics. First row has column names.  
-          **figures (subfolder)**
+  * **Output**   
+          ```fragments.tsv```:   A copy of the input fragment file.  
+          ```filtered_fragments.tsv```:  Fragments corresponding to quality nuclei based on the entropy criterion. Use this file for downstream analysis.  
+          ```entropy_filtered_bc_df.tsv```:  A .tsv (tab-separated) file containing filtered barcodes as row indices and entropy calculation metrics as columns.  
+          ```figures```: A subfolder containing generated plots.  
     
------- 
+
