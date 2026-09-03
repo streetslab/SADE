@@ -28,10 +28,10 @@ echo "export PYTHON_ENV='absolute_path_to_you_venv1_name/bin/activate'" > path_t
 ## Usage 
 ```
 sample_dir='path_to_your_sample_dir' # Need to contain fragment file (fragments.tsv or fragments.tsv.gz).
-ws=3000
+ws='3000'
 bash path_to_this_dir/sade.sh -o your_desired_output_directory \
       -f "${sample_dir}/fragments.tsv.gz" \
-      -w ${ws} \
+      -w "${ws}" \
       -c 'chr1' \
       -g 'hg38' # hg38 for the corresponding human sample
   ```   
