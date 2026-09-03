@@ -1,6 +1,9 @@
 # SADE
 **S**hannon-entropy to filter noisy reads on single-cell **A**TAC-seq for sensitive accessible region **de**tection
 
+
+Branch for the manuscript
+
 ------
 ## Run module-1  [auto_process.sh]
 > [!note]
