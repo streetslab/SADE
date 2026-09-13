@@ -7,7 +7,7 @@ _CHROMOSOME='chr1'
 _WindowSize=3000 # default window size
 _CandidateInflectionPoints=2    # default number of candidate inflection points to consider for entropy threshold selection.
 _GenomeSaturationCutoff=0.5 #  _GenomeSaturationCutoff := (1 - estimated_closed_region_genome_coverage). Higher value, less strict filtering of DNA-debris. 
-                            # Human cells typically have <0.7 genome coverage in scATAC-seq. this cutoff is pretty loose. 
+                            # Human cells typically have <0.3 genome coverage in scATAC-seq. this cutoff is pretty loose. 
 # GLOBAL VARIABLES <<<
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -25,7 +25,7 @@ Usage="Usage: $0
           [-w <window_size>. Default: ${_WindowSize}]
           [-k <candidate_inflection_points>. Default: ${_CandidateInflectionPoints}]
           [-s <genome_saturation_cutoff>. Default: ${_GenomeSaturationCutoff}. Values above cutoff means the genome is too saturated with fragments, 
-                                          they correspond to DNA debris.
+                                          likely corresponding to cellular debris.
                                           Mathematically valid value is in the range of (0, 1], but do not specify manually unless you know the 
                                           average genome coverage in basepair (bp) of a random given cell across all cell types for the species in the sample.
                                           Due to this reason, we manually set range to be [0.1, 1], where 1 means no filtering of DNA debris.]
