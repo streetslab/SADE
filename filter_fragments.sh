@@ -26,7 +26,7 @@ entropy_cutoff_file="${output_dir}/entropy_cutoff.csv"
 entropy_df_file="${output_dir}/calculated_barcode_entropy_df.tsv"
 
 # File to save results
-filtered_bc_wflag_df_file="${output_dir}/entropy_filtered_bc_w_DNAdebrisflag_df.tsv"
+filtered_bc_wflag_df_file="${output_dir}/entropy_filtered_bc_w_Debrisflag_df.tsv"
 filtered_bc_df_file="${output_dir}/entropy_filtered_bc_df.tsv"
 filtered_fragments_file="${output_dir}/filtered_fragments.tsv"
 
@@ -60,7 +60,7 @@ awk -F ',' -v OFS=',' -v cutoff="${genome_saturation_cutoff}" \
 awk -F',' -v OFS=',' 'NR==1 {print $0}'  "${filtered_bc_wflag_df_file}" > "${filtered_bc_df_file}"   # Write header
 awk -F ',' -v OFS=',' '$8=="NO" {print $0}'  "${filtered_bc_wflag_df_file}" >> "${filtered_bc_df_file}"
 # S3. Add DNA debris flag to the original entropy_df_file for all barcodes (including those not passed entropy threshold)
-awk -F ',' -v OFS=',' 'NR==FNR {dna_debris[$1]=$8; next} NR==1 {print $0, "DNA_debris"} NR>1 {flag=(dna_debris[$1]!="" ? dna_debris[$1] : "NO"); print $0, flag}'  "${filtered_bc_wflag_df_file}" "${entropy_df_file}" > "${output_dir}/calculated_barcode_entropy_wDNAdebrisflag_df.tsv"
+awk -F ',' -v OFS=',' 'NR==FNR {dna_debris[$1]=$8; next} NR==1 {print $0, "DNA_debris"} NR>1 {flag=(dna_debris[$1]!="" ? dna_debris[$1] : "NO"); print $0, flag}'  "${filtered_bc_wflag_df_file}" "${entropy_df_file}" > "${output_dir}/calculated_barcode_entropy_wDebrisflag_df.tsv"
 
 
 awk -F',' 'NR>1 {print $1}' "${filtered_bc_df_file}" > "${temp_bc_file}"  # Remove header for grep step 
