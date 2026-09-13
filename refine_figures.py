@@ -37,7 +37,7 @@ if __name__ == "__main__":
     entropy_all_file = os.path.join(output_dir, f'calculated_barcode_entropy_df.tsv')
     entropy_all_df = pd.read_csv(entropy_all_file, sep=',', header=0, index_col=0)
     
-    entropy_w_DNAdebrisflag_file = os.path.join(output_dir, 'entropy_filtered_bc_w_DNAdebrisflag_df.tsv')    
+    entropy_w_DNAdebrisflag_file = os.path.join(output_dir, 'entropy_filtered_bc_w_Debrisflag_df.tsv')    
     entropy_w_DNAdebrisflag_df = pd.read_csv(entropy_w_DNAdebrisflag_file, sep=',', index_col=0)
 
     entropy_df_file = os.path.join(output_dir, f'entropy_filtered_bc_df.tsv')

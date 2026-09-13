@@ -53,13 +53,13 @@ tmp_df_file="${output_dir}/tmp.tsv"
 # S1. Filter barcodes passed entropy threshold. 
 awk -F',' -v OFS=',' 'NR==1 {print $0}'  "${entropy_df_file}" > "${tmp_df_file}" # Write header
 awk -F ','  -v OFS=','  'NR>1 {print $0}'  "${entropy_df_file}"   | sort -k2,2 -g -r -t ',' | head -n "${entropy_rank_cutoff}"  >> "${tmp_df_file}"
-# S2a. Flag barcodes "YES" for DNA debris by estimated-P_closed_state < (1 - genome_saturation_cutoff)
+# S2a. Flag barcodes "YES" for Cellular debris by estimated-P_closed_state < (1 - genome_saturation_cutoff)
 awk -F ',' -v OFS=',' -v cutoff="${genome_saturation_cutoff}" \
     'NR==1 {print $0, "DNA_debris"}  NR>1 {if  ($7 < (1-cutoff))  print $0, "YES" ; else print $0, "NO" }'  "${tmp_df_file}" > "${filtered_bc_wflag_df_file}"
-# S2b. Final filtered barcodes: passed entropy threshold and not flagged as DNA debris 
+# S2b. Final filtered barcodes: passed entropy threshold and not flagged as Cellular debris 
 awk -F',' -v OFS=',' 'NR==1 {print $0}'  "${filtered_bc_wflag_df_file}" > "${filtered_bc_df_file}"   # Write header
 awk -F ',' -v OFS=',' '$8=="NO" {print $0}'  "${filtered_bc_wflag_df_file}" >> "${filtered_bc_df_file}"
-# S3. Add DNA debris flag to the original entropy_df_file for all barcodes (including those not passed entropy threshold)
+# S3. Add Cellular debris flag to the original entropy_df_file for all barcodes (including those not passed entropy threshold)
 awk -F ',' -v OFS=',' 'NR==FNR {dna_debris[$1]=$8; next} NR==1 {print $0, "DNA_debris"} NR>1 {flag=(dna_debris[$1]!="" ? dna_debris[$1] : "NO"); print $0, flag}'  "${filtered_bc_wflag_df_file}" "${entropy_df_file}" > "${output_dir}/calculated_barcode_entropy_wDebrisflag_df.tsv"
 
 
