@@ -66,30 +66,3 @@ do
 
 done
 
-exit 0
-
-# For SADE-clusters
-res_dir=${output_dir}/SADE_atac_cluster_info
-SADE_cluster_file=$res_dir/SADE_atac_cluster_info.tsv
-
-clusters="0 1 2 3 4 5 6 7 8 9"
-for c in $clusters;
-do 
-	awk -F '\t' -v OFS='\t' -v clus="$c" '{ if ($22==clus) print $1 }' $SADE_cluster_file > $res_dir/sade_c_${c}.txt
-	samtools view -h $frag_bam_file | awk -F '\t' -v OFS='\t'  '
-     NR==FNR {
-	bc_list[$1]; next
-      }
-
-	{ if ($1 ~ /^@/) { print $0; next }
-	if (  $1 in bc_list ) print $0  
-	}
-	'  $res_dir/sade_c_${c}.txt  - |  samtools sort -@ 8 -o $res_dir/sorted_farg_sade_c_${c}.bam 
-	
-	samtools index $res_dir/sorted_farg_sade_c_${c}.bam
-	bamCoverage -b $res_dir/sorted_farg_sade_c_${c}.bam \
-		    -o $res_dir/sorted_farg_sade_c_${c}.bw \
-		    -bs 1 \
-		    -p 8
-
-done
