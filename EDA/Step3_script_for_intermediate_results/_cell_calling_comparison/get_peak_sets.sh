@@ -1,5 +1,5 @@
 
-SCRIPT_DIR='/home/syyang/GitRepo/atac'
+SCRIPT_DIR='/home/syyang/GitRepo/SADE'
 source ${SCRIPT_DIR}/config.sh
 
 bamfile='/mnt/hdd_bob/syy/adipose/atac/protocol_benchmark/cr_results/atac/VIB_10xmultiome_2/outs/possorted_bam.bam'
@@ -37,7 +37,7 @@ bedtools subtract -a ${Entropy_peak_dir}/peaks_w_blacklistregion.bed  -b ${SCRIP
 
 
 # for FRIP filtered cells' peaks
-cp '/mnt/hdd_bob/syy/adipose/atac/protocol_benchmark/cr_results/atac/VIB_10xmultiome_2/outs/filtered_peak_bc_matrix/barcodes.tsv' ${FRIP_peak_dir}/CR_barcodes.tsv
+cp '/mnt/hdd_bob/syy/adipose/atac/res/VIB_10xmultiome_2_WS3000F/_CR_FRIP/barcodes.tsv' ${FRIP_peak_dir}/CR_barcodes.tsv
 awk -v OFS='' -v prefix='CB:Z:' '{print prefix, $1}'  ${FRIP_peak_dir}/CR_barcodes.tsv > ${FRIP_peak_dir}/CR_filtered_bc_CBZ.txt
 
 bash ${pres_dir}/scripts/filter_bam_w_bc.sh -s ${bamfile} \

@@ -1,4 +1,4 @@
-SCRIPT_DIR="/home/syyang/GitRepo/atac"
+SCRIPT_DIR="/home/syyang/GitRepo/SADE"
 source ${SCRIPT_DIR}/config.sh
 
 
