@@ -11,16 +11,19 @@ bw_dir=${pres_dir}/_cell_calling_comparison/per_bc_frag_bam2
 mkdir -p $bw_dir
 
 cd $bw_dir
-#awk -F '\t' 'NR>1 {print $13}' ${pres_dir}/_cell_calling_comparison/_Union_cell_3set_with_RNA_cluster_and_DNAdebrisflag.tsv  | while read -r bc1
-#do
-#
-#	samtools view -H $frag_bam_file >  "${bc1}_fragments.sam"
-#done
-#samtools view   $frag_bam_file |  awk  -F '\t' '{
-#	filename= $1"_fragments.sam";
-#	print $0 >> filename;
-#	close(filename);
-#}' - 
+
+awk -F '\t' 'NR>1 {print $13}' ${pres_dir}/_cell_calling_comparison/_Union_cell_3set_with_RNA_cluster_and_DNAdebrisflag.tsv  | while read -r bc1
+do
+	# header 
+	samtools view -H $frag_bam_file >  "${bc1}_fragments.sam"
+done
+
+# Split the fragments into separate files
+samtools view   $frag_bam_file |  awk  -F '\t' '{
+	filename= $1"_fragments.sam";
+	print $0 >> filename;
+	close(filename);
+}' - 
 
 awk -F '\t' 'NR>1 {print $13}' ${pres_dir}/_cell_calling_comparison/_Union_cell_3set_with_RNA_cluster_and_DNAdebrisflag.tsv  | while read -r bc1
 do

@@ -18,15 +18,15 @@ do
 
 	awk -F '\t' -v OFS='' -v col="${col}" '{ if ($col=="True") print $1, -1 }' ${set_annotation_file} > $res_dir/${set_name}_bc.txt
 
-	#samtools view -h $frag_bam_file | awk -F '\t' -v OFS='\t'  '
-        #NR==FNR {
-	#bc_list[$1]; next
-        #}
+	samtools view -h $frag_bam_file | awk -F '\t' -v OFS='\t'  '
+        NR==FNR {
+	bc_list[$1]; next
+        }
 
-	#{ if ($1 ~ /^@/) { print $0; next }
-	#if (  $1 in bc_list ) print $0  
-	#}
-	#'  $res_dir/${set_name}_bc.txt  - |  samtools sort -@ 8 -o $res_dir/sorted_farg_${set_name}.bam 
+	{ if ($1 ~ /^@/) { print $0; next }
+	if (  $1 in bc_list ) print $0  
+	}
+	'  $res_dir/${set_name}_bc.txt  - |  samtools sort -@ 8 -o $res_dir/sorted_farg_${set_name}.bam 
 	
 	samtools index $res_dir/sorted_farg_${set_name}.bam
 	bamCoverage -b $res_dir/sorted_farg_${set_name}.bam \
@@ -46,17 +46,17 @@ for i in {0..6}
 do
 	     set_name=${set_list[$i]}
 
-	#awk -F '\t' -v OFS='\t' -v clus="$set_name" '{ if ($2==clus) print $1 }' ${set_annotation_file} > $res_dir/${set_name//[" ",]/_}.txt
+	awk -F '\t' -v OFS='\t' -v clus="$set_name" '{ if ($2==clus) print $1 }' ${set_annotation_file} > $res_dir/${set_name//[" ",]/_}.txt
 
-	#samtools view -h $frag_bam_file | awk -F '\t' -v OFS='\t'  '
-        #NR==FNR {
-	#bc_list[$1]; next
-        #}
+	samtools view -h $frag_bam_file | awk -F '\t' -v OFS='\t'  '
+        NR==FNR {
+	bc_list[$1]; next
+        }
 
-	#{ if ($1 ~ /^@/) { print $0; next }
-	#if (  $1 in bc_list ) print $0  
-	#}
-	#'  $res_dir/${set_name//[" ",]/_}.txt  - |  samtools sort -@ 8 -o $res_dir/sorted_farg_${set_name//[" ",]/_}.bam 
+	{ if ($1 ~ /^@/) { print $0; next }
+	if (  $1 in bc_list ) print $0  
+	}
+	'  $res_dir/${set_name//[" ",]/_}.txt  - |  samtools sort -@ 8 -o $res_dir/sorted_farg_${set_name//[" ",]/_}.bam 
 	
 	samtools index $res_dir/sorted_farg_${set_name//[" ",]/_}.bam
 	bamCoverage -b $res_dir/sorted_farg_${set_name//[" ",]/_}.bam \
