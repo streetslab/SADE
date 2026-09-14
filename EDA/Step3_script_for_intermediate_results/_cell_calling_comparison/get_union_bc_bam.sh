@@ -1,6 +1,6 @@
 
 awk -F '\t' -v OFS="" -v prefix=CB:Z: 'NR>1 {print prefix, $1, -1}' Union_cell_3set.tsv  > Union_cells_bc_CBZ.txt
-awk -F '\t' -v OFS='\t' '{print $0, $1"-1"}' Union_cell_3set_with_RNA_cluster_and_DNAdebrisflag.tsv > _Union_cell_3set_with_RNA_cluster_and_DNAdebrisflag.tsv 
+#awk -F '\t' -v OFS='\t' '{print $0, $1"-1"}' Union_cell_3set_with_RNA_cluster_and_DNAdebrisflag.tsv > _Union_cell_3set_with_RNA_cluster_and_DNAdebrisflag.tsv 
 # ^ keep a column for barocde with '-1' appendix for filtering fragment file
 
 bamfile='/mnt/hdd_bob/syy/adipose/atac/protocol_benchmark/cr_results/atac/VIB_10xmultiome_2/outs/possorted_bam.bam'

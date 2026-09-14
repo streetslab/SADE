@@ -2,7 +2,7 @@
 awk -F '\t' -v OFS='\t' '{print $1, $3}' ~/GitRepo/atac/ref/hg38_genome_chromsize.tsv > simplified_hg38_genome_chromsize.tsv
 
 
-sort -k1,1 -k2,2n union_bc_fragments.tsv  > union_bc_fragments.bed
+# sort -k1,1 -k2,2n union_bc_fragments.tsv  > union_bc_fragments.bed
 bedtools bedtobam -i union_bc_fragments.bed -g simplified_hg38_genome_chromsize.tsv  > union_bc_fragments.bam 
 
 samtools view -h union_bc_fragments.bam | awk -F '\t' -v OFS='\t'  '
