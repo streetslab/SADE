@@ -8,6 +8,9 @@
 [ripgrep](https://github.com/BurntSushi/ripgrep)
 
 
+## Runtime
+SADE runs in a few minutes on standard macOS and Linux systems with 16 GB RAM, depending on dataset size and selected parameters.
+
 ## Environment Setup
 
 To run ```sade.sh```, a Python 3 virtual environment is required to calculate per-(droplet-)barcode entropy and perform auto-thresholding.
