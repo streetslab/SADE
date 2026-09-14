@@ -1,12 +1,11 @@
 
 
-bamfile='/mnt/hdd_bob/syy/adipose/atac/res/VIB_10xmultiome_2_WS3000F/_cell_calling_comparison/filtered.bam'
+bamfile='/mnt/hdd_bob/syy/adipose/atac/res/VIB_10xmultiome_2_WS3000F/_cell_calling_comparison/Union_cells_peaks/filtered.bam'
 pres_dir='/mnt/hdd_bob/syy/adipose/atac/res/VIB_10xmultiome_2_WS3000F'
 
 single_bc_dir=${pres_dir}/_cell_calling_comparison/Single_bc_bam/TSS_bc_lowFRIP_bc
 mkdir -p $single_bc_dir
 bc="ATGTTTGGTTTAATCG"
-bc="AAGCTAGGTTACTTCT"
 echo $bc"-1"  > ${single_bc_dir}/barcode.txt
 
 

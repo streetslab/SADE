@@ -20,10 +20,11 @@
     - cd VIB_10xultiome_2_WS3000F/_cell_calling_comparison
     - bash get_peak_sets.sh
     ## running this to have the Raw peaks, SADE-peaks, CR-peaks, and TSSe-peaks
+    ## Make sure this runs all the way through 
+---- !!!!!
     - bash filter_frag.sh
     ## run this to have the union_bc_fragments.bed that has subset fragments corresponding to the union bc retained by any of the 3 methods
-    ## -- here not run yet --!!!!!!!
-!!!!!!!!!!!
+    ## -- here not run yet --
     - bash overlap_frag_peaks.sh 
     ## run this to have subset fragments that overlapped with each peak set.
 
