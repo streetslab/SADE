@@ -15,11 +15,12 @@
     - bash get_CR_barcodes.sh
 
     - run  /home/syyang/GitRepo/SADE/EDA/F2_prepare_data.ipynb
-    ## running this is necessary to have 'Union_cell_3set_all_info.tsv' in the 'VIB_10xmultiome_2_WS3000F/_cell_calling_comparison'
+    ## running this is necessary to have 'Union_cell_3set_all_info.tsv' (BC that's not in union-bc are flagged but still kept) in the 'VIB_10xmultiome_2_WS3000F/_cell_calling_comparison'
 
     - cd VIB_10xultiome_2_WS3000F/_cell_calling_comparison
     - bash get_peak_sets.sh
-    ## running this to have the Raw peaks, SADE-peaks, CR-peaks, and TSSe-peaks
+    ## running this to have the Raw peaks, SADE-peaks, CR-peaks, and TSSe-peaks, 
+    ##         as well as the 'Union_cell_3set_all_info.tsv' that only has the union-bc 
     ## Make sure this runs all the way through 
 ---- !!!!!
     - bash filter_frag.sh

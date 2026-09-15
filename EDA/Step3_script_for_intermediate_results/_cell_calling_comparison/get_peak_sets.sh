@@ -43,31 +43,32 @@ TSS_peak_dir=${output_dir}/TSS_cells_peaks
 # bedtools subtract -a ${FRIP_peak_dir}/peaks_w_blacklistregion.bed  -b ${SCRIPT_DIR}/ref/hg38/hg38-blacklist.bed  > ${FRIP_peak_dir}/peaks.bed
 
 
-# # For TSS filtered cells' peaks
-# cp ${pres_dir}/_ArchR_TSS/TSS_pass_bc_CBZ.txt  ${TSS_peak_dir}/TSS_filtered_bc_CBZ.txt
+# For TSS filtered cells' peaks
+cp ${pres_dir}/_ArchR_TSS/TSS_pass_bc_CBZ.txt  ${TSS_peak_dir}/TSS_filtered_bc_CBZ.txt
 
-# bash ${pres_dir}/scripts/filter_bam_w_bc.sh -s ${bamfile} \
-# 	                -o ${TSS_peak_dir} \
-# 			-f ${TSS_peak_dir}/TSS_filtered_bc_CBZ.txt
-
-# bash /home/syyang/GitRepo/atac/call_peaks.sh -s ${TSS_peak_dir}/filtered.bam \
-# 	-o  ${TSS_peak_dir} 
-# bedtools subtract -a ${TSS_peak_dir}/peaks_w_blacklistregion.bed  -b ${SCRIPT_DIR}/ref/hg38/hg38-blacklist.bed  > ${TSS_peak_dir}/peaks.bed
-
-# for Entropy filtered cells' peaks 
-cp ${pres_dir}/Entropy_filtered_bc_CBZ.txt  ${Entropy_peak_dir}/Entropy_filtered_bc_CBZ.txt
 bash ${pres_dir}/scripts/filter_bam_w_bc.sh -s ${bamfile} \
-	                -o ${Entropy_peak_dir}  \
-			-f ${Entropy_peak_dir}/Entropy_filtered_bc_CBZ.txt
+	                -o ${TSS_peak_dir} \
+			-f ${TSS_peak_dir}/TSS_filtered_bc_CBZ.txt
 
-bash ${SCRIPT_DIR}/call_peaks.sh -s ${Entropy_peak_dir}/filtered.bam \
-	-o ${Entropy_peak_dir}
-bedtools subtract -a ${Entropy_peak_dir}/peaks_w_blacklistregion.bed  -b ${SCRIPT_DIR}/ref/hg38/hg38-blacklist.bed  > ${Entropy_peak_dir}/peaks.bed
+bash /home/syyang/GitRepo/atac/call_peaks.sh -s ${TSS_peak_dir}/filtered.bam \
+	-o  ${TSS_peak_dir} 
+bedtools subtract -a ${TSS_peak_dir}/peaks_w_blacklistregion.bed  -b ${SCRIPT_DIR}/ref/hg38/hg38-blacklist.bed  > ${TSS_peak_dir}/peaks.bed
+
+# # for Entropy filtered cells' peaks 
+# cp ${pres_dir}/Entropy_filtered_bc_CBZ.txt  ${Entropy_peak_dir}/Entropy_filtered_bc_CBZ.txt
+# bash ${pres_dir}/scripts/filter_bam_w_bc.sh -s ${bamfile} \
+# 	                -o ${Entropy_peak_dir}  \
+# 			-f ${Entropy_peak_dir}/Entropy_filtered_bc_CBZ.txt
+
+# bash ${SCRIPT_DIR}/call_peaks.sh -s ${Entropy_peak_dir}/filtered.bam \
+# 	-o ${Entropy_peak_dir}
+# bedtools subtract -a ${Entropy_peak_dir}/peaks_w_blacklistregion.bed  -b ${SCRIPT_DIR}/ref/hg38/hg38-blacklist.bed  > ${Entropy_peak_dir}/peaks.bed
 
 
 # --- Infer peaks with union cells 
-Common_peak_dir=${output_dir}/Union_cells_peaks
+Common_peak_dir=${output_dir}/Union_cells_peakss
 mkdir -p ${Common_peak_dir}
+awk -F '\t' -v OFS='\t' '{if ($8 != "none") print $0}'  ${output_dir}/Union_cell_3set_all_info.tsv >  ${output_dir}/Union_cell_3set.tsv
 awk -F '\t' -v OFS="" -v prefix=CB:Z: 'NR>1 {print prefix, $1, -1}' ${output_dir}/Union_cell_3set.tsv  > ${output_dir}/Union_cells_bc_CBZ.txt
 cp ${output_dir}/Union_cells_bc_CBZ.txt   ${Common_peak_dir}/Union_cells_bc_CBZ.txt
 
