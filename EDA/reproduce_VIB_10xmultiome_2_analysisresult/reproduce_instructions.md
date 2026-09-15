@@ -20,9 +20,12 @@
     - cd VIB_10xultiome_2_WS3000F/_cell_calling_comparison
     - bash get_peak_sets.sh
     ## running this to have the Raw peaks, SADE-peaks, CR-peaks, and TSSe-peaks, 
-    ##         as well as the 'Union_cell_3set_all_info.tsv' that only has the union-bc 
-    ## Make sure this runs all the way through 
----- !!!!!
+    ##         as well as the 'Union_cell_3set_all_info.tsv' that does not record bc deemed to be noisy by all the 3 methods
+
+    - run /home/syyang/GitRepo/SADE/EDA/F2_prepare_save_unionset_rna_h5_v.ipynb 
+    ## save rna modality info into h5:  _cell_calling_comparison/Union_3set_rna.h5ad
+
+    
     - bash filter_frag.sh
     ## run this to have the union_bc_fragments.bed that has subset fragments corresponding to the union bc retained by any of the 3 methods
     ## -- here not run yet --
@@ -31,4 +34,3 @@
 
     ## Able to run 
     ##  /home/syyang/GitRepo/SADE/EDA/F2_union_set_comparison.ipynb
-    
