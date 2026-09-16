@@ -5,8 +5,7 @@ res_dir="${output_dir}/_cell_calling_comparison"
 frag_file=$res_dir/union_bc_fragments.bed
 
 
-cmp_list2="$res_dir/Rawpeaks $res_dir/Entropy_cells_peaks $res_dir/FRIP_cells_peaks $res_dir/TSS_cells_peaks"
-# cmp_list2="$res_dir/Union_cells_peaks"
+cmp_list2="$res_dir/Rawpeaks $res_dir/Entropy_cells_peaks $res_dir/FRIP_cells_peaks $res_dir/TSS_cells_peaks $res_dir/Union_cells_peaks"
 # cmp_list2="$res_dir/Commoncells_peaks"
 for comparison_subdir in $cmp_list2
 do 

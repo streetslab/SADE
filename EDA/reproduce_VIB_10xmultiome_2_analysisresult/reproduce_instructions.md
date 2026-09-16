@@ -22,15 +22,41 @@
     ## running this to have the Raw peaks, SADE-peaks, CR-peaks, and TSSe-peaks, 
     ##         as well as the 'Union_cell_3set_all_info.tsv' that does not record bc deemed to be noisy by all the 3 methods
 
-    - run /home/syyang/GitRepo/SADE/EDA/F2_prepare_save_unionset_rna_h5_v.ipynb 
+    - run /home/syyang/GitRepo/SADE/EDA/F2_prepare_save_rna_in_atac_union_bc_v.ipynb
     ## save rna modality info into h5:  _cell_calling_comparison/Union_3set_rna.h5ad
 
-    
+    - run /home/syyang/GitRepo/SADE/EDA/F2_prepare_unionset_rna_clustering_v.ipynb
+    ## save rna gene expression cluster info: _cell_calling_comparison/Union_cell_3set_with_RNA_cluster.tsv
+    ##                                        _cell_calling_comparison/Union_3set_rna_with_RNA_cluster.h5ad
+
+    - run /home/syyang/GitRepo/SADE/EDA/F2_prepare_save_rna_RNACR_QC_info.ipynb
+    ## Add one more column to the 'rna_pass_cr' to 'Union_cell_3set_all_info.tsv' file 
+    ## resulting: _cell_calling_comparison/Union_cell_3set_w_RNAQC.tsv file
+
+    - cd VIB_10xultiome_2_WS3000F/_cell_calling_comparison
     - bash filter_frag.sh
-    ## run this to have the union_bc_fragments.bed that has subset fragments corresponding to the union bc retained by any of the 3 methods
-    ## -- here not run yet --
+    ## run this to have the 'union_bc_fragments.bed' that has subset fragments corresponding to the union bc retained by any of the 3 methods
+
+    - cd VIB_10xultiome_2_WS3000F/_cell_calling_comparison
+
     - bash overlap_frag_peaks.sh 
     ## run this to have subset fragments that overlapped with each peak set.
+    
 
     ## Able to run 
     ##  /home/syyang/GitRepo/SADE/EDA/F2_union_set_comparison.ipynb
+
+    - cd VIB_10xultiome_2_WS3000F/_cell_calling_comparison
+    - bash convert_frag_to_bam.sh
+    ## convert fragments .bed file into .bam so that we can do visualization like igv to see those fragments
+
+
+    ## Able to run 
+    ##  /home/syyang/GitRepo/SADE/EDA/F3_FRIP_union_3sets.ipynb
+
+
+    - cd VIB_10xultiome_2_WS3000F/_cell_calling_comparison
+    - bash  get_specific_bc_frag_bigwig_p2.sh
+    ## Get per barcode fragment 
+    ## Able to run 
+    ##  /home/syyang/GitRepo/SADE/EDA/F3_frag_dist_union_3sets_perbarcode.ipynb

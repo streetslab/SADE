@@ -12,7 +12,7 @@ mkdir -p $bw_dir
 
 cd $bw_dir
 
-awk -F '\t' 'NR>1 {print $13}' ${pres_dir}/_cell_calling_comparison/_Union_cell_3set_with_RNA_cluster_and_DNAdebrisflag.tsv  | while read -r bc1
+awk -F '\t' 'NR>1 {print $1}' ${pres_dir}/_cell_calling_comparison/Union_cell_3set.tsv  | while read -r bc1
 do
 	# header 
 	samtools view -H $frag_bam_file >  "${bc1}_fragments.sam"
@@ -25,7 +25,7 @@ samtools view   $frag_bam_file |  awk  -F '\t' '{
 	close(filename);
 }' - 
 
-awk -F '\t' 'NR>1 {print $13}' ${pres_dir}/_cell_calling_comparison/_Union_cell_3set_with_RNA_cluster_and_DNAdebrisflag.tsv  | while read -r bc1
+awk -F '\t' 'NR>1 {print $1}' ${pres_dir}/_cell_calling_comparison/Union_cell_3set.tsv  | while read -r bc1
 do
 	samtools view -bS "${bc1}_fragments.sam" > "${bc1}_fragments.bam"
 	samtools index "${bc1}_fragments.bam"
@@ -35,7 +35,7 @@ done
 
 
 
-#awk -F '\t' 'NR>1 {print $13}' ${pres_dir}/_cell_calling_comparison/_Union_cell_3set_with_RNA_cluster_and_DNAdebrisflag.tsv  | while read -r bc1
+#awk -F '\t' 'NR>1 {print $1}' ${pres_dir}/_cell_calling_comparison/Union_cell_3set.tsv  | while read -r bc1
 #do
 #	((count++))
 #	if [[ count -gt 98 ]]  #Remove
