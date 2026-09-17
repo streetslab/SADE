@@ -5,11 +5,14 @@
 
 
 ## System Requirements
-[ripgrep](https://github.com/BurntSushi/ripgrep)
+[ripgrep](https://github.com/BurntSushi/ripgrep)   
+[python3](https://www.python.org/downloads/)  
 
 
 ## Runtime
-SADE runs in a few minutes on standard macOS and Linux systems with 16 GB RAM, depending on dataset size and selected parameters.
+SADE runs in a few minutes on standard macOS and Linux systems with 16 GB RAM, depending on dataset size and selected parameters.    
+As reference: an experiment that targeted for 10k human cells took -- min to finish running SADE, an experiment that targeted for 2k human cells took -- min to finish running SADE.   
+If you didn't see progress messages popping up soon after starting running SADE, it is not properly set up. 
 
 ## Environment Setup
 
