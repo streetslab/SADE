@@ -10,9 +10,10 @@
 
 
 ## Runtime
-SADE runs in a few minutes on standard macOS and Linux systems with 16 GB RAM, depending on dataset size and selected parameters.    
-As reference: an experiment that targeted for 10k human cells took -- min to finish running SADE, an experiment that targeted for 2k human cells took -- min to finish running SADE.   
-If you didn't see progress messages popping up soon after starting running SADE, it is not properly set up. 
+SADE runs in a few minutes on standard macOS and Linux systems with 16 GB RAM, depending on dataset size and selected parameters.     
+As reference: with default genome window-size at 3000, an experiment that targeted for 10k human cells took 20-min to finish running SADE, an experiment that targeted for 2k human cells took 5-min to finish running SADE.    
+Specie's genome size is positively correlated with run-time, specified genome binning window-size is negatively correlated with run-time.     
+If you don't see progress messages popping up soon after starting running SADE, it is not properly set up. 
 
 ## Environment Setup
 
@@ -48,7 +49,8 @@ bash path_to_this_dir/sade.sh -o your_desired_output_directory \
           ```-f <fragments_file>``` (Required): Path to the fragments file.  
           ```-g <genome>```  (Required): Genome used for read mapping (e.g., hg38, mm10).  
           ```-c <chromosome>``` (Optional): Chromosome used to calculate entropy, space-separated list, or a single chromosome, e.g. 'chr1', 'chr1 chr2'. Default: chr1.  
-          ```-w <window_size>``` (Optional): Window size (in basepair) on genome to count Tn5 insertion frequencies. Default: 3000. (window size between 500-10000 is robust on genome sizes similar to human/mouse. We recommend roughly scale window size to genome size for other species.)    
+          ```-w <window_size>``` (Optional): Window size (in basepair) on genome to count Tn5 insertion frequencies. Default: 3000.    
+                **Note:** Window-size 3000 is recommended for human/mouse genomes, although sizes between 500-10000 were tested as robust for these two species. We recommend roughly scale window size to genome size for other species.    
           ```-k <candidate_inflection_points>```  (Optional): Number of candidate local inflection points being considered to find the global optimal inflection point on entropy value fitted cubic curve. Default: 2.  
           ```-s <genome_saturation_cutoff>``` (Optional): Upper bound of the genome portion that can possibly have experimental (i.e. Tn5 insertion) signals for any cells. Default: 0.5.  
 
