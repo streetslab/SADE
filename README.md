@@ -1,7 +1,7 @@
 # SADE
-**S**h**a**nnon-entropy **de**tection of quality nuclei in scATAC-seq.
+**S**hannon-entropy for sc**A**TAC-seq **De**noising.
 
-**SADE** quantifies the complexity of genome-wide chromatin accessibility for each droplet(-barcode) with entropy, and auto-threshold entropy values to identify droplets with quality nuclei, while filtering out empty droplets, droplets with damaged nuclei, as well as droplets with cellular-debris.  
+**SADE** quantifies the complexity of genome-wide chromatin accessibility for each droplet(-barcode) with Shannon entropy, and auto-threshold entropy values to identify droplets with quality nuclei, while filtering out empty droplets, droplets with damaged nuclei, as well as droplets with cellular-debris.  
 
 
 ## System Requirements
