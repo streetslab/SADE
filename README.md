@@ -48,7 +48,8 @@ bash path_to_this_dir/sade.sh -o your_desired_output_directory \
           ```-o <output_dir>``` (Required): Path to the output directory.  
           ```-f <fragments_file>``` (Required): Path to the fragments file.  
           ```-g <genome>```  (Required): Genome used for read mapping (e.g., hg38, mm10).  
-          ```-c <chromosome>``` (Optional): Chromosome used to calculate entropy, space-separated list, or a single chromosome, e.g. 'chr1', 'chr1 chr2'. Default: chr1.  
+          ```-c <chromosome>``` (Optional): Chromosome used to calculate entropy, space-separated list, or a single chromosome, e.g. 'chr1' (using only chr1), 'ch1 ch2' (using chr1 and chr2), 'chr1 chr2 chr3' (using chr1, chr2 and chr3). Default: chr1.     
+                **Note:** If multiple chromosomes are specified, they are treated as a single longer chromosome as if they were concatenated together. We recommend using longest chromosome, hence chr1.     
           ```-w <window_size>``` (Optional): Window size (in basepair) on genome to count Tn5 insertion frequencies. Default: 3000.    
                 **Note:** Window-size 3000 is recommended for human/mouse genomes, although sizes between 500-10000 were tested as robust for these two species. We recommend roughly scale window size to genome size for other species.    
           ```-k <candidate_inflection_points>```  (Optional): Number of candidate local inflection points being considered to find the global optimal inflection point on entropy value fitted cubic curve. Default: 2.  
