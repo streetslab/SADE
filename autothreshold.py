@@ -1,3 +1,130 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:38566843d72ec16814100e2a65e89aa6b016027c4761fbef44d1580067b715db
-size 5339
+import matplotlib.pyplot as plt
+import numpy as np
+import pickle
+
+
+from scipy.interpolate import BSpline, make_splrep
+
+
+def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline_k: int=3, limit: int=20000) -> tuple[float, int, BSpline]:
+    """
+    Takes the ranks (x) and the corresponding log 10 entropy values (y) and returns estimated entropy cutoff, the rank cutoff, and the scipy BSpline object used to fit the curve.
+    The function fits a smoothing spline to the curve, then computes the first and second derivatives on the spline. 
+        Then iterating on increasing x values, finds regions where its 2nd derivative of left bound of the region is negative, and the right bound is positive. 
+        Then takes the kth such region by ranks, and computes the greatest dropoff in the regions (min 1st derivative). returns this point as cutoff 
+
+
+    y: np.ndarray, the log_10 entropy values.
+    k: int, the first k inflection points as entropy cutoff candidates.
+    spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. Not very sensitive and need not to be sensitive so not tuned much but has to be >= 3. 
+    spline_k: int, degree of the spline fit, see scipy.make_splrep.
+
+    returns: tuple[int,float,Bspline]
+            [rank cutoff, entropy cutoff, spline fit result].
+    """
+    # only consider up to limit barcodes for spline fitting (as even the highest throughput datasets have < 20k cells)
+    limit = min(limit, len(y))
+    y = y[:limit]
+    x = np.arange(len(y))
+    
+    cs = make_splrep(x, y, k=spline_k, s=spline_s)
+    
+    first_deriv = cs.derivative(1)(x)
+    second_deriv = cs.derivative(2)(x)
+    second_deriv = second_deriv / np.abs(second_deriv).max()  # normalize second derivative to better find inflection regions
+    
+    left = 0
+    right = 0
+    flag = False
+    count = 0 
+
+    inflection_regions = {}
+    
+    for i in x: 
+        
+        d_2 = second_deriv[i]
+        if (not flag) and d_2 < 0:
+            flag = True
+            left = i
+        elif flag and d_2 > 0:
+            flag = False
+            right = i
+            
+            # store inflection region boundaries where the second derivative changes from negative to positive
+            # right is where the second derivative changes from negative to positive, and left is the first point where the second derivative is negative.
+            inflection_regions[count] = (left, right) # store inflection region boundaries
+            count += 1
+        
+        if count == k: 
+            break
+
+    # find the global minimum first derivative among the k inflection regions found
+    print(f"Found {len(inflection_regions)} inflection regions on ranked entropy curve.\n \
+        Look for the global minimum first derivative among these regions to determine entropy cutoff.")  
+    regions_rank = []
+    for region_index, (region) in inflection_regions.items():
+        left, right = region
+        if left > right:
+            right = x[-1]
+        rank = np.argmin(first_deriv[left:right+1]) + left
+        regions_rank.append(rank)
+
+    rank = regions_rank[np.argmin(first_deriv[regions_rank])]
+    
+    
+    if rank == len(y) -1:
+        # Warning: the rank cutoff is at the end of the considered range
+        print(f"Warning: all barcodes considered have entropy above the cutoff -- this is not normal. \n \
+            And take a look at the distribution of barcode entropies -- there should be multi-modality indicating different quality barcodes.\n \
+            Suggest to check quality of the experiment. \n")
+    
+    return rank, y[rank], cs, inflection_regions, regions_rank
+    # return rank, y[rank], cs
+
+def get_sorted_entropy_helper(pickle_path: str):
+    with open(pickle_path, 'rb') as f:
+        entropies = pickle.load(f)
+
+    sorted_entropies = dict(sorted(entropies.items(), key=lambda item: item[1], reverse=True))
+    barcodes = sorted_entropies.keys()
+    values = sorted_entropies.values()
+    # rank = range(len(barcodes))
+    # return np.array(list(rank)), np.array(np.log10(list(values)))
+    return np.array(np.log10(list(values)))  # only return sorted entropy values
+
+
+
+def make_plots(pickle_path, save_path):
+    y= get_sorted_entropy_helper(pickle_path)
+    x = np.arange(len(y))
+    rank_cutoff, entr_cutoff, cs = fit_spline_and_find_cutoff(y)
+
+    spl_y = cs(x)
+    deriv = {}
+    for i in range(1, 3):
+        deriv[i] = cs.derivative(i)(x)
+
+    deriv[2] = deriv[2] / np.abs(deriv[2]).max()  # normalize second derivative for better visualization    
+    
+    fig, ax = plt.subplots(3, 1, figsize=(10,10), dpi=300)
+    ax[0].plot(x, y, 'o', label='data')
+    ax[0].plot(x, spl_y, label='spline')
+    ax[1].plot(x, deriv[1], label='first derivative')
+    ax[2].plot(x, deriv[2], label='second derivative')
+
+    d1_limit = np.abs(deriv[1]).max()
+    ax[1].set_ylim(-d1_limit*1.1, d1_limit*1.1)
+
+    for i in range(3):
+        ax[i].axvline(rank_cutoff, color='pink', linestyle='--', label='rank_cutoff')
+        if i == 0:
+            ax[i].axhline(entr_cutoff, color='pink', linestyle='--', label='entr_cutoff')
+
+    ax[0].set_xlabel('rank')
+    ax[0].set_ylabel('log 10 entropy')
+    ax[0].set_title('fit spline')
+    ax[1].set_title('first derivative')
+    ax[2].set_title('second derivative')
+
+    plt.tight_layout()
+    fig.savefig(save_path)

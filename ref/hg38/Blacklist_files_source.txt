@@ -1,3 +1,4 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:ee3c543eb4445cc29259b0ce98dd1f7f870d2fee2751f6cf6b1b4105ebe403f2
-size 169
+# blacklist bed files were downloaded from 
+https://github.com/Boyle-Lab/Blacklist.git
+
+hg38-blacklist.bed:  from file in the git repo:   lists/hg38-blacklist.v2.bed.gz
