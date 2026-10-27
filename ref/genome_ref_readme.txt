@@ -1,3 +1,3 @@
-# mm10 genome size is from here:
-## genome.fasta was downloaded from here and processed with seqtk to get chromosome size
-https://personal.broadinstitute.org/bjames/ref/refdata-cellranger-arc-mm10-2020-A-2.0.0/
+version https://git-lfs.github.com/spec/v1
+oid sha256:55db396ba09f86319134da8947be191f25907e40b0c6307876a89683cfcecea7
+size 211
