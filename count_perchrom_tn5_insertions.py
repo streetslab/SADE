@@ -103,6 +103,7 @@ if __name__ == "__main__":
     parser.add_argument("--genome_chromsize_file", type=str, required=True, help="TSV file of human/species genome chromosome size.")
     parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome to analyze, default is chr1.")
     parser.add_argument("--windowsize", type=int, default=WindowSize, help="Window size for fragmentation.")
+    parser.add_argument("--shortcut_mode", type=str, required=False,  default="no", help="Go straight to Tn5 insertion counting and skip fragment splitting, default is no. no or yes")
 
     args = parser.parse_args()
     
@@ -111,6 +112,14 @@ if __name__ == "__main__":
     windowsize = args.windowsize
     chromosomes = args.chromosome
     
+    shortcut_mode = args.shortcut_mode.lower() == "yes"
+    if not shortcut_mode:
+        save_subdir = output_dir
+    else:
+        save_subdir = os.path.join(output_dir, 'per_chromosome_entropy')
+        if not os.path.exists(save_subdir):
+            os.makedirs(save_subdir, exist_ok=True)
+        
     chromosomes = chromosomes.split(' ') # turning into a list
     
     chromosome_fragment_dir = os.path.join(output_dir, 'chromosome_fragments')
@@ -131,7 +140,7 @@ if __name__ == "__main__":
                 using fragments from \n \
                     {frag_file} \n \
                 and saving results to \n \
-                    {output_dir} .......... \n")
+                    {save_subdir} .......... \n")
         
 
         # load human genome chromosome size
@@ -142,7 +151,7 @@ if __name__ == "__main__":
                 chromsize_dict[chrom] = int(size)
 
         print(f'chromosome size for {chromosome}: {chromsize_dict[chromosome]} \n ')
-        insert_frequency_file = os.path.join(output_dir, f'{chromosome}_insert_frequency.pickle')
+        insert_frequency_file = os.path.join(save_subdir, f'{chromosome}_insert_frequency.pickle')
         
 
         # Step 2. Count Tn5 insertion frequency for each cell barcode in the given chromosome
