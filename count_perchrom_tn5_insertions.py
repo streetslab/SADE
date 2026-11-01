@@ -147,8 +147,14 @@ if __name__ == "__main__":
         chromsize_dict = {}
         with open(genome_chromsize_file, "r") as f:
             for line in f:
-                chrom, _, size = line.strip().split("\t")
-                chromsize_dict[chrom] = int(size)
+                if line.startswith("#"):
+                    continue
+                try:
+                    chrom, _, size = line.strip().split("\t") # when genome size has 3 columns
+                    chromsize_dict[chrom] = int(size)
+                except:
+                    chrom, size = line.strip().split("\t") # when genome size has 2 columns
+                    chromsize_dict[chrom] = int(size)
 
         print(f'chromosome size for {chromosome}: {chromsize_dict[chromosome]} \n ')
         insert_frequency_file = os.path.join(save_subdir, f'{chromosome}_insert_frequency.pickle')
