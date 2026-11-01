@@ -11,9 +11,9 @@ seqkit fx2tab --length --name --header-line ${mouse_genome_fa} > mouse_genome_ch
 awk -F ' '  -v OFS='\t' '{print $1, $2, $3}' mouse_genome_chromsize.tsv > _ 
 mv _ mouse_genome_chromsize.tsv
 
-
 #e.g.
 mouse_genome_fa='/home/syyang/CR/refdata-cellranger-arc-mm10-2020-A-2.0.0/fasta/genome.fa'
-seqkit fx2tab --length --name --header-line ${mouse_genome_fa} > mm10_genome_chromsize.tsv
-awk -F ' '  -v OFS='\t' '{print $1, $2, $3}' mm10_genome_chromsize.tsv > _
-mv _ mm10_genome_chromsize.tsv
+seqkit fx2tab --length --name --header-line ${mouse_genome_fa} | awk -F ' '  -v OFS='\t' '{print $1, $2, $3}' - >  mm10_genome_chromsize.tsv 
+
+hg19_genome_fa='/home/syyang/CR/hg19/hg19.fa'
+seqkit fx2tab --length --name --header-line ${hg19_genome_fa=} | awk -F ' '  -v OFS='\t' '{print $1, $2, $3}' - >  hg19_genome_chromsize.tsv
