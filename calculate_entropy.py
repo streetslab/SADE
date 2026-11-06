@@ -106,17 +106,18 @@ shortcut_mode = args.shortcut_mode.lower() == "yes"
 if not shortcut_mode:
     save_subdir = output_dir
     barcode_entropy_df_file = os.path.join(save_subdir, f'calculated_barcode_entropy_df.tsv')
+    barcode_entropy_file = os.path.join(save_subdir, f'calculated_barcode_entropy.pickle')
 else:
     save_subdir = os.path.join(output_dir, 'per_chromosome_entropy')
     if not os.path.exists(save_subdir):
-        os.makedirs(save_subdir, exist_ok=True)
+        os.makedirs(save_subdir)
 
     # Always specific chromosome is specified in shortcut mode
     if chromosomes_spec.lower() == "autosomes" or len(chromosomes_spec.split(' '))  > 1:
         sys.exit("Shortcut mode with 'autosomes' or multiple chromosomes is not supported in per-chromosome calculation.")
     else:
         barcode_entropy_df_file = os.path.join(save_subdir, f'{chromosomes_spec.split(" ")[0]}_calculated_barcode_entropy_df.tsv')
-
+        barcode_entropy_file = os.path.join(save_subdir, f'{chromosomes_spec.split(" ")[0]}_barcode_entropy.pickle')
 
 
 #%%
@@ -227,8 +228,9 @@ if __name__ == "__main__":
                 barcode_entropy[bc] = Entropy_mixturedist
                 f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_closed_state}\n")
 
-
     # save entropy results
-    barcode_entropy_file = os.path.join(save_subdir, f'calculated_barcode_entropy.pickle')
     with open(barcode_entropy_file, 'wb') as file:
-        pickle.dump(barcode_entropy, file, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(barcode_entropy, file, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+        
