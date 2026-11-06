@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 _WindowSize=3000 # Default window size for fragmentation, if not specified by user
 THIS_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
 

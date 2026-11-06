@@ -23,6 +23,16 @@ import argparse
 
 from utils import return_none, get_chromsize_dict
 
+def available_cpus():
+    """CPUs this process may actually use (respects taskset/cgroup affinity where supported)."""
+    if hasattr(os, "process_cpu_count"):          # Python >= 3.13
+        n = os.process_cpu_count()
+    elif hasattr(os, "sched_getaffinity"):        # Linux
+        n = len(os.sched_getaffinity(0))
+    else:                                         # macOS / Windows
+        n = os.cpu_count()
+    return n or 1                                 # cpu_count() may return None
+
 
 
 #%%
@@ -96,10 +106,12 @@ chromosomes_spec = args.chromosome # can be space-separated list, or a single ch
 genome_chromsize_file = args.genomesize_file
 chromsize_dict = get_chromsize_dict(genome_chromsize_file)
 
+
 try:
-    nprocess = int(args.nprocess) if args.nprocess is not None else 4
+    requested = int(args.nprocess) if args.nprocess is not None else 1
 except ValueError:
-    nprocess = min(4, os.cpu_count())
+    requested = 1
+nprocess = min(requested,  available_cpus())       # always within [1, available CPUs]
     
     
 shortcut_mode = args.shortcut_mode.lower() == "yes"
