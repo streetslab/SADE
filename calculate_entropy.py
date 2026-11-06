@@ -1,7 +1,8 @@
 #%% 
 
 import os
-import re 
+import re
+import sys 
 import numpy as np
 
 import scipy
@@ -20,7 +21,7 @@ import argparse
 
 #%%
 
-from utils import return_none, get_chromsize_dict
+from utils import return_none, get_chromsize_dict, default_chrome_bin_sparse
 
 
 
@@ -84,6 +85,7 @@ parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome t
 parser.add_argument("--genomesize_file", type=str, required=True, help="Genome size reference file.")
 parser.add_argument("--shortcut_mode", type=str, required=False,  default="no", help="Go straight to Tn5 insertion counting and skip fragment splitting, default is no. no or yes")
 parser.add_argument("--nprocess", type=str, required=False, help="Number of cpu cores to use.")
+parser.add_argument("--windowsize", type=int, required=True,  help="Window size for fragmentation.")
 
 
 args = parser.parse_args()
@@ -93,10 +95,14 @@ chromosomes_spec = args.chromosome # can be space-separated list, or a single ch
                               # when multiple chormosomes are provided, the 1st chromosome will be used as the lead chromosome to load Tn5 insertion record, and the rest of the chromosomes will be used to update the Tn5 insertion record for each cell barcode.
 # chromosomes = chromosomes_spec.split(' ') # turning into a list 
 genome_chromsize_file = args.genomesize_file
-chromosome_size_dict = get_chromsize_dict(genome_chromsize_file)
+chromsize_dict = get_chromsize_dict(genome_chromsize_file)
+try:
+    window_size = int(args.windowsize)
+    if window_size <= 1:
+        sys.exit("Window size must be integer greater than 1.")
+except ValueError:
+    sys.exit("Invalid window size provided.")
 
-
-nprocess = 4
 try:
     nprocess = int(args.nprocess) if args.nprocess is not None else 4
 except ValueError:
@@ -128,7 +134,7 @@ else:
     if chromosomes_spec.lower() == "autosomes":
         # all autosomes used 
         chromosomes = []
-        for chrom in chromosome_size_dict.keys():
+        for chrom in chromsize_dict.keys():
             if re.match(r"^chr[0-9]+$", chrom) is not None:
                 chromosomes.append(chrom)
                 
@@ -151,10 +157,10 @@ else:
     
     for bc in keys:
         chromosome_insert_arrays = [
-            insert_record_dict[chrom].pop(bc) for chrom in chromosomes if insert_record_dict[chrom][bc] is not None
-        ]
-        if len(chromosome_insert_arrays) == Nchromosomes:
-            insert_record[bc] = hstack(chromosome_insert_arrays) 
+            insert_record_dict[chrom].pop(bc) if insert_record_dict[chrom][bc] is not None else default_chrome_bin_sparse(chromsize_dict[chrom], window_size) for chrom in chromosomes
+        ] # fill in empty insertions when a barcode has no fragments in a particular chromosome
+        
+        insert_record[bc] = hstack(chromosome_insert_arrays) 
 
 
 

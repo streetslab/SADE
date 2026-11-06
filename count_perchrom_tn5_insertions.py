@@ -15,25 +15,11 @@ WindowSize = 3000  # size of the window in bp, default is 250 bp
 ## Global Variables <<
 
 # Use the current directory for imports
-from utils import return_none, get_chromsize_dict
+from utils import return_none, get_chromsize_dict, assign_window, default_chrome_bin_sparse
 
 
 # %%
 
-
-def assign_window(insertion_pos, chromsize, window_size):
-    """
-    Assign tn5_insertion position to a window
-    Args:
-        insertion_pos (int): tn5_insertion position
-        chromsize (int): chromosome size
-        window_size (int): window size
-    Returns: index of the window that needs to be incremented with 1 
-    """
-    if insertion_pos < 0 or insertion_pos >= chromsize:
-        raise ValueError(f"Invalid insertion position: {insertion_pos} for chromosome size: {chromsize}")
-    
-    return insertion_pos // window_size 
 
 # %%
 def insert_frequency(chromosome:str, 
@@ -54,7 +40,6 @@ def insert_frequency(chromosome:str,
     
     record = defaultdict(return_none)
     
-    
     with open(fragments_file, "r") as f:
         #print(f"counting tn5 insertion frequency for {chromosome} in {os.path.basename(fragments_file)} ..........")
         for l in tqdm(f, desc="Counting Tn5 insertion frequency"):
@@ -62,13 +47,11 @@ def insert_frequency(chromosome:str,
                 continue
             chrom, left_insert, right_insert, cb, _ = l.strip().split("\t")  # cb -- cell barcode
             
-
-            left_insert = int(left_insert)
-            right_insert = int(right_insert)
+            left_insert = int(left_insert)  # start-position is inclusive
+            right_insert = int(right_insert) - 1  # end-position is exclusive
 
             if record[cb] is None:
-                total_seq = int(chromsize_dict[chrom] // window_size + 1)
-                record[cb] = lil_matrix((1, total_seq), dtype=np.int32) # initialize the dictionary with zeros
+                record[cb] = default_chrome_bin_sparse(chromsize_dict[chrom], window_size) # initialize the dictionary with zeros
 
             ind1 = assign_window(left_insert, chromsize_dict[chrom], window_size)
             ind2 = assign_window(right_insert, chromsize_dict[chrom], window_size)
