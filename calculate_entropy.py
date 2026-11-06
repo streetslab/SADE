@@ -27,21 +27,6 @@ from utils import return_none
 ############################################# 
 ## Calculate entropy for each cell barcode >>
 #############################################
-# @not-in-use 
-def kl_divergence(mle_lambda, cur, freq):
-    """ Compute KL divergence D_KL(P||Q) for discrete distributions
-        p and q are arrays of the same length representing probability distributions
-    """
-    # q is from Poisson distribution with parameter mle_lambda
-    
-    p = freq / np.sum(freq)
-    log_q = np.array([poisson.logpmf(k, mle_lambda) for k in cur]) 
-    
-    divergence = np.sum( p * (np.log(p) - log_q) )
-    
-    return divergence
-
-
 # Calculate Entropy using MLE estimate 
 def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
 
@@ -79,8 +64,8 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
     Entropy_openregion = -np.matmul(Poisson_prob, np.log2(Poisson_prob)) - P0 * np.log2(P0) 
 
     #Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion
-    Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion / Mnon0 * (1 - P0) # Adjust for sample size effect (indirectly read-depth)
-
+    # Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion / (Mnon0 * mean_adj) **2  # Adjust for sample size effect
+    Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion / (Mnon0 * (1 - P0))# Adjust for sample size effect (indirectly read-depth)
 
     return Entropy_mixturedist, Entropy_openregion, Mnon0, mle_lambda, P0, p_closestate
 
@@ -95,16 +80,26 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
 parser = argparse.ArgumentParser(description="Calculate entropy for cell barcodes based on fragment file.\n  Entropy calculation is for one chromosome at a time.")
 parser.add_argument("--output_dir", type=str, required=True, help="Directory to save entropy calculation results.")
 parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome to analyze, default is chr1.")
+parser.add_argument("--shortcut_mode", type=str, required=False,  default="no", help="Go straight to Tn5 insertion counting and skip fragment splitting, default is no. no or yes")
+
 
 args = parser.parse_args()
 
 output_dir = args.output_dir
 chromosomes = args.chromosome # can be space-separated list, or a single chromosome. 
                               # when multiple chormosomes are provided, the 1st chromosome will be used as the lead chromosome to load Tn5 insertion record, and the rest of the chromosomes will be used to update the Tn5 insertion record for each cell barcode.
+
+shortcut_mode = args.shortcut_mode.lower() == "yes"
+if not shortcut_mode:
+    save_subdir = output_dir
+else:
+    save_subdir = os.path.join(output_dir, 'per_chromosome_entropy')
+    if not os.path.exists(save_subdir):
+        os.makedirs(save_subdir, exist_ok=True)
+
 chromosomes = chromosomes.split(' ') # turning into a list 
 Nused_chromosomes = len(chromosomes)
 #%%
-
 # Step 1. Load Tn5 insertion frequency record for each cell barcode 
 if Nused_chromosomes > 1:
     # When multiple chromosomes are used, 
@@ -115,7 +110,7 @@ if Nused_chromosomes > 1:
     insert_record_dict = {}
     
     for chrom in chromosomes:
-        tn5_insert_record_file = os.path.join(output_dir, f'{chrom}_insert_frequency.pickle')
+        tn5_insert_record_file = os.path.join(save_subdir, f'{chrom}_insert_frequency.pickle')
         with open(tn5_insert_record_file, 'rb') as file:
             insert_record_dict[chrom] = pickle.load(file)
     
@@ -136,7 +131,7 @@ else:
     # just load the Tn5 insertion record for that chromosome.
     chrom = chromosomes[0]
     
-    tn5_insert_record_file = os.path.join(output_dir, f'{chrom}_insert_frequency.pickle')
+    tn5_insert_record_file = os.path.join(save_subdir, f'{chrom}_insert_frequency.pickle')
     with open(tn5_insert_record_file, 'rb') as file:
         insert_record = pickle.load(file)
 
@@ -145,9 +140,11 @@ else:
 # %%
 # Step 2. Calculate entropy for each cell barcode for the given chromosome 
 barcode_entropy = {}
-
-barcode_entropy_df_file = os.path.join(output_dir, f'calculated_barcode_entropy_df.tsv')
-
+if not shortcut_mode:
+    barcode_entropy_df_file = os.path.join(save_subdir, f'calculated_barcode_entropy_df.tsv')
+else:
+    # This mode only one chromosome is used, and the output file name will include the chromosome name.
+    barcode_entropy_df_file = os.path.join(save_subdir, f'{chromosomes[0]}_calculated_barcode_entropy_df.tsv') 
 
 # Wrapper function for multiprocessing
 def mp_wrapper(bc):
