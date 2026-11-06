@@ -1,6 +1,7 @@
 #%% 
 
-import os 
+import os
+import re 
 import numpy as np
 import pandas as pd
 from scipy.sparse import lil_matrix
@@ -109,8 +110,10 @@ if __name__ == "__main__":
     
     output_dir = args.output_dir
     genome_chromsize_file = args.genome_chromsize_file
+    chromsize_dict = get_chromsize_dict(genome_chromsize_file)
+    
     windowsize = args.windowsize
-    chromosomes = args.chromosome
+    chromosomes_spec = args.chromosome
     
     shortcut_mode = args.shortcut_mode.lower() == "yes"
     if not shortcut_mode:
@@ -119,18 +122,22 @@ if __name__ == "__main__":
         save_subdir = os.path.join(output_dir, 'per_chromosome_entropy')
         if not os.path.exists(save_subdir):
             os.makedirs(save_subdir, exist_ok=True)
-        
-    chromosomes = chromosomes.split(' ') # turning into a list
-    
     chromosome_fragment_dir = os.path.join(output_dir, 'chromosome_fragments')
     
+    
     # Do a file sanity check before counting even starts        
+    if chromosomes_spec.lower() == "autosomes":
+        chromosomes = []
+        for chrom in chromsize_dict.keys():
+            if re.match(r"^chr[0-9]+$", chrom) is not None:
+                chromosomes.append(chrom)
+    else:
+        chromosomes = chromosomes_spec.split(' ')
+        
     for chromosome in chromosomes:
         frag_file = os.path.join(chromosome_fragment_dir, f'{chromosome}_fragments.tsv')
-        
         if not os.path.exists(frag_file):
             raise FileNotFoundError(f"Fragment file not found: {frag_file}")
-    
     
     for chromosome in chromosomes:
         frag_file = os.path.join(chromosome_fragment_dir, f'{chromosome}_fragments.tsv')
@@ -142,14 +149,9 @@ if __name__ == "__main__":
                 and saving results to \n \
                     {save_subdir} .......... \n")
         
-
-        # load genome chromosome size
-        chromsize_dict = get_chromsize_dict(genome_chromsize_file)
-
         print(f'chromosome size for {chromosome}: {chromsize_dict[chromosome]} \n ')
         insert_frequency_file = os.path.join(save_subdir, f'{chromosome}_insert_frequency.pickle')
         
-
         # Step 2. Count Tn5 insertion frequency for each cell barcode in the given chromosome
         insert_frequency(chromosome=chromosome,
                         fragments_file=frag_file,

@@ -1,6 +1,7 @@
 #%% 
 
-import os 
+import os
+import re 
 import numpy as np
 
 import scipy
@@ -124,18 +125,17 @@ if len(chromosomes_spec.split(' ')) == 1 and chromosomes_spec != "autosomes" :
 else:
     # When multiple chromosomes are used, 
     # combine the records for all the chromosomes by concatenating the Tn5 insertion frequency arrays for each cell barcode.
-    if chromosomes_spec == "autosomes":
+    if chromosomes_spec.lower() == "autosomes":
         # all autosomes used 
         chromosomes = []
         for chrom in chromosome_size_dict.keys():
-            if chrom.startswith("chr") and chrom != "chrX" and chrom != "chrY":
+            if re.match(r"^chr[0-9]+$", chrom) is not None:
                 chromosomes.append(chrom)
-        lead_chrom = 'chr1'
                 
     else:
         chromosomes = chromosomes_spec.split(' ')
-        lead_chrom = chromosomes[0]
-
+    
+    lead_chrom = chromosomes[0]
     Nchromosomes = len(chromosomes)
     
     # Load Tn5 insertion record for each chromosomes     
@@ -155,8 +155,6 @@ else:
         ]
         if len(chromosome_insert_arrays) == Nchromosomes:
             insert_record[bc] = hstack(chromosome_insert_arrays) 
-
-
 
 
 

@@ -58,6 +58,6 @@ source ${PYTHON_ENV}
 barcode_entropy_df_file="${output_dir}/calculated_barcode_entropy_df.tsv"
 if [[ ! -f ${barcode_entropy_df_file} ]]; then
     # Calculate entropy for the specified chromosome
-    python "${SCRIPT_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}"
+    python "${SCRIPT_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}" --genomesize_file="${SCRIPT_DIR}/ref/${species_genome_size_file}"
 fi
 
