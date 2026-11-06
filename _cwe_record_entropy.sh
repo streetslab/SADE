@@ -2,6 +2,7 @@
 
 set -euo pipefail
 
+_DefaultNprocess=1 # Default number of processes for entropy calculation, if not specified by user
 _WindowSize=3000 # Default window size for fragmentation, if not specified by user
 THIS_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
 
@@ -12,7 +13,12 @@ source ${PYTHON_ENV}
 
 Usage="Usage: $0 -o output_dir -g species [-w window_size (default: ${_WindowSize})]"
 
-while getopts "o:w:g:" opt; do
+output_dir=""
+window_size=""
+nprocess=""
+species=""
+
+while getopts "o:w:g:p:" opt; do
   case ${opt} in
     o)
       output_dir=$OPTARG
@@ -24,6 +30,9 @@ while getopts "o:w:g:" opt; do
     g)
       species="$OPTARG"
       ;;
+    p)
+      nprocess="$OPTARG"
+      ;;
     *)
       echo "${Usage}"  && exit 1
       ;;
@@ -34,16 +43,27 @@ if [[ -z ${window_size} ]]; then
     window_size=${_WindowSize}
 fi
 
+if [[ -z ${nprocess} ]]; then
+    nprocess=${_DefaultNprocess}
+fi
+
 if [[ -z ${species} ]]; then
     echo "Species must be specified with -g option." >&2
-    echo "${Usage}" >&2
-    exit 1
+    echo "${Usage}" >&2 &&    exit 1
 else
     species_genome_size_file="${THIS_DIR}/ref/${species}_genome_chromsize.tsv"
     if [[ ! -f ${species_genome_size_file} ]]; then
-        echo "Genome size file for species ${species} not found: ${species_genome_size_file}" >&2
-        exit 1
+        echo "Genome size file for species ${species} not found: ${species_genome_size_file}" >&2 && exit 1
     fi
+fi
+
+if [[ -z ${output_dir} ]]; then
+    echo "Output directory must be specified with -o option." >&2
+    echo "${Usage}" >&2 && exit 1
+fi
+
+if [[ ! -d ${output_dir}/chromosome_fragments ]]; then
+    echo "No chromosome_fragments/ in ${output_dir}. Run sade.sh on this output directory first." >&2 && exit 1
 fi
 
 
@@ -70,6 +90,6 @@ for chromosome in "${chromosome_list[@]}"; do
           --shortcut_mode "yes"
 
       # Calculate entropy for the specified chromosome
-      python "${THIS_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}"  --genomesize_file="${species_genome_size_file}" --shortcut_mode "yes"
+      python "${THIS_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}"  --genomesize_file="${species_genome_size_file}" --shortcut_mode "yes" --nprocess="${nprocess}"
     fi
 done
