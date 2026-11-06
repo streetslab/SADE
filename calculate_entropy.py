@@ -96,12 +96,12 @@ chromosomes_spec = args.chromosome # can be space-separated list, or a single ch
 genome_chromsize_file = args.genomesize_file
 chromsize_dict = get_chromsize_dict(genome_chromsize_file)
 
-
 try:
     nprocess = int(args.nprocess) if args.nprocess is not None else 4
 except ValueError:
-    nprocess = 4 # default number of CPU cores to use if the provided value is invalid
-
+    nprocess = min(4, os.cpu_count())
+    
+    
 shortcut_mode = args.shortcut_mode.lower() == "yes"
 if not shortcut_mode:
     save_subdir = output_dir
@@ -110,7 +110,7 @@ if not shortcut_mode:
 else:
     save_subdir = os.path.join(output_dir, 'per_chromosome_entropy')
     if not os.path.exists(save_subdir):
-        os.makedirs(save_subdir)
+        os.makedirs(save_subdir, exist_ok=True)
 
     # Always specific chromosome is specified in shortcut mode
     if chromosomes_spec.lower() == "autosomes" or len(chromosomes_spec.split(' '))  > 1:
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     #%%
     ## Multiprocessing implementation
-    if os.cpu_count() and os.cpu_count() >= nprocess:
+    if nprocess > 1:
         num_cpus = nprocess
 
 
