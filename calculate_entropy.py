@@ -81,6 +81,7 @@ parser = argparse.ArgumentParser(description="Calculate entropy for cell barcode
 parser.add_argument("--output_dir", type=str, required=True, help="Directory to save entropy calculation results.")
 parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome to analyze, default is chr1.")
 parser.add_argument("--shortcut_mode", type=str, required=False,  default="no", help="Go straight to Tn5 insertion counting and skip fragment splitting, default is no. no or yes")
+parser.add_argument("--nprocess", type=str, required=False, help="Number of cpu cores to use.")
 
 
 args = parser.parse_args()
@@ -88,6 +89,11 @@ args = parser.parse_args()
 output_dir = args.output_dir
 chromosomes = args.chromosome # can be space-separated list, or a single chromosome. 
                               # when multiple chormosomes are provided, the 1st chromosome will be used as the lead chromosome to load Tn5 insertion record, and the rest of the chromosomes will be used to update the Tn5 insertion record for each cell barcode.
+nprocess = 4
+try:
+    nprocess = int(args.nprocess) if args.nprocess is not None else 4
+except ValueError:
+    nprocess = 4 # default number of CPU cores to use if the provided value is invalid
 
 shortcut_mode = args.shortcut_mode.lower() == "yes"
 if not shortcut_mode:
@@ -170,8 +176,8 @@ if __name__ == "__main__":
 
     #%%
     ## Multiprocessing implementation
-    if os.cpu_count() and os.cpu_count() >4:
-        num_cpus = 4
+    if os.cpu_count() and os.cpu_count() > nprocess:
+        num_cpus = nprocess
 
 
         from multiprocessing import Pool       # start num_cpus worker processes
@@ -202,6 +208,6 @@ if __name__ == "__main__":
 
 
     # save entropy results
-    barcode_entropy_file = os.path.join(output_dir, f'calculated_barcode_entropy.pickle')
+    barcode_entropy_file = os.path.join(save_subdir, f'calculated_barcode_entropy.pickle')
     with open(barcode_entropy_file, 'wb') as file:
         pickle.dump(barcode_entropy, file, protocol=pickle.HIGHEST_PROTOCOL)
