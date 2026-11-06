@@ -3,8 +3,6 @@
 _WindowSize=3000 # Default window size for fragmentation, if not specified by user
 THIS_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
 
-species_genome_size_file="${THIS_DIR}/ref/${species}_genome_chromsize.tsv"
-
 # echo ${THIS_DIR}
 # exit 0
 source "${THIS_DIR}/config.sh"
@@ -30,6 +28,17 @@ done
 
 if [[ -z ${window_size} ]]; then
     window_size=${_WindowSize}
+fi
+
+if [[ -z ${species} ]]; then
+    echo "Species must be specified with -g option."
+    exit 1
+else
+    species_genome_size_file="${THIS_DIR}/ref/${species}_genome_chromsize.tsv"
+    if [[ ! -f ${species_genome_size_file} ]]; then
+        echo "Genome size file for species ${species} not found: ${species_genome_size_file}"
+        exit 1
+    fi
 fi
 
 

@@ -105,10 +105,18 @@ except ValueError:
 shortcut_mode = args.shortcut_mode.lower() == "yes"
 if not shortcut_mode:
     save_subdir = output_dir
+    barcode_entropy_df_file = os.path.join(save_subdir, f'calculated_barcode_entropy_df.tsv')
 else:
     save_subdir = os.path.join(output_dir, 'per_chromosome_entropy')
     if not os.path.exists(save_subdir):
         os.makedirs(save_subdir, exist_ok=True)
+
+    # Always specific chromosome is specified in shortcut mode
+    if chromosomes_spec.lower() == "autosomes" or len(chromosomes_spec.split(' '))  > 1:
+        sys.exit("Shortcut mode with 'autosomes' or multiple chromosomes is not supported in per-chromosome calculation.")
+    else:
+        barcode_entropy_df_file = os.path.join(save_subdir, f'{chromosomes_spec.split(" ")[0]}_calculated_barcode_entropy_df.tsv')
+
 
 
 #%%
@@ -164,14 +172,6 @@ else:
 # %%
 # Step 2. Calculate entropy for each cell barcode for the given chromosome 
 barcode_entropy = {}
-if not shortcut_mode:
-    barcode_entropy_df_file = os.path.join(save_subdir, f'calculated_barcode_entropy_df.tsv')
-else:
-    # Always specific chromosome is specified in shortcut mode
-    if chromosomes_spec.lower() == "autosomes" or len(chromosomes) > 1:
-        sys.exit("Shortcut mode with 'autosomes' or multiple chromosomes is not supported in per-chromosome calculation.")
-    else:
-        barcode_entropy_df_file = os.path.join(save_subdir, f'{chromosomes[0]}_calculated_barcode_entropy_df.tsv')
 
 # Wrapper function for multiprocessing
 def mp_wrapper(bc):
@@ -197,7 +197,7 @@ if __name__ == "__main__":
 
     #%%
     ## Multiprocessing implementation
-    if os.cpu_count() and os.cpu_count() > nprocess:
+    if os.cpu_count() and os.cpu_count() >= nprocess:
         num_cpus = nprocess
 
 
