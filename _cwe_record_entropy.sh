@@ -10,6 +10,8 @@ THIS_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
 source "${THIS_DIR}/config.sh"
 source ${PYTHON_ENV}
 
+Usage="Usage: $0 -o output_dir -g species [-w window_size (default: ${_WindowSize})]"
+
 while getopts "o:w:g:" opt; do
   case ${opt} in
     o)
@@ -23,7 +25,7 @@ while getopts "o:w:g:" opt; do
       species="$OPTARG"
       ;;
     *)
-      echo "Usage: $0 -o output_dir  -w window_size -g species"  && exit 1
+      echo "${Usage}"  && exit 1
       ;;
   esac
 done
@@ -33,12 +35,13 @@ if [[ -z ${window_size} ]]; then
 fi
 
 if [[ -z ${species} ]]; then
-    echo "Species must be specified with -g option."
+    echo "Species must be specified with -g option." >&2
+    echo "${Usage}" >&2
     exit 1
 else
     species_genome_size_file="${THIS_DIR}/ref/${species}_genome_chromsize.tsv"
     if [[ ! -f ${species_genome_size_file} ]]; then
-        echo "Genome size file for species ${species} not found: ${species_genome_size_file}"
+        echo "Genome size file for species ${species} not found: ${species_genome_size_file}" >&2
         exit 1
     fi
 fi

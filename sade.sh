@@ -3,6 +3,7 @@ set -o errexit # exit on error and dont continue
 set -o pipefail # catch errors in piped commands
 
 # GLOBAL VARIABLES >>>
+_DefaultNprocess=4
 _CHROMOSOME='chr1'
 _WindowSize=3000 # default window size
 _CandidateInflectionPoints=2    # default number of candidate inflection points to consider for entropy threshold selection.
@@ -32,7 +33,7 @@ Usage="Usage: $0
           "
 
 ## BEFORE ANYTHING ELSE: process options 
-while  getopts "f:o:g:c:w:k:s:" opt; do
+while  getopts "f:o:g:c:w:k:s:p:" opt; do
   case $opt in
     f) 
       fragment_file="$OPTARG"
@@ -56,6 +57,9 @@ while  getopts "f:o:g:c:w:k:s:" opt; do
       ;;
     s)
       genome_saturation_cutoff="$OPTARG" # has default value
+      ;;
+    p)
+      nprocess="$OPTARG" # has default value
       ;;
     \?) 
       echo -e "Invalid option: -$OPTARG \n$usage" >&2
@@ -96,6 +100,10 @@ fi
 ##
 if [[ -z ${genome_saturation_cutoff} ]]; then
     genome_saturation_cutoff=${_GenomeSaturationCutoff}
+fi
+##
+if [[ -z ${nprocess} ]]; then
+    nprocess=${_DefaultNprocess}
 fi
 
 # Environment validation >>>
@@ -198,7 +206,8 @@ if [ ! -f ${barcode_entropy_df_file} ] ; then
           -o "${output_dir}" \
           -g "${species}" \
           -c "${chromosome}" \
-          -w "${window_size}"
+          -w "${window_size}" \
+          -p "${nprocess}"
 fi 
 
 
