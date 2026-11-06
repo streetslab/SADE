@@ -19,7 +19,7 @@ import argparse
 
 #%%
 
-from utils import return_none
+from utils import return_none, get_chromsize_dict
 
 
 
@@ -80,6 +80,7 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
 parser = argparse.ArgumentParser(description="Calculate entropy for cell barcodes based on fragment file.\n  Entropy calculation is for one chromosome at a time.")
 parser.add_argument("--output_dir", type=str, required=True, help="Directory to save entropy calculation results.")
 parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome to analyze, default is chr1.")
+parser.add_argument("--genomesize_file", type=str, required=True, help="Genome size reference file.")
 parser.add_argument("--shortcut_mode", type=str, required=False,  default="no", help="Go straight to Tn5 insertion counting and skip fragment splitting, default is no. no or yes")
 parser.add_argument("--nprocess", type=str, required=False, help="Number of cpu cores to use.")
 
@@ -87,8 +88,13 @@ parser.add_argument("--nprocess", type=str, required=False, help="Number of cpu 
 args = parser.parse_args()
 
 output_dir = args.output_dir
-chromosomes = args.chromosome # can be space-separated list, or a single chromosome. 
+chromosomes_spec = args.chromosome # can be space-separated list, or a single chromosome. 
                               # when multiple chormosomes are provided, the 1st chromosome will be used as the lead chromosome to load Tn5 insertion record, and the rest of the chromosomes will be used to update the Tn5 insertion record for each cell barcode.
+# chromosomes = chromosomes_spec.split(' ') # turning into a list 
+genome_chromsize_file = args.genomesize_file
+chromosome_size_dict = get_chromsize_dict(genome_chromsize_file)
+
+
 nprocess = 4
 try:
     nprocess = int(args.nprocess) if args.nprocess is not None else 4
@@ -103,18 +109,37 @@ else:
     if not os.path.exists(save_subdir):
         os.makedirs(save_subdir, exist_ok=True)
 
-chromosomes = chromosomes.split(' ') # turning into a list 
-Nused_chromosomes = len(chromosomes)
+
 #%%
 # Step 1. Load Tn5 insertion frequency record for each cell barcode 
-if Nused_chromosomes > 1:
+if len(chromosomes_spec.split(' ')) == 1 and chromosomes_spec != "autosomes" :
+    # When only one chromosome is used,
+    # just load the Tn5 insertion record for that chromosome.
+    chromosomes = chromosomes_spec.split(' ') # turning into a list
+    chrom = chromosomes[0]
+    
+    tn5_insert_record_file = os.path.join(save_subdir, f'{chrom}_insert_frequency.pickle')
+    with open(tn5_insert_record_file, 'rb') as file:
+        insert_record = pickle.load(file)
+else:
     # When multiple chromosomes are used, 
     # combine the records for all the chromosomes by concatenating the Tn5 insertion frequency arrays for each cell barcode.
-    lead_chrom = chromosomes[0]
+    if chromosomes_spec == "autosomes":
+        # all autosomes used 
+        chromosomes = []
+        for chrom in chromosome_size_dict.keys():
+            if chrom.startswith("chr") and chrom != "chrX" and chrom != "chrY":
+                chromosomes.append(chrom)
+        lead_chrom = 'chr1'
+                
+    else:
+        chromosomes = chromosomes_spec.split(' ')
+        lead_chrom = chromosomes[0]
 
+    Nchromosomes = len(chromosomes)
+    
     # Load Tn5 insertion record for each chromosomes     
     insert_record_dict = {}
-    
     for chrom in chromosomes:
         tn5_insert_record_file = os.path.join(save_subdir, f'{chrom}_insert_frequency.pickle')
         with open(tn5_insert_record_file, 'rb') as file:
@@ -122,24 +147,16 @@ if Nused_chromosomes > 1:
     
     # Prepare records for only the barcodes that have any fragments in the leading chromosome
     insert_record = defaultdict(return_none)
-    
     keys = list(insert_record_dict[lead_chrom].keys())
     
     for bc in keys:
         chromosome_insert_arrays = [
             insert_record_dict[chrom].pop(bc) for chrom in chromosomes if insert_record_dict[chrom][bc] is not None
         ]
-        if len(chromosome_insert_arrays) == Nused_chromosomes:
+        if len(chromosome_insert_arrays) == Nchromosomes:
             insert_record[bc] = hstack(chromosome_insert_arrays) 
-    
-else:
-    # When only one chromosome is used,
-    # just load the Tn5 insertion record for that chromosome.
-    chrom = chromosomes[0]
-    
-    tn5_insert_record_file = os.path.join(save_subdir, f'{chrom}_insert_frequency.pickle')
-    with open(tn5_insert_record_file, 'rb') as file:
-        insert_record = pickle.load(file)
+
+
 
 
 

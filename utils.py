@@ -12,7 +12,20 @@ import pandas as pd
 def return_none():
     return None
 
-
+def get_chromsize_dict(genome_chromsize_file):
+    chromsize_dict = {}
+    with open(genome_chromsize_file, "r") as f:
+        
+        for line in f:
+            if line.startswith("#"):
+                continue
+            try:
+                chrom, _, size = line.strip().split("\t") # when genome size has 3 columns
+                chromsize_dict[chrom] = int(size)
+            except:
+                chrom, size = line.strip().split("\t") # when genome size has 2 columns
+                chromsize_dict[chrom] = int(size)
+    return chromsize_dict
 
 
 def get_frag_overlap_peaks_df(output_dir, chromosome='chr1'):

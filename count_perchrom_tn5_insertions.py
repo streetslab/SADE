@@ -14,7 +14,7 @@ WindowSize = 3000  # size of the window in bp, default is 250 bp
 ## Global Variables <<
 
 # Use the current directory for imports
-from utils import return_none
+from utils import return_none, get_chromsize_dict
 
 
 # %%
@@ -143,18 +143,8 @@ if __name__ == "__main__":
                     {save_subdir} .......... \n")
         
 
-        # load human genome chromosome size
-        chromsize_dict = {}
-        with open(genome_chromsize_file, "r") as f:
-            for line in f:
-                if line.startswith("#"):
-                    continue
-                try:
-                    chrom, _, size = line.strip().split("\t") # when genome size has 3 columns
-                    chromsize_dict[chrom] = int(size)
-                except:
-                    chrom, size = line.strip().split("\t") # when genome size has 2 columns
-                    chromsize_dict[chrom] = int(size)
+        # load genome chromosome size
+        chromsize_dict = get_chromsize_dict(genome_chromsize_file)
 
         print(f'chromosome size for {chromosome}: {chromsize_dict[chromosome]} \n ')
         insert_frequency_file = os.path.join(save_subdir, f'{chromosome}_insert_frequency.pickle')
