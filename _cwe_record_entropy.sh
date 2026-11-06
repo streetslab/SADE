@@ -2,7 +2,6 @@
 
 _WindowSize=3000 # Default window size for fragmentation, if not specified by user
 THIS_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
-REF_DIR="${THIS_DIR}/ref"
 
 # echo ${THIS_DIR}
 # exit 0
@@ -31,7 +30,7 @@ if [[ -z ${window_size} ]]; then
     window_size=${_WindowSize}
 fi
 
-species_genome_size_file="${REF_DIR}/${species}_genome_chromsize.tsv"
+species_genome_size_file="${THIS_DIR}/ref/${species}_genome_chromsize.tsv"
 chromosome_list=()
 while IFS=$'\t' read -r chrom _res; do
     if [[ $chrom =~ ^'#' ]]; then
@@ -44,7 +43,7 @@ done < "${species_genome_size_file}"
 
 
 
-species_genome_size_file="${species}_genome_chromsize.tsv"
+species_genome_size_file="${THIS_DIR}/ref/${species}_genome_chromsize.tsv"
 for chromosome in "${chromosome_list[@]}"; do
     echo "Processing chromosome: ${chromosome}"
     if [[ -f ${output_dir}/chromosome_fragments/${chromosome}_fragments.tsv ]]; then
@@ -56,6 +55,6 @@ for chromosome in "${chromosome_list[@]}"; do
           --shortcut_mode "yes"
 
       # Calculate entropy for the specified chromosome
-      python "${THIS_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}"  --shortcut_mode "yes"
+      python "${THIS_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}"  --genomesize_file="${THIS_DIR}/ref/${species_genome_size_file}" --shortcut_mode "yes"
     fi
 done
