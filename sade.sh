@@ -30,6 +30,7 @@ Usage="Usage: $0
                                           Mathematically valid value is in the range of (0, 1], but do not specify manually unless you know the 
                                           average genome coverage in basepair (bp) of a random given cell across all cell types for the species in the sample.
                                           Due to this reason, we manually set range to be [0.1, 1], where 1 means no filtering of DNA debris.]
+          [-p <nprocess>. Default: ${_DefaultNprocess}. Number of computational threads to use.]
           "
 
 ## BEFORE ANYTHING ELSE: process options 

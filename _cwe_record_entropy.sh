@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-_DefaultNprocess=1 # Default number of processes for entropy calculation, if not specified by user
+_DefaultNprocess=4 # Default number of processes for entropy calculation, if not specified by user
 _WindowSize=3000 # Default window size for fragmentation, if not specified by user
 THIS_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
 
