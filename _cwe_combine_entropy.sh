@@ -10,6 +10,7 @@ OUT="${3:-selected_entropy_all.tsv}"
 files=( "$Chromosomal_Entropy_Dir"/chr*_calculated_barcode_entropy_df.tsv )
 [[ -e "${files[0]}" ]] || { echo "No matching files found" >&2; exit 1; }
 
+mkdir -p "$(dirname "$OUT")"
 
 
 awk -F'[\t,]' -v OFS='\t' '

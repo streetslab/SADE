@@ -34,7 +34,11 @@ fi
 species_genome_size_file="${REF_DIR}/${species}_genome_chromsize.tsv"
 chromosome_list=()
 while IFS=$'\t' read -r chrom _res; do
-    chromosome_list+=("$chrom")
+    if [[ $chrom =~ ^'#' ]]; then
+        continue
+    else
+        chromosome_list+=("$chrom")
+    fi
 done < "${species_genome_size_file}"
 
 
@@ -43,13 +47,15 @@ done < "${species_genome_size_file}"
 species_genome_size_file="${species}_genome_chromsize.tsv"
 for chromosome in "${chromosome_list[@]}"; do
     echo "Processing chromosome: ${chromosome}"
-    python "${THIS_DIR}/count_perchrom_tn5_insertions.py" \
-        --output_dir="${output_dir}" \
-        --genome_chromsize_file="${THIS_DIR}/ref/${species_genome_size_file}" \
-        --chromosome="${chromosome}" \
-        --windowsize="${window_size}" \
-        --shortcut_mode "yes"
+    if [[ -f ${output_dir}/chromosome_fragments/${chromosome}_fragments.tsv ]]; then
+      python "${THIS_DIR}/count_perchrom_tn5_insertions.py" \
+          --output_dir="${output_dir}" \
+          --genome_chromsize_file="${THIS_DIR}/ref/${species_genome_size_file}" \
+          --chromosome="${chromosome}" \
+          --windowsize="${window_size}" \
+          --shortcut_mode "yes"
 
-    # Calculate entropy for the specified chromosome
-    python "${THIS_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}"  --shortcut_mode "yes"
+      # Calculate entropy for the specified chromosome
+      python "${THIS_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}"  --shortcut_mode "yes"
+    fi
 done
