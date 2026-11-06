@@ -170,8 +170,11 @@ barcode_entropy = {}
 if not shortcut_mode:
     barcode_entropy_df_file = os.path.join(save_subdir, f'calculated_barcode_entropy_df.tsv')
 else:
-    # This mode only one chromosome is used, and the output file name will include the chromosome name.
-    barcode_entropy_df_file = os.path.join(save_subdir, f'{chromosomes[0]}_calculated_barcode_entropy_df.tsv') 
+    # Always specific chromosome is specified in shortcut mode
+    if chromosomes_spec.lower() == "autosomes" or len(chromosomes) > 1:
+        sys.exit("Shortcut mode with 'autosomes' or multiple chromosomes is not supported in per-chromosome calculation.")
+    else:
+        barcode_entropy_df_file = os.path.join(save_subdir, f'{chromosomes[0]}_calculated_barcode_entropy_df.tsv')
 
 # Wrapper function for multiprocessing
 def mp_wrapper(bc):
