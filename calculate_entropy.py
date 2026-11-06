@@ -21,7 +21,7 @@ import argparse
 
 #%%
 
-from utils import return_none, get_chromsize_dict, default_chrome_bin_sparse
+from utils import return_none, get_chromsize_dict
 
 
 
@@ -135,26 +135,23 @@ else:
     else:
         chromosomes = chromosomes_spec.split(' ')
     
-    lead_chrom = chromosomes[0]
-    Nchromosomes = len(chromosomes)
     
     # Load Tn5 insertion record for each chromosomes     
     insert_record_dict = {}
     keys = set()
+    chrom_bin_size  = {}
     for chrom in chromosomes:
+        
         tn5_insert_record_file = os.path.join(save_subdir, f'{chrom}_insert_frequency.pickle')
         with open(tn5_insert_record_file, 'rb') as file:
             insert_record_dict[chrom] = pickle.load(file)
             keys.update(list(insert_record_dict[chrom].keys()))
-    
-    # Prepare records for only the barcodes that have any fragments in the leading chromosome
-    insert_record = defaultdict(return_none)
-    
-    chrom_bin_size  = {}
-    for chrom in chromosomes:
+        
         random_bc = list(insert_record_dict[chrom].keys())[0]
         chrom_bin_size[chrom] = insert_record_dict[chrom][random_bc].shape[1]
 
+    # Default for missing key 
+    insert_record = defaultdict(return_none)
     for bc in keys:
         chromosome_insert_arrays = [
             insert_record_dict[chrom].pop(bc) if insert_record_dict[chrom][bc] is not None else lil_matrix((1, chrom_bin_size[chrom]), dtype=np.int32)  for chrom in chromosomes
