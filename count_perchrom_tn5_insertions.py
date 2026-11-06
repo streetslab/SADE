@@ -1,6 +1,7 @@
 #%% 
 
-import os 
+import os
+import re 
 import numpy as np
 import pandas as pd
 from scipy.sparse import lil_matrix
@@ -14,25 +15,11 @@ WindowSize = 3000  # size of the window in bp, default is 250 bp
 ## Global Variables <<
 
 # Use the current directory for imports
-from utils import return_none
+from utils import return_none, get_chromsize_dict, assign_window, default_chrome_bin_sparse
 
 
 # %%
 
-
-def assign_window(insertion_pos, chromsize, window_size):
-    """
-    Assign tn5_insertion position to a window
-    Args:
-        insertion_pos (int): tn5_insertion position
-        chromsize (int): chromosome size
-        window_size (int): window size
-    Returns: index of the window that needs to be incremented with 1 
-    """
-    if insertion_pos < 0 or insertion_pos >= chromsize:
-        raise ValueError(f"Invalid insertion position: {insertion_pos} for chromosome size: {chromsize}")
-    
-    return insertion_pos // window_size 
 
 # %%
 def insert_frequency(chromosome:str, 
@@ -53,7 +40,6 @@ def insert_frequency(chromosome:str,
     
     record = defaultdict(return_none)
     
-    
     with open(fragments_file, "r") as f:
         #print(f"counting tn5 insertion frequency for {chromosome} in {os.path.basename(fragments_file)} ..........")
         for l in tqdm(f, desc="Counting Tn5 insertion frequency"):
@@ -61,13 +47,11 @@ def insert_frequency(chromosome:str,
                 continue
             chrom, left_insert, right_insert, cb, _ = l.strip().split("\t")  # cb -- cell barcode
             
-
-            left_insert = int(left_insert)
-            right_insert = int(right_insert)
+            left_insert = int(left_insert)  # start-position is inclusive
+            right_insert = int(right_insert) - 1  # end-position is exclusive
 
             if record[cb] is None:
-                total_seq = int(chromsize_dict[chrom] // window_size + 1)
-                record[cb] = lil_matrix((1, total_seq), dtype=np.int32) # initialize the dictionary with zeros
+                record[cb] = default_chrome_bin_sparse(chromsize_dict[chrom], window_size) # initialize the dictionary with zeros
 
             ind1 = assign_window(left_insert, chromsize_dict[chrom], window_size)
             ind2 = assign_window(right_insert, chromsize_dict[chrom], window_size)
@@ -109,8 +93,10 @@ if __name__ == "__main__":
     
     output_dir = args.output_dir
     genome_chromsize_file = args.genome_chromsize_file
+    chromsize_dict = get_chromsize_dict(genome_chromsize_file)
+    
     windowsize = args.windowsize
-    chromosomes = args.chromosome
+    chromosomes_spec = args.chromosome
     
     shortcut_mode = args.shortcut_mode.lower() == "yes"
     if not shortcut_mode:
@@ -119,18 +105,22 @@ if __name__ == "__main__":
         save_subdir = os.path.join(output_dir, 'per_chromosome_entropy')
         if not os.path.exists(save_subdir):
             os.makedirs(save_subdir, exist_ok=True)
-        
-    chromosomes = chromosomes.split(' ') # turning into a list
-    
     chromosome_fragment_dir = os.path.join(output_dir, 'chromosome_fragments')
     
+    
     # Do a file sanity check before counting even starts        
+    if chromosomes_spec.lower() == "autosomes":
+        chromosomes = []
+        for chrom in chromsize_dict.keys():
+            if re.match(r"^chr[0-9]+$", chrom) is not None:
+                chromosomes.append(chrom)
+    else:
+        chromosomes = chromosomes_spec.split(' ')
+        
     for chromosome in chromosomes:
         frag_file = os.path.join(chromosome_fragment_dir, f'{chromosome}_fragments.tsv')
-        
         if not os.path.exists(frag_file):
             raise FileNotFoundError(f"Fragment file not found: {frag_file}")
-    
     
     for chromosome in chromosomes:
         frag_file = os.path.join(chromosome_fragment_dir, f'{chromosome}_fragments.tsv')
@@ -142,24 +132,9 @@ if __name__ == "__main__":
                 and saving results to \n \
                     {save_subdir} .......... \n")
         
-
-        # load human genome chromosome size
-        chromsize_dict = {}
-        with open(genome_chromsize_file, "r") as f:
-            for line in f:
-                if line.startswith("#"):
-                    continue
-                try:
-                    chrom, _, size = line.strip().split("\t") # when genome size has 3 columns
-                    chromsize_dict[chrom] = int(size)
-                except:
-                    chrom, size = line.strip().split("\t") # when genome size has 2 columns
-                    chromsize_dict[chrom] = int(size)
-
         print(f'chromosome size for {chromosome}: {chromsize_dict[chromosome]} \n ')
         insert_frequency_file = os.path.join(save_subdir, f'{chromosome}_insert_frequency.pickle')
         
-
         # Step 2. Count Tn5 insertion frequency for each cell barcode in the given chromosome
         insert_frequency(chromosome=chromosome,
                         fragments_file=frag_file,

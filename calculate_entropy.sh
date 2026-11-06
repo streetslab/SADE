@@ -4,9 +4,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/config.sh"
 
 
-Msg="Usage: $0 -o output_dir -c chromosome -w window_size -g species"
+Msg="Usage: $0 -o output_dir -c chromosome -w window_size -g species -p nprocess"
 
-while getopts "o:c:w:g:" opt; do
+while getopts "o:c:w:g:p:" opt; do
   case ${opt} in
     o)
       output_dir=$OPTARG
@@ -21,11 +21,15 @@ while getopts "o:c:w:g:" opt; do
     g)
       species="$OPTARG"
       ;;
+    p)
+      nprocess="$OPTARG"
+      ;;
     *)
       echo $Msg  && exit 1
       ;;
   esac
 done
+
 
 
 # Step 1: Split fragments file by chromosome 
@@ -58,6 +62,7 @@ source ${PYTHON_ENV}
 barcode_entropy_df_file="${output_dir}/calculated_barcode_entropy_df.tsv"
 if [[ ! -f ${barcode_entropy_df_file} ]]; then
     # Calculate entropy for the specified chromosome
-    python "${SCRIPT_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}"
+    python "${SCRIPT_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}" \
+        --genomesize_file="${SCRIPT_DIR}/ref/${species_genome_size_file}" --nprocess="${nprocess}"
 fi
 

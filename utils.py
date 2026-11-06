@@ -3,6 +3,7 @@
 
 import os
 import numpy as np
+from scipy.sparse import lil_matrix
 import pandas as pd
 
 
@@ -11,6 +12,41 @@ import pandas as pd
 # necessary for loading pickle files of Tn5_insertion_count results
 def return_none():
     return None
+
+def get_chromsize_dict(genome_chromsize_file):
+    chromsize_dict = {}
+    with open(genome_chromsize_file, "r") as f:
+        
+        for line in f:
+            if line.startswith("#"):
+                continue
+            try:
+                chrom, _, size = line.strip().split("\t") # when genome size has 3 columns
+                chromsize_dict[chrom] = int(size)
+            except:
+                chrom, size = line.strip().split("\t") # when genome size has 2 columns
+                chromsize_dict[chrom] = int(size)
+    return chromsize_dict
+
+
+
+def assign_window(insertion_pos, chromsize, window_size):
+    """
+    Assign tn5_insertion position to a window
+    Args:
+        insertion_pos (int): tn5_insertion position
+        chromsize (int): chromosome size
+        window_size (int): window size
+    Returns: index of the window that needs to be incremented with 1 
+    """
+    if insertion_pos < 0 or insertion_pos >= chromsize:
+        raise ValueError(f"Invalid insertion position: {insertion_pos} for chromosome size: {chromsize}")
+    
+    return insertion_pos // window_size 
+
+def default_chrome_bin_sparse(chromsize, window_size):
+    total_bin = int(chromsize // window_size + 1)
+    return lil_matrix((1, total_bin), dtype=np.int32)
 
 
 
