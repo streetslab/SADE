@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 from scipy.special import lambertw
 from scipy.stats import poisson 
-from scipy.sparse import hstack
+from scipy.sparse import hstack, lil_matrix
 from collections import defaultdict
 
 import argparse
@@ -85,7 +85,6 @@ parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome t
 parser.add_argument("--genomesize_file", type=str, required=True, help="Genome size reference file.")
 parser.add_argument("--shortcut_mode", type=str, required=False,  default="no", help="Go straight to Tn5 insertion counting and skip fragment splitting, default is no. no or yes")
 parser.add_argument("--nprocess", type=str, required=False, help="Number of cpu cores to use.")
-parser.add_argument("--windowsize", type=int, required=True,  help="Window size for fragmentation.")
 
 
 args = parser.parse_args()
@@ -96,12 +95,7 @@ chromosomes_spec = args.chromosome # can be space-separated list, or a single ch
 # chromosomes = chromosomes_spec.split(' ') # turning into a list 
 genome_chromsize_file = args.genomesize_file
 chromsize_dict = get_chromsize_dict(genome_chromsize_file)
-try:
-    window_size = int(args.windowsize)
-    if window_size <= 1:
-        sys.exit("Window size must be integer greater than 1.")
-except ValueError:
-    sys.exit("Invalid window size provided.")
+
 
 try:
     nprocess = int(args.nprocess) if args.nprocess is not None else 4
@@ -155,9 +149,14 @@ else:
     insert_record = defaultdict(return_none)
     keys = list(insert_record_dict[lead_chrom].keys())
     
+    chrom_bin_size  = {}
+    for chrom in chromosomes:
+        random_bc = list(insert_record_dict[chrom].keys())[0]
+        chrom_bin_size[chrom] = insert_record_dict[chrom][random_bc].shape[1]
+
     for bc in keys:
         chromosome_insert_arrays = [
-            insert_record_dict[chrom].pop(bc) if insert_record_dict[chrom][bc] is not None else default_chrome_bin_sparse(chromsize_dict[chrom], window_size) for chrom in chromosomes
+            insert_record_dict[chrom].pop(bc) if insert_record_dict[chrom][bc] is not None else lil_matrix((1, chrom_bin_size[chrom]), dtype=np.int32)  for chrom in chromosomes
         ] # fill in empty insertions when a barcode has no fragments in a particular chromosome
         
         insert_record[bc] = hstack(chromosome_insert_arrays) 

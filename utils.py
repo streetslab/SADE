@@ -3,6 +3,7 @@
 
 import os
 import numpy as np
+from scipy.sparse import lil_matrix
 import pandas as pd
 
 
@@ -26,7 +27,6 @@ def get_chromsize_dict(genome_chromsize_file):
                 chrom, size = line.strip().split("\t") # when genome size has 2 columns
                 chromsize_dict[chrom] = int(size)
     return chromsize_dict
-
 
 
 
