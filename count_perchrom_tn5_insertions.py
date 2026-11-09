@@ -37,20 +37,19 @@ def insert_frequency(chromosome:str,
     
     if chromosome +'_' not in fragments_file:
         raise ValueError(f"fragments_file: **{fragments_file}** does not contain chromosome: **{chromosome}**")
-    
-    bl = pd.read_csv(bl_region_file, sep='\t', header=None, usecols=[0, 1, 2], comment="#")
-    bl.columns = ['chrom', 'start', 'end']
 
-    windowdrop_indices = []
-    for s, e in bl.loc[bl['chrom'] == chromosome, ['start', 'end']].itertuples(index=False):
-        windowdrop_indices.append((s // window_size,  (e - 1) // window_size + 1))
+    if bl_region_file is not None:
+        bl = pd.read_csv(bl_region_file, sep='\t', header=None, usecols=[0, 1, 2], comment="#")
+        bl.columns = ['chrom', 'start', 'end']
+        is_bl = np.zeros(int(chromsize_dict[chromosome] // window_size + 1), dtype=bool)
+        for s, e in bl.loc[bl.chrom == chromosome, ["start", "end"]].itertuples(index=False):
+            is_bl[s // window_size:(e - 1) // window_size + 1] = True
+    
+        bl_record = defaultdict(return_none)
     
     record = defaultdict(return_none)
-    bl_record = defaultdict(return_none)
-    
-    bc_list = {}
     with open(fragments_file, "r") as f:
-        for l in tqdm(f, desc="Counting Tn5 insertion frequency"):
+        for l in tqdm(f, desc="Counting Tn5 insertion frequency "):
             if l.startswith("#"):
                 continue
             chrom, left_insert, right_insert, cb, _ = l.strip().split("\t")  # cb -- cell barcode
@@ -60,33 +59,39 @@ def insert_frequency(chromosome:str,
 
             if record[cb] is None:
                 record[cb] = default_chrome_bin_sparse(chromsize_dict[chrom], window_size) # initialize the dictionary with zeros
-                bl_record[cb] = default_chrome_bin_sparse(chromsize_dict[chrom], window_size) # initialize the blacklisted record with zeros
+                if bl_region_file is not None:
+                    bl_record[cb] = default_chrome_bin_sparse(chromsize_dict[chrom], window_size) # initialize the blacklisted record with zeros
 
             ind1 = assign_window(left_insert, chromsize_dict[chrom], window_size)
             ind2 = assign_window(right_insert, chromsize_dict[chrom], window_size)
-            record[cb][0, ind1] += 1
-            record[cb][0, ind2] += 1
-            
-            bc_list[cb] = True
+
+            if bl_region_file is not None:
+            # if index is in the blacklisted region then store in the blacklisted record
+            # else in the regular record
+                if is_bl[ind1]:
+                    bl_record[cb][0, ind1] += 1 
+                else:
+                    record[cb][0, ind1] += 1
+                if is_bl[ind2]:
+                    bl_record[cb][0, ind2] += 1
+                else:
+                    record[cb][0, ind2] += 1
+            else:
+            # no blacklist regions provided so count all the insertions
+                record[cb][0, ind1] += 1
+                record[cb][0, ind2] += 1
         
-    # Remove blacklisted windows from the record
-    if windowdrop_indices:
-        for cb in tqdm(bc_list, desc=f'Subtracting insertions in blacklisted regions from the record for chromosome {chromosome} ....'):
-            for start, end in windowdrop_indices:
-                bl_record[cb][0, start:end] =  record[cb][0, start:end] # store the original values in the blacklisted record before zeroing them out
-                record[cb][0, start:end] = 0
-                
-    else:
-        print(f'All insertions are counted as no blacklisted regions provided for this chromosome {chromosome}.')
-    
     # Save the insertion frequency record to a pickle file
     with open(output_file, 'wb') as f:
         pickle.dump(record, f, protocol=pickle.HIGHEST_PROTOCOL)
-    with open(output_file.replace('.pickle', '_blacklisted.pickle'), 'wb') as f:
-        pickle.dump(bl_record, f, protocol=pickle.HIGHEST_PROTOCOL)
-    
     del record
-    del bl_record
+    
+    if bl_region_file is not None:
+        with open(output_file.replace('.pickle', '_blacklisted.pickle'), 'wb') as f:
+            pickle.dump(bl_record, f, protocol=pickle.HIGHEST_PROTOCOL)
+        del bl_record
+
+
 
 # %%
 
