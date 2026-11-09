@@ -9,6 +9,7 @@ THIS_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
 # echo ${THIS_DIR}
 # exit 0
 source "${THIS_DIR}/config.sh"
+blacklist_file="${THIS_DIR}/ref/${species}/${species}-blacklist.bed"
 source ${PYTHON_ENV}
 
 Usage="Usage: $0 -o output_dir -g species [-w window_size (default: ${_WindowSize})]"
@@ -86,6 +87,7 @@ for chromosome in "${chromosome_list[@]}"; do
           --output_dir="${output_dir}" \
           --genome_chromsize_file="${species_genome_size_file}" \
           --chromosome="${chromosome}" \
+          --blacklist_file="${blacklist_file}" \
           --windowsize="${window_size}" \
           --shortcut_mode "yes"
 
