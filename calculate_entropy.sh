@@ -46,7 +46,7 @@ fi
 ## This can be done in parallel for multiple chromosomes in python
 ## TODO: add parallelization 
 source ${PYTHON_ENV}
-insert_frequency_file="${output_dir}/{chromosome}_insert_frequency.pickle"
+insert_frequency_file="${output_dir}/${chromosome}_insert_frequency.pickle"
 species_genome_size_file="${SCRIPT_DIR}/ref/${species}_genome_chromsize.tsv"
 blacklist_file="${SCRIPT_DIR}/ref/${species}/${species}-blacklist.bed"
 if [[ ! -f ${insert_frequency_file} ]]; then
