@@ -82,14 +82,18 @@ done < "${species_genome_size_file}"
 
 for chromosome in "${chromosome_list[@]}"; do
     echo "Processing chromosome: ${chromosome}"
-    if [[ -f ${output_dir}/chromosome_fragments/${chromosome}_fragments.tsv ]]; then
-      python "${THIS_DIR}/count_perchrom_tn5_insertions.py" \
-          --output_dir="${output_dir}" \
-          --genome_chromsize_file="${species_genome_size_file}" \
-          --chromosome="${chromosome}" \
-          --blacklist_file="${blacklist_file}" \
-          --windowsize="${window_size}" \
-          --shortcut_mode "yes"
+    if [[  -f ${output_dir}/chromosome_fragments/${chromosome}_fragments.tsv ]]; then
+        if [[ ! -f "${output_dir}/chromosome_fragments/.${chromosome}_insertion_done.log" ]]; then
+            python "${THIS_DIR}/count_perchrom_tn5_insertions.py" \
+                --output_dir="${output_dir}" \
+                --genome_chromsize_file="${species_genome_size_file}" \
+                --chromosome="${chromosome}" \
+                --blacklist_file="${blacklist_file}" \
+                --windowsize="${window_size}" \
+                --shortcut_mode "yes"  && touch "${output_dir}/chromosome_fragments/.${chromosome}_insertion_done.log"
+        else
+            echo "Insertion for chromosome ${chromosome} already counted. Skip to calculate entropy."
+        fi
 
       # Calculate entropy for the specified chromosome
       python "${THIS_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}"  --genomesize_file="${species_genome_size_file}" --shortcut_mode "yes" --nprocess="${nprocess}"

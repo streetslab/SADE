@@ -23,6 +23,7 @@ from utils import return_none, get_chromsize_dict, assign_window, default_chrome
 
 # %%
 def insert_frequency(chromosome:str, 
+                     bl_region_file:str,
                      fragments_file:str, 
                      chromsize_dict:dict, 
                      output_file:str,
@@ -37,11 +38,17 @@ def insert_frequency(chromosome:str,
     if chromosome +'_' not in fragments_file:
         raise ValueError(f"fragments_file: **{fragments_file}** does not contain chromosome: **{chromosome}**")
     
+    bl = pd.read_csv(bl_region_file, sep='\t', header=None, usecols=[0, 1, 2], comment="#")
+    bl.columns = ['chrom', 'start', 'end']
+
+    windowdrop_indices = []
+    for s, e in bl.loc[bl['chrom'] == chromosome, ['start', 'end']].itertuples(index=False):
+        windowdrop_indices.append((s // window_size,  (e - 1) // window_size + 1))
     
     record = defaultdict(return_none)
     
+    bc_list = {}
     with open(fragments_file, "r") as f:
-        #print(f"counting tn5 insertion frequency for {chromosome} in {os.path.basename(fragments_file)} ..........")
         for l in tqdm(f, desc="Counting Tn5 insertion frequency"):
             if l.startswith("#"):
                 continue
@@ -57,6 +64,16 @@ def insert_frequency(chromosome:str,
             ind2 = assign_window(right_insert, chromsize_dict[chrom], window_size)
             record[cb][0, ind1] += 1
             record[cb][0, ind2] += 1
+            
+            bc_list[cb] = True
+        
+    # Remove blacklisted windows from the record
+    if windowdrop_indices:
+        for cb in tqdm(bc_list, desc=f'Subtracting insertions in blacklisted regions from the record for chromosome {chromosome} ....'):
+            for start, end in windowdrop_indices:
+                record[cb][0, start:end] = 0
+    else:
+        print(f'All insertions are counted as no blacklisted regions provided for this chromosome {chromosome}.')
     
     # Save the insertion frequency record to a pickle file
     with open(output_file, 'wb') as f:
@@ -97,9 +114,6 @@ if __name__ == "__main__":
     blacklist_file = args.blacklist_file
     windowsize = args.windowsize
     chromosomes_spec = args.chromosome
-    
-    bl_region_df = pd.read_csv(blacklist_file, sep='\t', header=None, usecols=[0, 1, 2], comment="#")
-    bl_region_df.columns = ['chrom', 'start', 'end']
 
     
     chromsize_dict = get_chromsize_dict(genome_chromsize_file)
@@ -143,26 +157,11 @@ if __name__ == "__main__":
         
         # Step 2. Count Tn5 insertion frequency for each cell barcode in the given chromosome
         insert_frequency(chromosome=chromosome,
+                         blacklist_file=blacklist_file,
                         fragments_file=frag_file,
                         chromsize_dict=chromsize_dict,
                         output_file=insert_frequency_file,
                         window_size=windowsize)
         
-        # Step 3. Filter out blacklisted regions from the insertion frequency data
-        windowdrop_indices = []
-        for s, e in bl_region_df.loc[bl_region_df['chrom'] == chromosome, ['start', 'end']].itertuples(index=False):
-            windowdrop_indices.append((s // windowsize,  (e - 1) // windowsize + 1))
-        if not windowdrop_indices:
-            continue
-        else:            
-            with open(insert_frequency_file, 'rb') as file:
-                    insert_record = pickle.load(file)
-            for bc in insert_record.keys():
-                for window_start, window_end in windowdrop_indices:
-                    insert_record[bc][0, window_start:window_end] = 0
-            
-            RmBlackregion_insert_frequency_file = os.path.join(save_subdir, f'{chromosome}_insert_frequency.pickle')
-            with open(RmBlackregion_insert_frequency_file, 'wb') as f:
-                pickle.dump(insert_record, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
