@@ -85,6 +85,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Calculate entropy for cell barcodes based on fragment file.\n  Entropy calculation is for one chromosome at a time.")
     parser.add_argument("--output_dir", type=str, required=True, help="Directory to save entropy calculation results.")
     parser.add_argument("--genome_chromsize_file", type=str, required=True, help="TSV file of human/species genome chromosome size.")
+    parser.add_argument("--blacklist_file", type=str, required=True, help="bed file of blacklisted regions.")
     parser.add_argument("--chromosome", type=str, default="chr1", help="Chromosome to analyze, default is chr1.")
     parser.add_argument("--windowsize", type=int, default=WindowSize, help="Window size for fragmentation.")
     parser.add_argument("--shortcut_mode", type=str, required=False,  default="no", help="Go straight to Tn5 insertion counting and skip fragment splitting, default is no. no or yes")
@@ -93,10 +94,14 @@ if __name__ == "__main__":
     
     output_dir = args.output_dir
     genome_chromsize_file = args.genome_chromsize_file
-    chromsize_dict = get_chromsize_dict(genome_chromsize_file)
-    
+    blacklist_file = args.blacklist_file
     windowsize = args.windowsize
     chromosomes_spec = args.chromosome
+    
+    blacklist_regions_df = pd.read_csv(blacklist_file, sep='\t', header=None, usecols=[0, 1, 2], comment="#")
+
+    
+    chromsize_dict = get_chromsize_dict(genome_chromsize_file)
     
     shortcut_mode = args.shortcut_mode.lower() == "yes"
     if not shortcut_mode:
@@ -133,7 +138,7 @@ if __name__ == "__main__":
                     {save_subdir} .......... \n")
         
         print(f'chromosome size for {chromosome}: {chromsize_dict[chromosome]} \n ')
-        insert_frequency_file = os.path.join(save_subdir, f'{chromosome}_insert_frequency.pickle')
+        insert_frequency_file = os.path.join(save_subdir, f'Pre_blacklist_{chromosome}_insert_frequency.pickle')
         
         # Step 2. Count Tn5 insertion frequency for each cell barcode in the given chromosome
         insert_frequency(chromosome=chromosome,
@@ -141,5 +146,22 @@ if __name__ == "__main__":
                         chromsize_dict=chromsize_dict,
                         output_file=insert_frequency_file,
                         window_size=windowsize)
+        
+        # Step 3. Filter out blacklisted regions from the insertion frequency data
+        drop_indices = []
+        for s, e in blacklist_regions_df.loc[blacklist_regions_df['chrom'] == chromosome, ['start', 'end']].itertuples(index=False):
+            drop_indices.append((s // windowsize,  (e - 1) // windowsize + 1))
+        if not drop_indices:
+            continue
+        else:            
+            with open(insert_frequency_file, 'rb') as file:
+                    insert_record = pickle.load(file)
+            for bc in insert_record.keys():
+                for window_start, window_end in drop_indices:
+                    insert_record[bc][0, window_start:window_end] = 0
+            
+            RmBlackregion_insert_frequency_file = os.path.join(save_subdir, f'{chromosome}_insert_frequency.pickle')
+            with open(RmBlackregion_insert_frequency_file, 'wb') as f:
+                pickle.dump(insert_record, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 

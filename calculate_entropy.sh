@@ -47,13 +47,16 @@ fi
 ## TODO: add parallelization 
 source ${PYTHON_ENV}
 insert_frequency_file="${output_dir}/{chromosome}_insert_frequency.pickle"
-species_genome_size_file="${species}_genome_chromsize.tsv"
+species_genome_size_file="${SCRIPT_DIR}/ref/${species}_genome_chromsize.tsv"
+blacklist_file="${SCRIPT_DIR}/ref/${species}/${species}-blacklist.bed"
 if [[ ! -f ${insert_frequency_file} ]]; then
     python "${SCRIPT_DIR}/count_perchrom_tn5_insertions.py" \
         --output_dir="${output_dir}" \
-        --genome_chromsize_file="${SCRIPT_DIR}/ref/${species_genome_size_file}" \
+        --genome_chromsize_file="${species_genome_size_file}" \
+        --blacklist_file="${blacklist_file}" \
         --chromosome="${chromosome}" \
-        --windowsize="${window_size}"
+        --windowsize="${window_size}" 
+
 fi
 
 
@@ -63,6 +66,6 @@ barcode_entropy_df_file="${output_dir}/calculated_barcode_entropy_df.tsv"
 if [[ ! -f ${barcode_entropy_df_file} ]]; then
     # Calculate entropy for the specified chromosome
     python "${SCRIPT_DIR}/calculate_entropy.py" --output_dir="${output_dir}" --chromosome="${chromosome}" \
-        --genomesize_file="${SCRIPT_DIR}/ref/${species_genome_size_file}" --nprocess="${nprocess}"
+        --genomesize_file="${species_genome_size_file}" --nprocess="${nprocess}"
 fi
 
