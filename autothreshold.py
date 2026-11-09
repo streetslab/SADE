@@ -70,19 +70,20 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
         regions_rank.append(rank)
 
     if not regions_rank:
-        # region_rank empty, i.e. no such region found
-        rank = None
-        return rank, None, cs, inflection_regions, regions_rank
+        # region_rank empty, i.e. no such region found, 
+        #  then there is no inflection point, so 2nd derivative < 0 all the time 
+        #  in this case, the rank cutoff naturally is the last barcode
+        rank = len(y) - 1
     else:
         rank = regions_rank[np.argmin(first_deriv[regions_rank])]
 
-        if rank == len(y) -1:
-            # Warning: the rank cutoff is at the end of the considered range
-            print(f"Warning: all barcodes considered have entropy above the cutoff -- this is not normal. \n \
-                And take a look at the distribution of barcode entropies -- there should be multi-modality indicating different quality barcodes.\n \
-                Suggest to check quality of the experiment. \n")
-        
-        return rank, y[rank], cs, inflection_regions, regions_rank
+    if rank == len(y) -1:
+        # Warning: the rank cutoff is at the end of the considered range
+        print(f"Warning: all barcodes considered have entropy above the cutoff. \n \
+            Take a look at the distribution of barcode entropies. If you expect to see mixture of empty barcodes and barcodes with cells, \
+            there should be multiple populations in the entropy distribution.\n")
+    
+    return rank, y[rank], cs, inflection_regions, regions_rank
 
 
 def get_sorted_entropy_helper(pickle_path: str):
