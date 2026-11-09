@@ -46,6 +46,7 @@ def insert_frequency(chromosome:str,
         windowdrop_indices.append((s // window_size,  (e - 1) // window_size + 1))
     
     record = defaultdict(return_none)
+    bl_record = defaultdict(return_none)
     
     bc_list = {}
     with open(fragments_file, "r") as f:
@@ -59,6 +60,7 @@ def insert_frequency(chromosome:str,
 
             if record[cb] is None:
                 record[cb] = default_chrome_bin_sparse(chromsize_dict[chrom], window_size) # initialize the dictionary with zeros
+                bl_record[cb] = default_chrome_bin_sparse(chromsize_dict[chrom], window_size) # initialize the blacklisted record with zeros
 
             ind1 = assign_window(left_insert, chromsize_dict[chrom], window_size)
             ind2 = assign_window(right_insert, chromsize_dict[chrom], window_size)
@@ -71,16 +73,20 @@ def insert_frequency(chromosome:str,
     if windowdrop_indices:
         for cb in tqdm(bc_list, desc=f'Subtracting insertions in blacklisted regions from the record for chromosome {chromosome} ....'):
             for start, end in windowdrop_indices:
+                bl_record[cb][0, start:end] =  record[cb][0, start:end] # store the original values in the blacklisted record before zeroing them out
                 record[cb][0, start:end] = 0
+                
     else:
         print(f'All insertions are counted as no blacklisted regions provided for this chromosome {chromosome}.')
     
     # Save the insertion frequency record to a pickle file
     with open(output_file, 'wb') as f:
         pickle.dump(record, f, protocol=pickle.HIGHEST_PROTOCOL)
-    
+    with open(output_file.replace('.pickle', '_blacklisted.pickle'), 'wb') as f:
+        pickle.dump(bl_record, f, protocol=pickle.HIGHEST_PROTOCOL)
     
     del record
+    del bl_record
 
 # %%
 
