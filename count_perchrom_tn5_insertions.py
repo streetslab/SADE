@@ -98,7 +98,8 @@ if __name__ == "__main__":
     windowsize = args.windowsize
     chromosomes_spec = args.chromosome
     
-    blacklist_regions_df = pd.read_csv(blacklist_file, sep='\t', header=None, usecols=[0, 1, 2], comment="#")
+    bl_region_df = pd.read_csv(blacklist_file, sep='\t', header=None, usecols=[0, 1, 2], comment="#")
+    bl_region_df.columns = ['chrom', 'start', 'end']
 
     
     chromsize_dict = get_chromsize_dict(genome_chromsize_file)
@@ -148,16 +149,16 @@ if __name__ == "__main__":
                         window_size=windowsize)
         
         # Step 3. Filter out blacklisted regions from the insertion frequency data
-        drop_indices = []
-        for s, e in blacklist_regions_df.loc[blacklist_regions_df['chrom'] == chromosome, ['start', 'end']].itertuples(index=False):
-            drop_indices.append((s // windowsize,  (e - 1) // windowsize + 1))
-        if not drop_indices:
+        windowdrop_indices = []
+        for s, e in bl_region_df.loc[bl_region_df['chrom'] == chromosome, ['start', 'end']].itertuples(index=False):
+            windowdrop_indices.append((s // windowsize,  (e - 1) // windowsize + 1))
+        if not windowdrop_indices:
             continue
         else:            
             with open(insert_frequency_file, 'rb') as file:
                     insert_record = pickle.load(file)
             for bc in insert_record.keys():
-                for window_start, window_end in drop_indices:
+                for window_start, window_end in windowdrop_indices:
                     insert_record[bc][0, window_start:window_end] = 0
             
             RmBlackregion_insert_frequency_file = os.path.join(save_subdir, f'{chromosome}_insert_frequency.pickle')
