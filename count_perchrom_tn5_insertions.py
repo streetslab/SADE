@@ -153,7 +153,7 @@ if __name__ == "__main__":
                     {save_subdir} .......... \n")
         
         print(f'chromosome size for {chromosome}: {chromsize_dict[chromosome]} \n ')
-        insert_frequency_file = os.path.join(save_subdir, f'Pre_blacklist_{chromosome}_insert_frequency.pickle')
+        insert_frequency_file = os.path.join(save_subdir, f'{chromosome}_insert_frequency.pickle')
         
         # Step 2. Count Tn5 insertion frequency for each cell barcode in the given chromosome
         insert_frequency(chromosome=chromosome,
