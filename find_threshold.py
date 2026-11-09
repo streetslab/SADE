@@ -48,7 +48,7 @@ if __name__ == "__main__":
     sorted_log10entropy_list = get_sorted_entropy_helper(pickle_path)
     
     # Find threshold using Spline fitting
-    rank_cutoff, log10_entry_cutoff, cs, _, _ = fit_spline_and_find_cutoff(sorted_log10entropy_list, k=k_candidate_inflections, spline_s=_spline_s, spline_k=_spline_k)
+    rank_cutoff, log10_entry_cutoff, cs, _, regions_rank = fit_spline_and_find_cutoff(sorted_log10entropy_list, k=k_candidate_inflections, spline_s=_spline_s, spline_k=_spline_k)
 
     if rank_cutoff is None:
         print("No valid rank cutoff found")
@@ -57,6 +57,9 @@ if __name__ == "__main__":
             f.write(f"entropy cutoff, None\n")
             f.write(f"log10 entropy cutoff,None\n")
             f.write(f"rank cutoff, None\n")
+        with open(os.path.join(output_dir, f"all_candidate_entropy_cutoffs.csv"), 'a') as f:
+            f.write(f"All the candidate entropy inflection point ranks: None\n")
+
     else:
         print(f"Rank cutoff: {rank_cutoff}, log10 Entropy cutoff: {log10_entry_cutoff}")
 
@@ -64,6 +67,8 @@ if __name__ == "__main__":
             f.write(f"entropy cutoff,{10**log10_entry_cutoff}\n")
             f.write(f"log10 entropy cutoff,{log10_entry_cutoff}\n")
             f.write(f"rank cutoff,{rank_cutoff}\n")
+        with open(os.path.join(output_dir, f"all_candidate_entropy_cutoffs.csv"), 'a') as f:
+            f.write(f"All the candidate entropy inflection point ranks: {', '.join(str(r) for r in regions_rank)}\n")
 
 
     # Make plots
