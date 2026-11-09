@@ -157,7 +157,7 @@ if __name__ == "__main__":
         
         # Step 2. Count Tn5 insertion frequency for each cell barcode in the given chromosome
         insert_frequency(chromosome=chromosome,
-                         blacklist_file=blacklist_file,
+                         bl_region_file=blacklist_file,
                         fragments_file=frag_file,
                         chromsize_dict=chromsize_dict,
                         output_file=insert_frequency_file,
