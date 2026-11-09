@@ -50,12 +50,20 @@ if __name__ == "__main__":
     # Find threshold using Spline fitting
     rank_cutoff, log10_entry_cutoff, cs, _, _ = fit_spline_and_find_cutoff(sorted_log10entropy_list, k=k_candidate_inflections, spline_s=_spline_s, spline_k=_spline_k)
 
-    print(f"Rank cutoff: {rank_cutoff}, log10 Entropy cutoff: {log10_entry_cutoff}")
+    if rank_cutoff is None:
+        print("No valid rank cutoff found")
 
-    with open(os.path.join(output_dir, f"entropy_cutoff.csv"), 'w') as f:
-        f.write(f"entropy cutoff,{10**log10_entry_cutoff}\n")
-        f.write(f"log10 entropy cutoff,{log10_entry_cutoff}\n")
-        f.write(f"rank cutoff,{rank_cutoff}\n")
+        with open(os.path.join(output_dir, f"entropy_cutoff.csv"), 'w') as f:
+            f.write(f"entropy cutoff, None\n")
+            f.write(f"log10 entropy cutoff,None\n")
+            f.write(f"rank cutoff, None\n")
+    else:
+        print(f"Rank cutoff: {rank_cutoff}, log10 Entropy cutoff: {log10_entry_cutoff}")
+
+        with open(os.path.join(output_dir, f"entropy_cutoff.csv"), 'w') as f:
+            f.write(f"entropy cutoff,{10**log10_entry_cutoff}\n")
+            f.write(f"log10 entropy cutoff,{log10_entry_cutoff}\n")
+            f.write(f"rank cutoff,{rank_cutoff}\n")
 
 
     # Make plots
@@ -76,11 +84,13 @@ if __name__ == "__main__":
     d1_limit = np.abs(deriv[1]).max()
     ax[1].set_ylim(-d1_limit*1.1, d1_limit*1.1)
 
-    for i in range(3):
-        ax[i].axvline(rank_cutoff, color='pink', linestyle='--', label='rank_cutoff', lw=2)
-        if i == 0:
-            ax[i].axhline(log10_entry_cutoff, color='pink', linestyle='--', label='entry_cutoff', lw=2)
-
+    if rank_cutoff is not None:
+        for i in range(3):
+            ax[i].axvline(rank_cutoff, color='pink', linestyle='--', label='rank_cutoff', lw=2)
+            if i == 0:
+                ax[i].axhline(log10_entry_cutoff, color='pink', linestyle='--', label='entry_cutoff', lw=2)
+    else:
+        ax[0].text(0.5, 0.9, "No valid rank cutoff found", transform=ax[0].transAxes, fontsize=12, ha='center', va='center')
 
     ax[0].set_ylabel('Entropy(log10)\n', fontsize=10)
     ax[0].set_title('Fit spline', fontsize=12)
