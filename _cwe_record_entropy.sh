@@ -9,7 +9,6 @@ THIS_DIR=$(dirname $(realpath ${BASH_SOURCE[0]}))
 # echo ${THIS_DIR}
 # exit 0
 source "${THIS_DIR}/config.sh"
-blacklist_file="${THIS_DIR}/ref/${species}/${species}-blacklist.bed"
 source ${PYTHON_ENV}
 
 Usage="Usage: $0 -o output_dir -g species [-w window_size (default: ${_WindowSize})]"
@@ -53,6 +52,7 @@ if [[ -z ${species} ]]; then
     echo "${Usage}" >&2 &&    exit 1
 else
     species_genome_size_file="${THIS_DIR}/ref/${species}_genome_chromsize.tsv"
+    blacklist_file="${THIS_DIR}/ref/${species}/${species}-blacklist.bed"
     if [[ ! -f ${species_genome_size_file} ]]; then
         echo "Genome size file for species ${species} not found: ${species_genome_size_file}" >&2 && exit 1
     fi
