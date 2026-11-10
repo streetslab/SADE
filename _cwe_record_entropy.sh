@@ -46,9 +46,7 @@ if [[ -z ${window_size} ]]; then
     window_size=${_WindowSize}
 fi
 
-if [[ -z ${use_blacklisted_regions} ]]; then
-    use_blacklisted_regions=${_UseBlacklistedRegions}
-fi
+
 if [[ ${use_blacklisted_regions} != "Y" && ${use_blacklisted_regions} != "N" ]]; then
     echo "Invalid value for -b option. Please use Y or N."  >&2 && exit 1
 fi
