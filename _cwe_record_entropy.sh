@@ -18,7 +18,7 @@ window_size=""
 nprocess=""
 species=""
 
-while getopts "o:w:g:p:" opt; do
+while getopts "o:w:g:p:b:" opt; do
   case ${opt} in
     o)
       output_dir=$OPTARG
@@ -33,6 +33,9 @@ while getopts "o:w:g:p:" opt; do
     p)
       nprocess="$OPTARG"
       ;;
+    b)
+      use_blacklisted_regions="$OPTARG"
+      ;;
     *)
       echo "${Usage}"  && exit 1
       ;;
@@ -41,6 +44,13 @@ done
 
 if [[ -z ${window_size} ]]; then
     window_size=${_WindowSize}
+fi
+
+if [[ -z ${use_blacklisted_regions} ]]; then
+    use_blacklisted_regions=${_UseBlacklistedRegions}
+fi
+if [[ ${use_blacklisted_regions} != "Y" && ${use_blacklisted_regions} != "N" ]]; then
+    echo "Invalid value for -b option. Please use Y or N."  >&2 && exit 1
 fi
 
 if [[ -z ${nprocess} ]]; then
@@ -52,11 +62,20 @@ if [[ -z ${species} ]]; then
     echo "${Usage}" >&2 &&    exit 1
 else
     species_genome_size_file="${THIS_DIR}/ref/${species}_genome_chromsize.tsv"
-    blacklist_file="${THIS_DIR}/ref/${species}/${species}-blacklist.bed"
     if [[ ! -f ${species_genome_size_file} ]]; then
         echo "Genome size file for species ${species} not found: ${species_genome_size_file}" >&2 && exit 1
     fi
+    if [[ ${use_blacklisted_regions} == "Y" ]]; then
+        blacklist_file="${THIS_DIR}/ref/${species}/${species}-blacklist.bed"
+        if [[ ! -f ${blacklist_file} ]]; then
+            echo "You specified using blacklist region to exclude insertion counting, but the blacklist file for species ${species} not found: ${blacklist_file}" >&2 && exit 1
+        fi
+    elif [[ ${use_blacklisted_regions} == "N" ]]; then
+        blacklist_file="False"
+    fi
 fi
+
+
 
 if [[ -z ${output_dir} ]]; then
     echo "Output directory must be specified with -o option." >&2

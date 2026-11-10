@@ -53,6 +53,9 @@ insert_frequency_file="${output_dir}/${chromosome}_insert_frequency.pickle"
 species_genome_size_file="${SCRIPT_DIR}/ref/${species}_genome_chromsize.tsv"
 if [[ ${use_blacklisted_regions} == "Y" ]]; then
     blacklist_file="${SCRIPT_DIR}/ref/${species}/${species}-blacklist.bed"
+    if [[ ! -f ${blacklist_file} ]]; then
+        echo "You specified using blacklist region to exclude insertion counting, but the blacklist file for species ${species} not found: ${blacklist_file}" >&2 && exit 1
+    fi
 elif [[ ${use_blacklisted_regions} == "N" ]]; then
     blacklist_file="False"
 else
