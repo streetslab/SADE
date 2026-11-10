@@ -17,6 +17,7 @@ output_dir=""
 window_size=""
 nprocess=""
 species=""
+use_blacklisted_regions=""
 
 while getopts "o:w:g:p:b:" opt; do
   case ${opt} in
