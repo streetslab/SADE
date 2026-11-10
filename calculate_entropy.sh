@@ -4,9 +4,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/config.sh"
 
 
-Msg="Usage: $0 -o output_dir -c chromosome -w window_size -g species -p nprocess"
+Msg="Usage: $0 -o output_dir -c chromosome -w window_size -g species -p nprocess -b Y|N"
 
-while getopts "o:c:w:g:p:" opt; do
+while getopts "o:c:w:g:p:b:" opt; do
   case ${opt} in
     o)
       output_dir=$OPTARG
@@ -23,6 +23,9 @@ while getopts "o:c:w:g:p:" opt; do
       ;;
     p)
       nprocess="$OPTARG"
+      ;;
+    b)
+      use_blacklisted_regions="$OPTARG"
       ;;
     *)
       echo $Msg  && exit 1
@@ -48,7 +51,14 @@ fi
 source ${PYTHON_ENV}
 insert_frequency_file="${output_dir}/${chromosome}_insert_frequency.pickle"
 species_genome_size_file="${SCRIPT_DIR}/ref/${species}_genome_chromsize.tsv"
-blacklist_file="${SCRIPT_DIR}/ref/${species}/${species}-blacklist.bed"
+if [[ ${use_blacklisted_regions} == "Y" ]]; then
+    blacklist_file="${SCRIPT_DIR}/ref/${species}/${species}-blacklist.bed"
+elif [[ ${use_blacklisted_regions} == "N" ]]; then
+    blacklist_file="False"
+else
+    echo "Invalid value for -b option. Please use Y or N."  >&2 && exit 1
+fi
+
 if [[ ! -f ${insert_frequency_file} ]]; then
     python "${SCRIPT_DIR}/count_perchrom_tn5_insertions.py" \
         --output_dir="${output_dir}" \

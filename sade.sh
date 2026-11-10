@@ -3,6 +3,7 @@ set -o errexit # exit on error and dont continue
 set -o pipefail # catch errors in piped commands
 
 # GLOBAL VARIABLES >>>
+_UseBlacklistedRegions='Y' # default value for using blacklisted regions
 _DefaultNprocess=4
 _CHROMOSOME='chr1'
 _WindowSize=3000 # default window size
@@ -31,10 +32,11 @@ Usage="Usage: $0
                                           average genome coverage in basepair (bp) of a random given cell across all cell types for the species in the sample.
                                           Due to this reason, we manually set range to be [0.1, 1], where 1 means no filtering of DNA debris.]
           [-p <nprocess>. Default: ${_DefaultNprocess}. Number of computational threads to use.]
+          [-b Y|N. Default: 'Y' as in 'Yes use blacklisted regions'. Whether to use blacklisted regions.]
           "
 
 ## BEFORE ANYTHING ELSE: process options 
-while  getopts "f:o:g:c:w:k:s:p:" opt; do
+while  getopts "f:o:g:c:w:k:s:p:b:" opt; do
   case $opt in
     f) 
       fragment_file="$OPTARG"
@@ -61,6 +63,9 @@ while  getopts "f:o:g:c:w:k:s:p:" opt; do
       ;;
     p)
       nprocess="$OPTARG" # has default value
+      ;;
+    b)
+      use_blacklisted_regions="$OPTARG" # has default value
       ;;
     \?) 
       echo -e "Invalid option: -$OPTARG \n$usage" >&2
@@ -105,6 +110,13 @@ fi
 ##
 if [[ -z ${nprocess} ]]; then
     nprocess=${_DefaultNprocess}
+fi
+##
+if [[ -z ${use_blacklisted_regions} ]]; then
+    use_blacklisted_regions=${_UseBlacklistedRegions}
+fi
+if [[ ${use_blacklisted_regions} != "Y" && ${use_blacklisted_regions} != "N" ]]; then
+    echo "Invalid value for -b option. Please use Y or N."  >&2 && exit 1
 fi
 
 # Environment validation >>>
@@ -208,7 +220,8 @@ if [ ! -f ${barcode_entropy_df_file} ] ; then
           -g "${species}" \
           -c "${chromosome}" \
           -w "${window_size}" \
-          -p "${nprocess}"
+          -p "${nprocess}" \
+          -b "${use_blacklisted_regions}"
 fi 
 
 

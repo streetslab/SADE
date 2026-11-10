@@ -126,6 +126,8 @@ if __name__ == "__main__":
     windowsize = args.windowsize
     chromosomes_spec = args.chromosome
 
+
+    blacklist_file = None if blacklist_file == 'False' else blacklist_file
     
     chromsize_dict = get_chromsize_dict(genome_chromsize_file)
     
