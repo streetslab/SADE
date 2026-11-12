@@ -60,7 +60,7 @@ if [[ -z ${species} ]]; then
     echo "Species must be specified with -g option." >&2
     echo "${Usage}" >&2 &&    exit 1
 else
-    species_genome_size_file="${THIS_DIR}/ref/${species}_genome_chromsize.tsv"
+    species_genome_size_file="${THIS_DIR}/ref/${species}/${species}_genome_chromsize.tsv"
     if [[ ! -f ${species_genome_size_file} ]]; then
         echo "Genome size file for species ${species} not found: ${species_genome_size_file}" >&2 && exit 1
     fi
