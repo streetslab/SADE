@@ -50,7 +50,7 @@ fi
 ## TODO: add parallelization 
 source ${PYTHON_ENV}
 insert_frequency_file="${output_dir}/${chromosome}_insert_frequency.pickle"
-species_genome_size_file="${SCRIPT_DIR}/ref/${species}_genome_chromsize.tsv"
+species_genome_size_file="${SCRIPT_DIR}/ref/${species}/${species}_genome_chromsize.tsv"
 if [[ ${use_blacklisted_regions} == "Y" ]]; then
     blacklist_file="${SCRIPT_DIR}/ref/${species}/${species}-blacklist.bed"
     if [[ ! -f ${blacklist_file} ]]; then
