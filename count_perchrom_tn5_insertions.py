@@ -99,11 +99,11 @@ if __name__ == "__main__":
     '''
     running example:
     python3 calculate_entropy.py --output_dir 'res' \
-        --genome_chromsize 'ref/human_genome_chromsize.tsv' --chromosome 'chr22' 
+        --genome_chromsize 'ref/hg38/hg38_genome_chromsize.tsv' --chromosome 'chr22' 
     
     # input arguments:
     # output_dir: dir to save entropy calculation results 
-    # frag_file: tsv file of fragments from CR output 
+    # frag_file: tsv file of fragments 
     # genome_chromsize: tsv file of human genome chromosome size
     
     '''
