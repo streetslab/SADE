@@ -172,7 +172,7 @@ if __name__ == "__main__":
 
         # ax4 
         s4 = ax4.scatter(entropy_w_DNAdebrisflag_df['log_total_fragments'], entropy_w_DNAdebrisflag_df['log_entropy'],
-                        c = 1- entropy_w_DNAdebrisflag_df['P_closed_state'],
+                        c = entropy_w_DNAdebrisflag_df['P_open_state'],
                         alpha=1, s=5, cmap='coolwarm' )
         ax4.set_xlabel('Total Fragments ($log$)')
         ax4.set_yticklabels([]) # hide y-ticks
