@@ -62,7 +62,9 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
     P0 = np.exp(-mle_lambda)
 
     M0_openregion = Mnon0 / ( 1- P0) * P0
-    p_closestate = 1 -  (M0_openregion + Mnon0) / Mtotal
+    p_closestate_rpt = 1 -  (M0_openregion + Mnon0) / Mtotal
+    p_closestate = 1 -  (M0_openregion + Mnon0) / Mtotal / mean_adj # Adjust for read-depth to a constant
+
 
     if p_closestate < 0:
         return None, None, Mnon0, mle_lambda, P0, p_closestate
@@ -76,10 +78,9 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
     Entropy_openregion = -np.matmul(Poisson_prob, np.log2(Poisson_prob)) - P0 * np.log2(P0) 
 
     #Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion
-    # Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion / (Mnon0 * mean_adj) **2  # Adjust for sample size effect
     Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion / Mnon0 * (1 - P0) # Adjust for sample size effect (indirectly read-depth)
 
-    return Entropy_mixturedist, Entropy_openregion, Mnon0, mle_lambda, P0, p_closestate
+    return Entropy_mixturedist, Entropy_openregion, Mnon0, mle_lambda, P0, p_closestate_rpt
 
 
 ############################################# 
