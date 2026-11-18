@@ -80,7 +80,7 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
     #Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion
     Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion / Mnon0 * (1 - P0) # Adjust for sample size effect (indirectly read-depth)
 
-    return Entropy_mixturedist, Entropy_openregion, Mnon0, mle_lambda, P0, p_closestate_rpt
+    return Entropy_mixturedist, Entropy_openregion, Mnon0, mle_lambda, P0, 1-p_closestate_rpt
 
 
 ############################################# 
@@ -189,8 +189,8 @@ barcode_entropy = {}
 
 # Wrapper function for multiprocessing
 def mp_wrapper(bc):
-    Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(insert_record[bc])
-    return ( bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state )
+    Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_open_state = mixdist_mle_entropy(insert_record[bc])
+    return ( bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_open_state )
 
 ## << Move all the code before multiprocessing outside of __main__ 
 ## <<
@@ -221,25 +221,25 @@ if __name__ == "__main__":
             res = pool.imap_unordered(mp_wrapper, keys, chunksize=4000)
 
             with open(barcode_entropy_df_file, 'w') as f:
-                f.write(",Entropy,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_closed_state\n")
+                f.write(",Entropy,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_open_state\n")
                 for r in tqdm(res, total=len(keys), desc="Calculating entropy for each cell barcode"):
-                    bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = r
+                    bc, Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_open_state = r
                     if Entropy_mixturedist is None:
                         continue
                     barcode_entropy[bc] = Entropy_mixturedist
-                    f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_closed_state}\n")
+                    f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_open_state}\n")
 
 
     ## Single-threaded implementation 
     else:
         with open(barcode_entropy_df_file, 'w') as f:
-            f.write(",Entropy,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_closed_state\n")
+            f.write(",Entropy,Entropy_open_region,Mp,mle_lambda,P0_open_region,P_open_state\n")
             for bc, v in tqdm(insert_record.items(), desc="Calculating entropy for each cell barcode"):
-                Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_closed_state = mixdist_mle_entropy(v)
+                Entropy_mixturedist, Entropy_open_region, Mnon0, mle_lambda, p0, p_open_state = mixdist_mle_entropy(v)
                 if Entropy_mixturedist is None:
                     continue
                 barcode_entropy[bc] = Entropy_mixturedist
-                f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_closed_state}\n")
+                f.write(f"{bc},{Entropy_mixturedist},{Entropy_open_region},{Mnon0},{mle_lambda},{p0},{p_open_state}\n")
 
     # save entropy results
     with open(barcode_entropy_file, 'wb') as file:
