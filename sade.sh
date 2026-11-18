@@ -68,7 +68,7 @@ while  getopts "f:o:g:c:w:k:s:p:b:" opt; do
       use_blacklisted_regions="$OPTARG" # has default value
       ;;
     \?) 
-      echo -e "Invalid option: -$OPTARG \n$usage" >&2
+      echo -e "Invalid option: -$OPTARG \n${Usage}" >&2
       exit 1
       ;;
   esac

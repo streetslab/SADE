@@ -67,7 +67,7 @@ awk -F',' 'NR>1 {print $1}' "${filtered_bc_df_file}" > "${temp_bc_file}"  # Remo
 
 
 # ###### Approach 3: use rg (ripgrep) -- fastest
-rg -f "${temp_bc_file}"  "${fragment_file}" > "${filtered_fragments_file}"
+rg -F -w  -f "${temp_bc_file}"  "${fragment_file}" > "${filtered_fragments_file}"
 
 
 awk -v OFS='' -v prefix='CB:Z:' '{print prefix, $1}' "${temp_bc_file}" > "${output_dir}/Entropy_filtered_bc_CBZ.txt"
