@@ -158,8 +158,8 @@ if __name__ == "__main__":
         ax2.set_yticks([])
 
         # ax3 
-        DNAdebris_index = entropy_w_DNAdebrisflag_df['DNA_debris'] == 'YES'
-        noDNAdebris_index = entropy_w_DNAdebrisflag_df['DNA_debris'] == 'NO'
+        DNAdebris_index = entropy_w_DNAdebrisflag_df['Debris'] == 'YES'
+        noDNAdebris_index = entropy_w_DNAdebrisflag_df['Debris'] == 'NO'
         s3 = ax3.hist(entropy_w_DNAdebrisflag_df['log_entropy'][noDNAdebris_index], bins=50, alpha=0.6, color="#2E5BFF",
                     orientation='horizontal')
         s3_a = ax3.hist(entropy_w_DNAdebrisflag_df['log_entropy'][DNAdebris_index],  alpha=0.6, color="#E4D00A",

@@ -29,7 +29,7 @@ awk -F'[\t,]' -v OFS='\t' '
     {
         for (i = 1; i <= NF; i++) {
             if ($i == "Entropy")        e = i
-            if ($i == "P_closed_state") p = i
+            if ($i == "P_open_state") p = i
             if ($i == "mle_lambda") l = i
             if ($i == "Entropy_open_region") m = i
         }
@@ -43,7 +43,7 @@ awk -F'[\t,]' -v OFS='\t' '
     END {
         # Header
         line = "barcode"
-        for (c = 1; c <= nc; c++) line = line OFS chrs[c] "_Entropy" OFS chrs[c] "_P_closed_state" OFS chrs[c] "_mle_lambda" OFS chrs[c] "_Entropy_open_region"
+        for (c = 1; c <= nc; c++) line = line OFS chrs[c] "_Entropy" OFS chrs[c] "_P_open_state" OFS chrs[c] "_mle_lambda" OFS chrs[c] "_Entropy_open_region"
         print line
         # One row per barcode
         for (r = 1; r <= n; r++) {
