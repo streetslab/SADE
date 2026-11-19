@@ -6,6 +6,30 @@ import pickle
 from scipy.interpolate import BSpline, make_splrep
 
 
+
+def single_population_threshold(y: np.ndarray, limit: int=20000) -> tuple[float, int]:
+    '''
+    using median and median absolute deviation (MAD) to find a threshold for single entropy population of barcodes. 
+    
+    y: np.ndarray, log_10 entropy values ordered from high to low. 
+    '''
+    limit = min(limit, len(y))
+    y = y[:limit]
+    x = np.arange(len(y))
+    
+    median = np.median(y)
+    dev =y - median
+    abs_dev = np.abs(dev)
+    mad = np.median(abs_dev)
+    
+    # threshold at 3MAD away from the median
+    threshold =  3 * mad
+    left_rank_cutoff = (dev >  threshold).sum()
+    right_rank_cutoff = (dev > -threshold).sum()
+    
+    return left_rank_cutoff, right_rank_cutoff
+
+
 def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline_k: int=3, limit: int=20000) -> tuple[float, int, BSpline]:
     """
     Takes the ranks (x) and the corresponding log 10 entropy values (y) and returns estimated entropy cutoff, the rank cutoff, and the scipy BSpline object used to fit the curve.
@@ -14,7 +38,7 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
         Then takes the kth such region by ranks, and computes the greatest dropoff in the regions (min 1st derivative). returns this point as cutoff 
 
 
-    y: np.ndarray, the log_10 entropy values.
+    y: np.ndarray, log_10 entropy values ordered from high to low. 
     k: int, the first k inflection points as entropy cutoff candidates.
     spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. Not very sensitive and need not to be sensitive so not tuned much but has to be >= 3. 
     spline_k: int, degree of the spline fit, see scipy.make_splrep.
@@ -80,10 +104,20 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
     if rank == len(y) -1:
         # Warning: the rank cutoff is at the end of the considered range
         print(f"Warning: all barcodes considered have entropy above the cutoff. \n \
+            This indicates there is a single entropy population. \n  \
+            In a single population scenario, no inflection point can be found, thus the rank cut off is chosen to separate entropy outliers. \n \
             Take a look at the distribution of barcode entropies. If you expect to see mixture of empty barcodes and barcodes with cells, \
             there should be multiple populations in the entropy distribution.\n")
-    
+        
+        single_pop_rank_cutoff = single_population_threshold(y, limit=limit)
+        rank = single_pop_rank_cutoff[1]  # take the right rank cutoff as the threshold for single population of barcodes
+        regions_rank = [*single_pop_rank_cutoff]  # store both left and right rank cutoffs 
+        
     return rank, y[rank], cs, inflection_regions, regions_rank
+
+
+
+
 
 
 def get_sorted_entropy_helper(pickle_path: str):
