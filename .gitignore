@@ -2,6 +2,8 @@
 __pycache__/**
 **/__pycache__/**
 **/sade_pbmc500
+tutorial/sade_pbmc500
+!tutorial/sade_pbmc500/sade_out/figures/
 
 # All files/folders below should be only in manuscript branch
 CODE_REVIEW*
