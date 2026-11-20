@@ -72,8 +72,7 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
 
     # Entropy of mix states
     P_states = np.array([p_openstate, p_closestate])
-    Entropy_states = -np.matmul(P_states,  np.log2(P_states)) * Mtotal
-    # Entropy_states = -np.matmul(P_states * np.log2(P_states),  Mtotal*P_states)
+    Entropy_states = -np.matmul(P_states * np.log2(P_states),  Mtotal*P_states)
 
     # Entropy only for open regions under Poisson model
     Poisson_prob = poisson.pmf(cur_adj, mle_lambda ) *  (1 - P0) # Only for non-zero windows in open region
