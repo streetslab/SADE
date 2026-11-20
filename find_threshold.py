@@ -53,7 +53,7 @@ if __name__ == "__main__":
     # Find threshold using Spline fitting
     spline_fit_para = {"spline_s": _spline_s, "spline_k": _spline_k}
     #rank_cutoff, log10_entry_cutoff, cs, _, regions_rank = fit_spline_and_find_cutoff(sorted_log10entropy_list, k=k_candidate_inflections, **spline_fit_para)
-    rank_cutoff, log10_entry_cutoff, cs, _, regions_rank = optimize_threshold(sorted_log10entropy_list, targeted_cell_number=targeted_cell_number, k=k_candidate_inflections, spline_fit_para=spline_fit_para)
+    rank_cutoff, log10_entry_cutoff, cs, _, regions_rank = optimize_threshold(sorted_log10entropy_list, targeted_cell_number=targeted_cell_number, k=k_candidate_inflections, spline_para=spline_fit_para)
 
 
     if rank_cutoff is None:
