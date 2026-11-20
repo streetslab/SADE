@@ -64,7 +64,7 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
     M0_openregion = Mnon0 / ( 1- P0) * P0
     p_openstate =  (M0_openregion + Mnon0) / Mtotal / mean_adj # Adjust for read-depth to a constant
     p_closestate = 1 - p_openstate
-    p_openstate_rpt =  np.min(p_openstate * mean_adj,  1.0) # over-tagmentation do not adjust by read-depth bc Poisson is violated
+    p_openstate_rpt = np.minimum(p_openstate * mean_adj,  1.0) # over-tagmentation do not adjust by read-depth bc Poisson is violated
 
 
     if p_closestate < 0:
