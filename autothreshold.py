@@ -81,6 +81,7 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
         
         if count == k: 
             break
+        
 
     # find the global minimum first derivative among the k inflection regions found
     print(f"Found {len(inflection_regions)} inflection regions on ranked entropy curve.\n \
@@ -93,25 +94,37 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
         rank = np.argmin(first_deriv[left:right+1]) + left
         regions_rank.append(rank)
 
+    # add a shoulder of that cliff = point farthest above the chord from first to last point
+    # when not enough inflection candidates.
+    if flag and len(inflection_regions) < k:
+        fx = cs(x)
+        xs = x / x[-1] # scale to [0, 1] 
+        ys = (fx - fx.min()) / (fx.max() - fx.min()) # scale to [0, 1]
+        shoulder_point = int(np.argmax(ys - (ys[0] + (ys[-1] - ys[0]) * xs)))
+        regions_rank.append(shoulder_point)
+
     if not regions_rank:
         # region_rank empty, i.e. no such region found, 
         #  then there is no inflection point, so 2nd derivative < 0 all the time 
-        #  in this case, the rank cutoff naturally is the last barcode
-        rank = len(y) - 1
+        #  in this case, use the single population threshold to determine the rank cutoff
+        print("No inflection regions found, using single population threshold to determine rank cutoff.")
+        single_pop_rank_cutoff = single_population_threshold(y, limit=limit)
+        rank = single_pop_rank_cutoff[1]  # take the right rank cutoff as the threshold for single population of barcodes
+        
+        rank = min(rank, len(y) - 1)
     else:
         rank = regions_rank[np.argmin(first_deriv[regions_rank])]
 
     if rank == len(y) -1:
-        # Warning: the rank cutoff is at the end of the considered range
-        print(f"Warning: all barcodes considered have entropy above the cutoff. \n \
-            This indicates there is a single entropy population. \n  \
-            In a single population scenario, no inflection point can be found, thus the rank cut off is chosen to separate entropy outliers. \n \
-            Take a look at the distribution of barcode entropies. If you expect to see mixture of empty barcodes and barcodes with cells, \
-            there should be multiple populations in the entropy distribution.\n")
+        print("Warning: the dataset has very homogeneous samples. \n \
+              And no outliers are found, the rank cutoff is at the end of the considered range. \n \
+            ")
+        # print(f"Warning: all barcodes considered have entropy above the cutoff. \n \
+        #     This indicates there is a single entropy population. \n  \
+        #     In a single population scenario, no inflection point can be found, thus the rank cut off is chosen to separate entropy outliers. \n \
+        #     Take a look at the distribution of barcode entropies. If you expect to see mixture of empty barcodes and barcodes with cells, \
+        #     there should be multiple populations in the entropy distribution.\n")
         
-        single_pop_rank_cutoff = single_population_threshold(y, limit=limit)
-        rank = single_pop_rank_cutoff[1]  # take the right rank cutoff as the threshold for single population of barcodes
-        regions_rank = [*single_pop_rank_cutoff]  # store both left and right rank cutoffs 
         
     return rank, y[rank], cs, inflection_regions, regions_rank
 
