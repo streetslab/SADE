@@ -48,7 +48,7 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
     Mnon0 = non0_insert.shape[0]
 
 
-    non0_insert_adjusted = (non0_insert + 1) // 2 # adjust for paired-end sequencing
+    non0_insert_adjusted = (non0_insert + 2) // 2 # adjust for paired-end sequencing
     cur_adj, freq_adj = np.unique(non0_insert_adjusted, return_counts=True)
 
     ZTP_prob = freq_adj / Mnon0
