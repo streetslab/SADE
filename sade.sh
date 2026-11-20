@@ -7,7 +7,7 @@ _UseBlacklistedRegions='Y' # default value for using blacklisted regions
 _DefaultNprocess=4
 _CHROMOSOME='chr1'
 _WindowSize=3000 # default window size
-_CandidateInflectionPoints=2    # default number of candidate inflection points to consider for entropy threshold selection.
+_CandidateInflectionPoints=3    # default number of candidate inflection points to consider for entropy threshold selection.
 _GenomeSaturationCutoff=0.5 #  _GenomeSaturationCutoff := (1 - estimated_closed_region_genome_coverage). Higher value, less strict filtering of DNA-debris. 
                             # Human cells typically have <0.7 genome coverage in scATAC-seq. this cutoff is pretty loose. 
 # GLOBAL VARIABLES <<<
