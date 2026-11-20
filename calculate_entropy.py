@@ -67,7 +67,7 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
 
 
     if p_closestate < 0:
-        return None, None, Mnon0, mle_lambda, P0, p_closestate
+        return None, None, Mnon0, mle_lambda, P0, 1-p_closestate_rpt
 
     # Entropy of mix states
     p_openstate = 1 - p_closestate
