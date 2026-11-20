@@ -68,7 +68,7 @@ if __name__ == "__main__":
             f.write(f"log10 entropy cutoff,{log10_entry_cutoff}\n")
             f.write(f"rank cutoff,{rank_cutoff}\n")
         with open(os.path.join(output_dir, f"all_candidate_entropy_cutoffs.csv"), 'a') as f:
-            f.write(f"All the candidate entropy inflection point ranks: {', '.join(str(r) for r in regions_rank)}\n")
+            f.write(f"All the candidate entropy inflection point ranks, {', '.join(str(r) for r in regions_rank)}\n")
 
 
     # Make plots

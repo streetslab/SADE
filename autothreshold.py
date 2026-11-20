@@ -119,7 +119,6 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
 
 
 
-
 def get_sorted_entropy_helper(pickle_path: str):
     with open(pickle_path, 'rb') as f:
         entropies = pickle.load(f)
