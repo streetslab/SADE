@@ -30,6 +30,7 @@ def single_population_threshold(y: np.ndarray, limit: int=20000) -> tuple[float,
     return left_rank_cutoff, right_rank_cutoff
 
 
+
 def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline_k: int=3, limit: int=20000) -> tuple[float, int, BSpline]:
     """
     Takes the ranks (x) and the corresponding log 10 entropy values (y) and returns estimated entropy cutoff, the rank cutoff, and the scipy BSpline object used to fit the curve.
@@ -50,6 +51,7 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
     limit = min(limit, len(y))
     y = y[:limit]
     x = np.arange(len(y))
+    
     
     cs = make_splrep(x, y, k=spline_k, s=spline_s)
     
@@ -94,7 +96,7 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
         rank = np.argmin(first_deriv[left:right+1]) + left
         regions_rank.append(rank)
 
-    # add a shoulder of that cliff = point farthest above the chord from first to last point
+    # add a shoulder of that cliff = point farthest above the straight line between first to last point
     # when not enough inflection candidates.
     if flag and len(inflection_regions) < k:
         fx = cs(x)
@@ -128,6 +130,30 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
         
     return rank, y[rank], cs, inflection_regions, regions_rank
 
+
+
+def ignore_top_entropy_for_spline(y: np.ndarray, top_perc=0.01, limit: int=20000, fit_spline_para={}) -> np.ndarray:
+    '''
+    Ignore the top percentage of entropy values for spline fitting.
+    So that the extremely high entropy values (corresponding to debris) do not affect the spline fitting.
+    returns: np.ndarray, the entropy values with the top percentage ignored.
+    '''
+    print(f"Ignoring top {top_perc*100:.2f}% of entropy values for spline fitting...")
+    
+    limit = min(limit, len(y))
+    y = y[:limit]
+    top_count = int(len(y) * top_perc)
+    if top_count > 0:
+        y = y[top_count:]
+    
+    rank, entropy_cutoff, cs, inflection_regions, regions_rank = fit_spline_and_find_cutoff(y, **fit_spline_para)
+    rank_adjusted = rank + top_count
+    if len(regions_rank) > 0:
+        regions_rank_adjusted = [r + top_count for r in regions_rank]
+    else:
+        regions_rank_adjusted = []
+    return rank_adjusted, entropy_cutoff, cs, inflection_regions, regions_rank_adjusted
+    
 
 
 

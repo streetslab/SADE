@@ -19,7 +19,7 @@ import numpy as np
 
 #%%
 # Use the current directory for imports
-from autothreshold import   fit_spline_and_find_cutoff,  get_sorted_entropy_helper
+from autothreshold import   fit_spline_and_find_cutoff,  get_sorted_entropy_helper, ignore_top_entropy_for_spline
 
 
 #%%
@@ -48,7 +48,9 @@ if __name__ == "__main__":
     sorted_log10entropy_list = get_sorted_entropy_helper(pickle_path)
     
     # Find threshold using Spline fitting
-    rank_cutoff, log10_entry_cutoff, cs, _, regions_rank = fit_spline_and_find_cutoff(sorted_log10entropy_list, k=k_candidate_inflections, spline_s=_spline_s, spline_k=_spline_k)
+    spline_fit_para = {"k": k_candidate_inflections, "spline_s": _spline_s, "spline_k": _spline_k}
+    # rank_cutoff, log10_entry_cutoff, cs, _, regions_rank = fit_spline_and_find_cutoff(sorted_log10entropy_list, **spline_fit_para)
+    rank_cutoff, log10_entry_cutoff, cs, _, regions_rank = ignore_top_entropy_for_spline(sorted_log10entropy_list, spline_fit_para)
 
     if rank_cutoff is None:
         print("No valid rank cutoff found")
