@@ -41,7 +41,7 @@ Usage="Usage: $0
           "
 
 ## BEFORE ANYTHING ELSE: process options 
-while  getopts "f:o:g:c:w:k:s:p:b:" opt; do
+while  getopts "f:o:g:c:w:k:s:p:b:n:" opt; do
   case $opt in
     f) 
       fragment_file="$OPTARG"
