@@ -67,12 +67,13 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
     p_openstate_rpt = np.minimum(p_openstate * mean_adj,  1.0) # over-tagmentation do not adjust by read-depth bc Poisson is violated
 
 
-    if p_closestate < 0:
+    if p_openstate > 1:
         return None, None, Mnon0, mle_lambda, P0, p_openstate_rpt
 
     # Entropy of mix states
-    Entropy_states = -np.log2( p_closestate ) * p_closestate - p_openstate * np.log2( p_openstate )
-    Entropy_states = Entropy_states * Mtotal
+    #Entropy_states = Mtotal * (-1) * np.log2( p_closestate ) * p_closestate - p_openstate * np.log2( p_openstate )
+    P_states = np.array([p_openstate, p_closestate])
+    Entropy_states = -np.matmul(P_states * np.log2(P_states),  Mtotal*P_states)
 
     # Entropy only for open regions under Poisson model
     Poisson_prob = poisson.pmf(cur_adj, mle_lambda ) *  (1 - P0) # Only for non-zero windows in open region
