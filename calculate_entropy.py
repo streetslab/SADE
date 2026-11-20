@@ -80,7 +80,7 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
     Entropy_openregion =  -np.matmul(Poisson_prob * np.log2(Poisson_prob), freq_adj) - M0_openregion * P0 * np.log2(P0)
 
     #Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion
-    Entropy_mixturedist =  Entropy_states + p_openstate * Entropy_openregion / Mnon0 * (1-P0) # adjust read-depth indirectly
+    Entropy_mixturedist =  Entropy_states + p_openstate * Entropy_openregion / mean_adj # adjust read-depth indirectly
     
     return Entropy_mixturedist, Entropy_openregion, Mnon0, mle_lambda, P0, p_openstate_rpt
 

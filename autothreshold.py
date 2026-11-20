@@ -26,6 +26,7 @@ def single_population_threshold(y: np.ndarray, limit: int=20000) -> tuple[float,
     threshold =  3 * mad
     left_rank_cutoff = (dev >  threshold).sum()
     right_rank_cutoff = (dev > -threshold).sum()
+    right_rank_cutoff = min(right_rank_cutoff, len(y) - 1)
     
     return left_rank_cutoff, right_rank_cutoff
 
@@ -111,11 +112,10 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
         #  in this case, use the single population threshold to determine the rank cutoff
         print("No inflection regions found, using single population threshold to determine rank cutoff.")
         single_pop_rank_cutoff = single_population_threshold(y, limit=limit)
-        rank = single_pop_rank_cutoff[1]  # take the right rank cutoff as the threshold for single population of barcodes
         
-        rank = min(rank, len(y) - 1)
-    else:
-        rank = regions_rank[np.argmin(first_deriv[regions_rank])]
+        regions_rank.append(single_pop_rank_cutoff[1])
+    
+    rank = regions_rank[np.argmin(first_deriv[regions_rank])]
 
     if rank == len(y) -1:
         print("Warning: the dataset has very homogeneous samples. \n \
@@ -127,35 +127,27 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
         #     Take a look at the distribution of barcode entropies. If you expect to see mixture of empty barcodes and barcodes with cells, \
         #     there should be multiple populations in the entropy distribution.\n")
         
+    return rank, y, cs, first_deriv, regions_rank
+
+
+def optimize_threshold(y: np.ndarray, targeted_cell_number: int, k=4, limit: int=20000, spline_para={}):
+
+    rank, y, cs, first_deriv, regions_rank = fit_spline_and_find_cutoff(y, k=k, limit=limit, **spline_para)
+    
+    if targeted_cell_number > 0:
+        search_range = ( targeted_cell_number//5, limit )
+
+        # Choose the entropy cutoff within the [N/5, min(5*N, limit)] range. N=targeted_cell_number
+        ranks_could_be_in_search_range = regions_rank.copy()
+        while rank < search_range[0] or rank > search_range[1]:
+            if len(ranks_could_be_in_search_range) == 0:
+                break
+            rank = ranks_could_be_in_search_range[np.argmin(first_deriv[ranks_could_be_in_search_range])]
+            ranks_could_be_in_search_range.remove(rank)
+        return rank, y[rank], cs, first_deriv[regions_rank], regions_rank
+    
+    return rank, y[rank], cs, first_deriv[regions_rank], regions_rank
         
-    return rank, y[rank], cs, inflection_regions, regions_rank
-
-
-
-def ignore_top_entropy_for_spline(y: np.ndarray, top_perc=0.01, limit: int=20000, fit_spline_para={}) -> np.ndarray:
-    '''
-    Ignore the top percentage of entropy values for spline fitting.
-    So that the extremely high entropy values (corresponding to debris) do not affect the spline fitting.
-    returns: np.ndarray, the entropy values with the top percentage ignored.
-    '''
-    print(f"Ignoring top {top_perc*100:.2f}% of entropy values for spline fitting...")
-    
-    limit = min(limit, len(y))
-    y = y[:limit]
-    top_count = int(len(y) * top_perc)
-    if top_count > 0:
-        y = y[top_count:]
-    
-    rank, entropy_cutoff, cs, inflection_regions, regions_rank = fit_spline_and_find_cutoff(y, **fit_spline_para)
-    rank_adjusted = rank + top_count
-    if len(regions_rank) > 0:
-        regions_rank_adjusted = [r + top_count for r in regions_rank]
-    else:
-        regions_rank_adjusted = []
-    return rank_adjusted, entropy_cutoff, cs, inflection_regions, regions_rank_adjusted
-    
-
-
 
 
 def get_sorted_entropy_helper(pickle_path: str):
