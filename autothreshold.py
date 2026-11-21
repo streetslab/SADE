@@ -33,7 +33,7 @@ def single_population_threshold(y: np.ndarray, limit: int=20000) -> tuple[float,
 def find_shoulder(x, cs):
     # Find the shoulder of that cliff = point farthest above the straight line between first to last point
         fx = cs(x)
-        xs = x / x[-1] # scale to [0, 1] 
+        xs = (x - x[0]) / (x[-1] - x[0])   # scale to [0, 1] 
         ys = (fx - fx.min()) / (fx.max() - fx.min()) # scale to [0, 1]
         shoulder_point = int(np.argmax(ys - (ys[0] + (ys[-1] - ys[0]) * xs)))
         return shoulder_point
@@ -107,22 +107,14 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
                 right = x[-1]
             rank = np.argmin(first_deriv[left:right+1]) + left
             regions_rank.append(rank)
-        # Add a shoulder point if not enough inflection regions are found
-        if flag and len(regions_rank) < k:
-            offset_index = regions_rank[-1]
-            shoulder_point = find_shoulder(x[offset_index:], cs)
-            regions_rank.append(offset_index + shoulder_point)
+
+    # when no inflection regions are found and k > 1, add a shoulder point as a fallback
+    if flag and not inflection_regions and k > 1: 
+        shoulder_point = find_shoulder(x, cs)
+        regions_rank.append(shoulder_point)
 
     print(f"Found {len(regions_rank)} inflection regions on ranked entropy curve.\n \
         Look for the global minimum first derivative among these regions to determine entropy cutoff.")  
-
-    # add a shoulder of that cliff = point farthest above the straight line between first to last point
-    # when not enough inflection candidates.
-    # This is normally due to there is one population corresponding to cells + empty droplets, 
-    # no extreme high entropy outliers corresponding to debris. 
-    if flag and len(inflection_regions) < k:
-        shoulder_point = find_shoulder(x, cs)
-        regions_rank.append(shoulder_point)
 
     if not regions_rank:
         # region_rank empty, i.e. no such region found, 
