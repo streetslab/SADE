@@ -171,39 +171,3 @@ def get_sorted_entropy_helper(pickle_path: str):
     # return np.array(list(rank)), np.array(np.log10(list(values)))
     return np.array(np.log10(list(values)))  # only return sorted entropy values
 
-
-
-def make_plots(pickle_path, save_path):
-    y= get_sorted_entropy_helper(pickle_path)
-    x = np.arange(len(y))
-    rank_cutoff, entr_cutoff, cs = fit_spline_and_find_cutoff(y)
-
-    spl_y = cs(x)
-    deriv = {}
-    for i in range(1, 3):
-        deriv[i] = cs.derivative(i)(x)
-
-    deriv[2] = deriv[2] / np.abs(deriv[2]).max()  # normalize second derivative for better visualization    
-    
-    fig, ax = plt.subplots(3, 1, figsize=(10,10), dpi=300)
-    ax[0].plot(x, y, 'o', label='data')
-    ax[0].plot(x, spl_y, label='spline')
-    ax[1].plot(x, deriv[1], label='first derivative')
-    ax[2].plot(x, deriv[2], label='second derivative')
-
-    d1_limit = np.abs(deriv[1]).max()
-    ax[1].set_ylim(-d1_limit*1.1, d1_limit*1.1)
-
-    for i in range(3):
-        ax[i].axvline(rank_cutoff, color='pink', linestyle='--', label='rank_cutoff')
-        if i == 0:
-            ax[i].axhline(entr_cutoff, color='pink', linestyle='--', label='entr_cutoff')
-
-    ax[0].set_xlabel('rank')
-    ax[0].set_ylabel('log 10 entropy')
-    ax[0].set_title('fit spline')
-    ax[1].set_title('first derivative')
-    ax[2].set_title('second derivative')
-
-    plt.tight_layout()
-    fig.savefig(save_path)
