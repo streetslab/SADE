@@ -56,27 +56,30 @@ if __name__ == "__main__":
 
     # %%
     # Knee plot for entropy
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.plot(np.log10(entropy[::-1] ), '-', color='blue', alpha=0.5, label='Entropy(filtered Barcodes)')
-    ax.plot(np.log10(entropy_all[::-1] ), '-', color='red', alpha=0.5, label='Entropy(all Barcodes)')
+    fig, ax = plt.subplots(figsize=(8, 5), nrows=1, ncols=1, dpi=300)
+    ax.plot(np.log10(entropy[::-1] ), '-', color='blue', alpha=0.5, label='Filtered Barcodes')
+    ax.plot(np.log10(entropy_all[::-1] ), '-', color='red', alpha=0.5, label='All barcodes')
     if EntropyThreshold is not None:
-        ax.axhline(y=np.log10(EntropyThreshold ), color='green', linestyle='--', label=f'log10({EntropyThreshold:.4f})')
-    ax.set_ylabel('Entropy (log10)')
+        ax.axhline(y=np.log10(EntropyThreshold ), color='green', linestyle='--', label=f'{np.log10(EntropyThreshold):.4f} (log10)')
     ax.set_xlabel('Barcode Rank')
+    ax.set_ylabel('Entropy (log10)')
     fig.legend()
     fig_file = os.path.join(figure_subdir, f'{chromosome}_entropy_knee_plot_logscale.png')
     fig.savefig(fig_file, bbox_inches='tight')
     #%%
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.hist(np.log10(entropy_all ), bins=100, color='orange',  alpha=0.5, label='log10(Entropy) (all Barcodes)')
-    ax.hist(np.log10(entropy ), bins=100, color='blue',  alpha=0.5, label='log10(Entropy) (filtered Barcodes)')
-    if EntropyThreshold is not None:
-        ax.axvline(x=np.log10(EntropyThreshold), color='green', linestyle='--', label=f'log10({EntropyThreshold:.4f})')
-    ax.set_ylabel('Frequency')
-    ax.set_xlabel('log10(Entropy)')
-    fig.legend()
-    fig_file = os.path.join(figure_subdir, f'{chromosome}_Entropy_histogram.png')
-    fig.savefig(fig_file, bbox_inches='tight')
+    # Histogram of entropy values
+    # fig, axes = plt.subplots(figsize=(8, 5), nrows=2, ncols=1, sharex=True)
+    # axes[0].hist(np.log10(entropy_all ), bins=100, color='orange',  alpha=0.5, label='All barcodes')
+    # axes[1].hist(np.log10(entropy ), bins=100, color='blue',  alpha=0.5, label='Filtered Barcodes')
+    # if EntropyThreshold is not None:
+    #     for ax in axes:
+    #         ax.axvline(x=np.log10(EntropyThreshold), color='green', linestyle='--', label=f'{np.log10(EntropyThreshold):.4f} (log10)')          
+    # for ax in axes:
+    #     ax.set_xlabel('Entropy (log10)')
+    #     ax.set_ylabel('Frequency')
+    # fig.legend()
+    # fig_file = os.path.join(figure_subdir, f'{chromosome}_Entropy_histogram.png')
+    # fig.savefig(fig_file, bbox_inches='tight')
 
     #%%
     Make_demonstration_plot=False
@@ -91,18 +94,15 @@ if __name__ == "__main__":
         garbage_frag_df = frag_df[~ frag_df['entropy_pass']]
 
         fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(15, 6), sharey=True)
+        titles = ['Reads in permitted droplets', 'All reads in the experiment', 'Reads in filtered out droplets']
         ax[0].hist(filter_frag_df['length'], bins=100, alpha=0.5, label='fl', color='green', range=(0,500))
-        ax[0].set_xlabel('Fragment length')
-        ax[0].set_ylabel('Frequency')
-        ax[0].set_title('Reads in permitted droplets')
         ax[1].hist(frag_df['length'], bins=100, alpha=0.5, label='fl', color='green', range=(0,500))
-        ax[1].set_xlabel('Fragment length')
-        ax[1].set_ylabel('Frequency')
-        ax[1].set_title('All reads in the experiment')
         ax[2].hist(garbage_frag_df['length'], bins=100, alpha=0.5, label='fl', color='green', range=(0,500))
-        ax[2].set_xlabel('Fragment length')
-        ax[2].set_ylabel('Frequency')
-        ax[2].set_title('Reads in filtered out droplets')
+
+        for i, a in enumerate(ax):
+            a.set_xlabel('Fragment length')
+            a.set_ylabel('Frequency')
+            a.set_title(titles[i])
         fig_file = os.path.join(output_dir, 'figures', 'frag_length_distribution.png')
         fig.tight_layout()
         fig.savefig(fig_file)

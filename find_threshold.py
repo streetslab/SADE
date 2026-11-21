@@ -112,3 +112,19 @@ if __name__ == "__main__":
     
     fig.savefig(os.path.join(figure_subdir, f"{chromosome}_entropy_threshold_fitting_k{_k}_s{_spline_s}.png"))
     plt.close(fig)
+    
+    
+    
+    # Histogram of entropy values
+    fig, axes = plt.subplots(figsize=(8, 5), nrows=2, ncols=1, sharex=True)
+    axes[0].hist(sorted_log10entropy_list, bins=100, color='orange',  alpha=0.5, label='All barcodes')
+    if rank_cutoff is not None:
+        axes[1].hist(sorted_log10entropy_list[:rank_cutoff], bins=100, color='blue',  alpha=0.5, label='Filtered Barcodes')
+        for ax in axes:
+            ax.axvline(x=log10_entry_cutoff, color='green', linestyle='--', label=f'{log10_entry_cutoff:.4f} (log10)')
+    for ax in axes:
+        ax.set_xlabel('Entropy (log10)')
+        ax.set_ylabel('Frequency')
+    fig.legend()
+    fig_file = os.path.join(figure_subdir, f'{chromosome}_Entropy_histogram.png')
+    fig.savefig(fig_file, bbox_inches='tight')
