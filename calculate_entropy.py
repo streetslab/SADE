@@ -62,25 +62,26 @@ def mixdist_mle_entropy(tn5_insert_array:scipy.sparse):
     P0 = np.exp(-mle_lambda)
 
     M0_openregion = Mnon0 / ( 1- P0) * P0
-    p_closestate_rpt = 1 -  (M0_openregion + Mnon0) / Mtotal
-    p_closestate = 1 -  (M0_openregion + Mnon0) / Mtotal / mean_adj # Adjust for read-depth to a constant
+    p_openstate =  (M0_openregion + Mnon0) / Mtotal / mean_adj # Adjust for read-depth to a constant
+    p_closestate = 1 - p_openstate
+    p_openstate_rpt = np.minimum(p_openstate * mean_adj,  1.0) # over-tagmentation do not adjust by read-depth bc Poisson is violated
 
 
-    if p_closestate < 0:
-        return None, None, Mnon0, mle_lambda, P0, 1-p_closestate_rpt
+    if p_openstate > 1:
+        return None, None, Mnon0, mle_lambda, P0, p_openstate_rpt
 
     # Entropy of mix states
-    p_openstate = 1 - p_closestate
-    Entropy_states = -np.log2( p_closestate ) * p_closestate - p_openstate * np.log2( p_openstate )
+    P_states = np.array([p_openstate, p_closestate])
+    Entropy_states = -np.matmul(P_states, np.log2(P_states))
 
     # Entropy only for open regions under Poisson model
     Poisson_prob = ZTP_prob * (1 - P0) # Only for non-zero windows in open region
-    Entropy_openregion = -np.matmul(Poisson_prob, np.log2(Poisson_prob)) - P0 * np.log2(P0) 
+    Entropy_openregion =  -np.matmul(Poisson_prob * np.log2(Poisson_prob), freq_adj) - M0_openregion * P0 * np.log2(P0)
 
     #Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion
     Entropy_mixturedist = Entropy_states + p_openstate * Entropy_openregion / Mnon0 * (1 - P0) # Adjust for sample size effect (indirectly read-depth)
 
-    return Entropy_mixturedist, Entropy_openregion, Mnon0, mle_lambda, P0, 1-p_closestate_rpt
+    return Entropy_mixturedist, Entropy_openregion, Mnon0, mle_lambda, P0, p_openstate_rpt
 
 
 ############################################# 
