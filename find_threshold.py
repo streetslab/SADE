@@ -2,8 +2,8 @@
 
 #%% 
 # Set default parameters
-_k = 2
-_spline_s = 3
+_k = 3
+_spline_s = 1
 _spline_k = 3
 # Each parameters above correspond to the the parameters in fit_spline_and_find_cutoff function in autothreshold.py below:
 # k: int, the first k inflection points as entropy cutoff candidates.
