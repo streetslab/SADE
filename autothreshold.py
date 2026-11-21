@@ -98,7 +98,7 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
             # right is where the second derivative changes from negative to positive, and left is the first point where the second derivative is negative.
             inflection_regions[count] = (left, right) # store inflection region boundaries
             count += 1
-        
+    
     if inflection_regions: # when there are inflection regions found in k>1 
         # find the global minimum first derivative among the k inflection regions found
         for region_index, (region) in inflection_regions.items():
@@ -107,6 +107,11 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
                 right = x[-1]
             rank = np.argmin(first_deriv[left:right+1]) + left
             regions_rank.append(rank)
+        # Add a shoulder point if not enough inflection regions are found
+        if flag and len(regions_rank) < k:
+            offset_index = regions_rank[-1]
+            shoulder_point = find_shoulder(x[offset_index:], cs)
+            regions_rank.append(offset_index + shoulder_point)
 
     print(f"Found {len(regions_rank)} inflection regions on ranked entropy curve.\n \
         Look for the global minimum first derivative among these regions to determine entropy cutoff.")  
