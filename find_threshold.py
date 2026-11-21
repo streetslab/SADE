@@ -87,10 +87,16 @@ if __name__ == "__main__":
     deriv[2] = deriv[2] / np.abs(deriv[2]).max()  # normalize second derivative for better visualization    
 
     fig, ax = plt.subplots(3, 1, figsize=(8,6), dpi=800)
-    ax[0].plot(rank_list, sorted_log10entropy_list, 'o', label='data')
-    ax[0].plot(rank_list, spl_y, label='spline')
-    ax[1].plot(rank_list, deriv[1], label='first derivative')
-    ax[2].plot(rank_list, deriv[2], label='second derivative')
+    
+    labels = ['Spline','First derivative', 'Second derivative']
+    ax[0].plot(rank_list, sorted_log10entropy_list, 'o')
+    ax[0].plot(rank_list, spl_y, label='Fitted spline')
+    ax[1].plot(rank_list, deriv[1])
+    ax[2].plot(rank_list, deriv[2])
+
+    ylabels = ['Entropy(log10)', 'First derivative', 'Second derivative']
+    for i in range(3):
+        ax[i].set_ylabel(ylabels[i], fontsize=10)
 
     d1_limit = np.abs(deriv[1]).max()
     ax[1].set_ylim(-d1_limit*1.1, d1_limit*1.1)
@@ -103,14 +109,14 @@ if __name__ == "__main__":
     else:
         ax[0].text(0.5, 0.9, "No valid rank cutoff found", transform=ax[0].transAxes, fontsize=12, ha='center', va='center')
 
-    ax[0].set_ylabel('Entropy(log10)\n', fontsize=10)
+
     ax[0].set_title('Fit spline', fontsize=12)
-    ax[1].set_ylabel('First derivative', fontsize=10)
-    ax[2].set_ylabel('Second derivative', fontsize=10)
-    ax[2].set_xlabel('Droplet rank', fontsize=10)
-    fig.tight_layout()
+    ax[-1].set_xlabel('Droplet rank', fontsize=10)
+
     
-    fig.savefig(os.path.join(figure_subdir, f"{chromosome}_entropy_threshold_fitting_k{_k}_s{_spline_s}.png"))
+    fig.tight_layout()
+    fig_file = os.path.join(figure_subdir, f"{chromosome}_entropy_threshold_fitting_k{_k}_s{_spline_s}.png")
+    fig.savefig(fig_file, bbox_inches='tight')
     plt.close(fig)
     
     
@@ -128,3 +134,4 @@ if __name__ == "__main__":
     fig.legend()
     fig_file = os.path.join(figure_subdir, f'{chromosome}_Entropy_histogram.png')
     fig.savefig(fig_file, bbox_inches='tight')
+    plt.close(fig)
