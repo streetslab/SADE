@@ -30,7 +30,15 @@ def single_population_threshold(y: np.ndarray, limit: int=20000) -> tuple[float,
     
     return left_rank_cutoff, right_rank_cutoff
 
-
+def find_shoulder(x, cs):
+    # Find the shoulder of that cliff = point farthest above the straight line between first to last point
+        fx = cs(x)
+        xs = x / x[-1] # scale to [0, 1] 
+        ys = (fx - fx.min()) / (fx.max() - fx.min()) # scale to [0, 1]
+        shoulder_point = int(np.argmax(ys - (ys[0] + (ys[-1] - ys[0]) * xs)))
+        return shoulder_point
+    
+    
 
 def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline_k: int=3, limit: int=20000) -> tuple[float, int, BSpline]:
     """
@@ -42,7 +50,7 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
 
     y: np.ndarray, log_10 entropy values ordered from high to low. 
     k: int, the first k inflection points as entropy cutoff candidates.
-    spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. Not very sensitive and need not to be sensitive so not tuned much but has to be >= 3. 
+    spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. 
     spline_k: int, degree of the spline fit, see scipy.make_splrep.
 
     returns: tuple[int,float,Bspline]
@@ -66,8 +74,17 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
     count = 0 
 
     inflection_regions = {}
+    regions_rank = []
     
+    # When k is 1, directly find the shoulder point as the first inflection candidate
+    if k == 1:
+        shoulder_point = find_shoulder(x, cs)
+        regions_rank.append(shoulder_point)
+        count += 1
+    # when k > 1, iterate through the second derivative to find inflection regions
     for i in x: 
+        if count == k: 
+            break
         
         d_2 = second_deriv[i]
         if (not flag) and d_2 < 0:
@@ -82,28 +99,24 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline
             inflection_regions[count] = (left, right) # store inflection region boundaries
             count += 1
         
-        if count == k: 
-            break
-        
+    if inflection_regions: # when there are inflection regions found in k>1 
+        # find the global minimum first derivative among the k inflection regions found
+        for region_index, (region) in inflection_regions.items():
+            left, right = region
+            if left > right:
+                right = x[-1]
+            rank = np.argmin(first_deriv[left:right+1]) + left
+            regions_rank.append(rank)
 
-    # find the global minimum first derivative among the k inflection regions found
-    print(f"Found {len(inflection_regions)} inflection regions on ranked entropy curve.\n \
+    print(f"Found {len(regions_rank)} inflection regions on ranked entropy curve.\n \
         Look for the global minimum first derivative among these regions to determine entropy cutoff.")  
-    regions_rank = []
-    for region_index, (region) in inflection_regions.items():
-        left, right = region
-        if left > right:
-            right = x[-1]
-        rank = np.argmin(first_deriv[left:right+1]) + left
-        regions_rank.append(rank)
 
     # add a shoulder of that cliff = point farthest above the straight line between first to last point
     # when not enough inflection candidates.
+    # This is normally due to there is one population corresponding to cells + empty droplets, 
+    # no extreme high entropy outliers corresponding to debris. 
     if flag and len(inflection_regions) < k:
-        fx = cs(x)
-        xs = x / x[-1] # scale to [0, 1] 
-        ys = (fx - fx.min()) / (fx.max() - fx.min()) # scale to [0, 1]
-        shoulder_point = int(np.argmax(ys - (ys[0] + (ys[-1] - ys[0]) * xs)))
+        shoulder_point = find_shoulder(x, cs)
         regions_rank.append(shoulder_point)
 
     if not regions_rank:

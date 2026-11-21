@@ -7,7 +7,7 @@ _spline_s = 3
 _spline_k = 3
 # Each parameters above correspond to the the parameters in fit_spline_and_find_cutoff function in autothreshold.py below:
 # k: int, the first k inflection points as entropy cutoff candidates.
-# spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. Not very sensitive and need not to be sensitive so not tuned much but has to be >= 3. 
+# spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. Not very sensitive when >3.   
 # spline_k: int, degree of the spline fit, see scipy.make_splrep.
 
 #%%
