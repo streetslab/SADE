@@ -26,11 +26,21 @@ def single_population_threshold(y: np.ndarray, limit: int=20000) -> tuple[float,
     threshold =  3 * mad
     left_rank_cutoff = (dev >  threshold).sum()
     right_rank_cutoff = (dev > -threshold).sum()
+    right_rank_cutoff = min(right_rank_cutoff, len(y) - 1)
     
     return left_rank_cutoff, right_rank_cutoff
 
+def find_shoulder(x, cs):
+    # Find the shoulder of that cliff = point farthest above the straight line between first to last point
+        fx = cs(x)
+        xs = x / x[-1] # scale to [0, 1] 
+        ys = (fx - fx.min()) / (fx.max() - fx.min()) # scale to [0, 1]
+        shoulder_point = int(np.argmax(ys - (ys[0] + (ys[-1] - ys[0]) * xs)))
+        return shoulder_point
+    
+    
 
-def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline_k: int=3, limit: int=20000) -> tuple[float, int, BSpline]:
+def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=1, spline_k: int=3, limit: int=20000) -> tuple[float, int, BSpline]:
     """
     Takes the ranks (x) and the corresponding log 10 entropy values (y) and returns estimated entropy cutoff, the rank cutoff, and the scipy BSpline object used to fit the curve.
     The function fits a smoothing spline to the curve, then computes the first and second derivatives on the spline. 
@@ -40,7 +50,7 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
 
     y: np.ndarray, log_10 entropy values ordered from high to low. 
     k: int, the first k inflection points as entropy cutoff candidates.
-    spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. Not very sensitive and need not to be sensitive so not tuned much but has to be >= 3. 
+    spline_s: int >=3, spline smoothing conditions, see scipy.make_splrep. 
     spline_k: int, degree of the spline fit, see scipy.make_splrep.
 
     returns: tuple[int,float,Bspline]
@@ -50,6 +60,7 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
     limit = min(limit, len(y))
     y = y[:limit]
     x = np.arange(len(y))
+    
     
     cs = make_splrep(x, y, k=spline_k, s=spline_s)
     
@@ -63,8 +74,17 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
     count = 0 
 
     inflection_regions = {}
+    regions_rank = []
     
+    # When k is 1, directly find the shoulder point as the first inflection candidate
+    if k == 1:
+        shoulder_point = find_shoulder(x, cs)
+        regions_rank.append(shoulder_point)
+        count += 1
+    # when k > 1, iterate through the second derivative to find inflection regions
     for i in x: 
+        if count == k: 
+            break
         
         d_2 = second_deriv[i]
         if (not flag) and d_2 < 0:
@@ -79,44 +99,68 @@ def fit_spline_and_find_cutoff( y: np.ndarray, k: int=2, spline_s: int=7, spline
             inflection_regions[count] = (left, right) # store inflection region boundaries
             count += 1
         
-        if count == k: 
-            break
+    if inflection_regions: # when there are inflection regions found in k>1 
+        # find the global minimum first derivative among the k inflection regions found
+        for region_index, (region) in inflection_regions.items():
+            left, right = region
+            if left > right:
+                right = x[-1]
+            rank = np.argmin(first_deriv[left:right+1]) + left
+            regions_rank.append(rank)
 
-    # find the global minimum first derivative among the k inflection regions found
-    print(f"Found {len(inflection_regions)} inflection regions on ranked entropy curve.\n \
+    print(f"Found {len(regions_rank)} inflection regions on ranked entropy curve.\n \
         Look for the global minimum first derivative among these regions to determine entropy cutoff.")  
-    regions_rank = []
-    for region_index, (region) in inflection_regions.items():
-        left, right = region
-        if left > right:
-            right = x[-1]
-        rank = np.argmin(first_deriv[left:right+1]) + left
-        regions_rank.append(rank)
+
+    # add a shoulder of that cliff = point farthest above the straight line between first to last point
+    # when not enough inflection candidates.
+    # This is normally due to there is one population corresponding to cells + empty droplets, 
+    # no extreme high entropy outliers corresponding to debris. 
+    if flag and len(inflection_regions) < k:
+        shoulder_point = find_shoulder(x, cs)
+        regions_rank.append(shoulder_point)
 
     if not regions_rank:
         # region_rank empty, i.e. no such region found, 
         #  then there is no inflection point, so 2nd derivative < 0 all the time 
-        #  in this case, the rank cutoff naturally is the last barcode
-        rank = len(y) - 1
-    else:
-        rank = regions_rank[np.argmin(first_deriv[regions_rank])]
+        #  in this case, use the single population threshold to determine the rank cutoff
+        print("No inflection regions found, using single population threshold to determine rank cutoff.")
+        single_pop_rank_cutoff = single_population_threshold(y, limit=limit)
+        
+        regions_rank.append(single_pop_rank_cutoff[1])
+    
+    rank = regions_rank[np.argmin(first_deriv[regions_rank])]
 
     if rank == len(y) -1:
-        # Warning: the rank cutoff is at the end of the considered range
-        print(f"Warning: all barcodes considered have entropy above the cutoff. \n \
-            This indicates there is a single entropy population. \n  \
-            In a single population scenario, no inflection point can be found, thus the rank cut off is chosen to separate entropy outliers. \n \
-            Take a look at the distribution of barcode entropies. If you expect to see mixture of empty barcodes and barcodes with cells, \
-            there should be multiple populations in the entropy distribution.\n")
+        print("Warning: the dataset has very homogeneous samples. \n \
+              And no outliers are found, the rank cutoff is at the end of the considered range. \n \
+            ")
+        # print(f"Warning: all barcodes considered have entropy above the cutoff. \n \
+        #     This indicates there is a single entropy population. \n  \
+        #     In a single population scenario, no inflection point can be found, thus the rank cut off is chosen to separate entropy outliers. \n \
+        #     Take a look at the distribution of barcode entropies. If you expect to see mixture of empty barcodes and barcodes with cells, \
+        #     there should be multiple populations in the entropy distribution.\n")
         
-        single_pop_rank_cutoff = single_population_threshold(y, limit=limit)
-        rank = single_pop_rank_cutoff[1]  # take the right rank cutoff as the threshold for single population of barcodes
-        regions_rank = [*single_pop_rank_cutoff]  # store both left and right rank cutoffs 
+    return rank, y, cs, first_deriv, regions_rank
+
+
+def optimize_threshold(y: np.ndarray, targeted_cell_number: int, k=4, limit: int=20000, spline_para={}):
+
+    rank, y, cs, first_deriv, regions_rank = fit_spline_and_find_cutoff(y, k=k, limit=limit, **spline_para)
+    
+    if targeted_cell_number > 0:
+        search_range = ( targeted_cell_number//5, limit )
+
+        # Choose the entropy cutoff within the [N/5, min(5*N, limit)] range. N=targeted_cell_number
+        ranks_could_be_in_search_range = regions_rank.copy()
+        while rank < search_range[0] or rank > search_range[1]:
+            if len(ranks_could_be_in_search_range) == 0:
+                break
+            rank = ranks_could_be_in_search_range[np.argmin(first_deriv[ranks_could_be_in_search_range])]
+            ranks_could_be_in_search_range.remove(rank)
+        return rank, y[rank], cs, first_deriv[regions_rank], regions_rank
+    
+    return rank, y[rank], cs, first_deriv[regions_rank], regions_rank
         
-    return rank, y[rank], cs, inflection_regions, regions_rank
-
-
-
 
 
 def get_sorted_entropy_helper(pickle_path: str):

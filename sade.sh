@@ -7,10 +7,12 @@ _UseBlacklistedRegions='Y' # default value for using blacklisted regions
 _DefaultNprocess=4
 _CHROMOSOME='chr1'
 _WindowSize=3000 # default window size
-_CandidateInflectionPoints=2    # default number of candidate inflection points to consider for entropy threshold selection.
+_CandidateInflectionPoints=3    # default number of candidate inflection points to consider for entropy threshold selection.
 _GenomeSaturationCutoff=0.5 #  _GenomeSaturationCutoff := (1 - estimated_closed_region_genome_coverage). Higher value, less strict filtering of DNA-debris. 
                             # Human cells typically have <0.7 genome coverage in scATAC-seq. this cutoff is pretty loose. 
 # GLOBAL VARIABLES <<<
+_TargetedCellNumber=0 # default targeted cell number for threshold optimization
+
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -33,10 +35,13 @@ Usage="Usage: $0
                                           Due to this reason, we manually set range to be [0.1, 1], where 1 means no filtering of DNA debris.]
           [-p <nprocess>. Default: ${_DefaultNprocess}. Number of computational threads to use.]
           [-b Y|N. Default: 'Y' as in 'Yes use blacklisted regions'. Whether to use blacklisted regions.]
+          [-n <targeted_cell_number>. Default: 0. Targeted number of cells for threshold optimization, used to avoid early cutoff at debris
+                                        since they have elevated entropy values separated from the main distribution of cell entropies.
+                                        When set as 0 or negative, this parameter is ignored.]
           "
 
 ## BEFORE ANYTHING ELSE: process options 
-while  getopts "f:o:g:c:w:k:s:p:b:" opt; do
+while  getopts "f:o:g:c:w:k:s:p:b:n:" opt; do
   case $opt in
     f) 
       fragment_file="$OPTARG"
@@ -66,6 +71,9 @@ while  getopts "f:o:g:c:w:k:s:p:b:" opt; do
       ;;
     b)
       use_blacklisted_regions="$OPTARG" # has default value
+      ;;
+    n)
+      targeted_cell_number="$OPTARG" # has default value
       ;;
     \?) 
       echo -e "Invalid option: -$OPTARG \n${Usage}" >&2
@@ -117,6 +125,9 @@ if [[ -z ${use_blacklisted_regions} ]]; then
 fi
 if [[ ${use_blacklisted_regions} != "Y" && ${use_blacklisted_regions} != "N" ]]; then
     echo "Invalid value for -b option. Please use Y or N."  >&2 && exit 1
+fi
+if [[ -z ${targeted_cell_number} ]]; then
+    targeted_cell_number=${_TargetedCellNumber}
 fi
 
 # Environment validation >>>
@@ -232,7 +243,8 @@ if [ ! -f ${auto_entropy_file} ] ; then
     python ${SCRIPT_DIR}/find_threshold.py \
         --output_dir "${output_dir}" \
         --chromosome "${chromosome}" \
-        --k  "${candidate_inflection_points}"
+        --k  "${candidate_inflection_points}"  \
+        --targeted_cell_number "${targeted_cell_number}"
 
     # Record entropy threshold into the parameters file
     awk 'NR==1' ${auto_entropy_file} >> ${output_dir}/parameters.csv
