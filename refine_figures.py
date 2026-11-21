@@ -70,6 +70,8 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.hist(np.log10(entropy_all ), bins=100, color='orange',  alpha=0.5, label='log10(Entropy) (all Barcodes)')
     ax.hist(np.log10(entropy ), bins=100, color='blue',  alpha=0.5, label='log10(Entropy) (filtered Barcodes)')
+    if EntropyThreshold is not None:
+        ax.axvline(x=np.log10(EntropyThreshold), color='green', linestyle='--', label=f'log10({EntropyThreshold:.4f})')
     ax.set_ylabel('Frequency')
     ax.set_xlabel('log10(Entropy)')
     fig.legend()
